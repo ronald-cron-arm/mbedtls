@@ -174,8 +174,11 @@ if(USE_STATIC_MBEDTLS_LIBRARY)
     target_link_libraries(${mbedtls_static_target} ${libs} ${mbedx509_static_target})
 
     install(TARGETS ${mbedtls_static_target} ${mbedx509_static_target} ${mbedcrypto_static_target}
+            EXPORT mbedtls
             DESTINATION ${LIB_INSTALL_DIR}
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+    install(EXPORT mbedtls NAMESPACE mbedtls_ DESTINATION lib/mbedtls)
 endif(USE_STATIC_MBEDTLS_LIBRARY)
 
 if(USE_SHARED_MBEDTLS_LIBRARY)
