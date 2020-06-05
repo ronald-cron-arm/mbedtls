@@ -29,7 +29,7 @@ set(executables_2
 
 if(NOT FUZZINGENGINE_LIB)
     foreach(exe IN LISTS executables_1 executables_2)
-        add_executable(${exe} ${exe}.c onefile.c)
+        add_executable(${exe} ${exe}.c onefile.c $<TARGET_OBJECTS:mbedtls_test>)
         target_link_libraries(${exe} ${libs})
 
         list(FIND executables_2 ${exe} exe_index)
@@ -41,7 +41,7 @@ else()
     project(fuzz CXX)
 
     foreach(exe IN LISTS executables_1 executables_2)
-        add_executable(${exe} ${exe}.c)
+        add_executable(${exe} ${exe}.c $<TARGET_OBJECTS:mbedtls_test>)
         target_link_libraries(${exe} ${libs} FuzzingEngine)
         SET_TARGET_PROPERTIES(${exe} PROPERTIES LINKER_LANGUAGE CXX)
 

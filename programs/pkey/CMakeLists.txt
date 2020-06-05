@@ -4,7 +4,7 @@ set(executables_1
 )
 
 foreach(exe IN LISTS executables_1)
-    add_executable(${exe} ${exe}.c)
+    add_executable(${exe} ${exe}.c $<TARGET_OBJECTS:mbedtls_test>)
     target_link_libraries(${exe} mbedtls)
 endforeach()
 
@@ -30,7 +30,7 @@ set(executables_2
 )
 
 foreach(exe IN LISTS executables_2)
-    add_executable(${exe} ${exe}.c)
+    add_executable(${exe} ${exe}.c $<TARGET_OBJECTS:mbedtls_test>)
     target_link_libraries(${exe} mbedcrypto)
 endforeach()
 

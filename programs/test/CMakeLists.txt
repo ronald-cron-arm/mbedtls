@@ -26,7 +26,7 @@ if(TEST_CPP)
 endif()
 
 foreach(exe IN LISTS executables_1 executables_2)
-    add_executable(${exe} ${exe}.c)
+    add_executable(${exe} ${exe}.c $<TARGET_OBJECTS:mbedtls_test>)
 
     list(FIND executables_1 ${exe} exe_index)
     if (${exe_index} GREATER -1)
