@@ -1161,20 +1161,24 @@ void test_vec_crypt( int cipher_id, int operation, char *hex_key,
     TEST_ASSERT( 0 == mbedtls_cipher_setup( &ctx,
                               mbedtls_cipher_info_from_type( cipher_id ) ) );
 
-    key_len = mbedtls_test_unhexify( key, hex_key );
-    inputlen =  mbedtls_test_unhexify( input, hex_input );
-    resultlen = mbedtls_test_unhexify( result, hex_result );
+    TEST_ASSERT( mbedtls_test_unhexify( key, sizeof( key ),
+                                        hex_key, &key_len ) == 0 );
+    TEST_ASSERT( mbedtls_test_unhexify( input, sizeof( input ),
+                                        hex_input, &inputlen ) == 0 );
+    TEST_ASSERT( mbedtls_test_unhexify( result, sizeof( result ),
+                                        hex_result, &resultlen ) == 0 );
 
     TEST_ASSERT( 0 == mbedtls_cipher_setkey( &ctx, key, 8 * key_len, operation ) );
     if( MBEDTLS_MODE_CBC == ctx.cipher_info->mode )
         TEST_ASSERT( 0 == mbedtls_cipher_set_padding_mode( &ctx, MBEDTLS_PADDING_NONE ) );
 
-    iv_len = mbedtls_test_unhexify( iv, hex_iv );
+    TEST_ASSERT( mbedtls_test_unhexify( iv, sizeof( iv ),
+                                        hex_iv, &iv_len ) == 0 );
 
     TEST_ASSERT( finish_result == mbedtls_cipher_crypt( &ctx, iv_len ? iv : NULL,
                                                         iv_len, input, inputlen,
                                                         output, &outlen ) );
-    TEST_ASSERT( resultlen == outlen );
+    TEST_ASSERT( (size_t)resultlen == outlen );
     /* check plaintext only if everything went fine */
     if( 0 == finish_result )
         TEST_ASSERT( 0 == memcmp( output, result, outlen ) );

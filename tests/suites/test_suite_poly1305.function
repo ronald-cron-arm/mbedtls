@@ -15,7 +15,7 @@ void mbedtls_poly1305( char *hex_key_string, char *hex_mac_string, char *hex_src
     unsigned char key[32]; /* size set by the standard */
     unsigned char mac[16]; /* size set by the standard */
     unsigned char mac_str[33]; /* hex expansion of the above */
-    size_t src_len;
+    size_t src_len, len;
     mbedtls_poly1305_context ctx;
 
     memset( src_str, 0x00, sizeof( src_str ) );
@@ -23,8 +23,10 @@ void mbedtls_poly1305( char *hex_key_string, char *hex_mac_string, char *hex_src
     memset( key,     0x00, sizeof( key ) );
     memset( mac,     0x00, sizeof( mac ) );
 
-    src_len = mbedtls_test_unhexify( src_str, hex_src_string );
-    mbedtls_test_unhexify( key, hex_key_string );
+    TEST_ASSERT( mbedtls_test_unhexify( src_str, sizeof( src_str ),
+                                        hex_src_string, &src_len ) == 0 );
+    TEST_ASSERT( mbedtls_test_unhexify( key, sizeof( key ),
+                                        hex_key_string, &len ) == 0 );
 
     /*
      * Test the integrated API
