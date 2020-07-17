@@ -150,31 +150,6 @@ exit:
     psa_free_persistent_key_data( key_data, key_data_length );
     return( status );
 }
-
-/** Check whether a key identifier is acceptable.
- *
- * For backward compatibility, key identifiers that were valid in a
- * past released version must remain valid, unless a migration path
- * is provided.
- *
- * \param key        The key identifier to check.
- * \param vendor_ok  Nonzero to allow key ids in the vendor range.
- *                   0 to allow only key ids in the application range.
- *
- * \return           1 if \p key is acceptable, otherwise 0.
- */
-static int psa_is_key_id_valid( mbedtls_svc_key_id_t key, int vendor_ok )
-{
-    psa_key_id_t key_id = MBEDTLS_SVC_KEY_ID_GET_KEY_ID( key );
-    if( PSA_KEY_ID_USER_MIN <= key_id && key_id <= PSA_KEY_ID_USER_MAX )
-        return( 1 );
-    else if( vendor_ok &&
-             PSA_KEY_ID_VENDOR_MIN <= key_id &&
-             key_id <= PSA_KEY_ID_VENDOR_MAX )
-        return( 1 );
-    else
-        return( 0 );
-}
 #endif /* defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) */
 
 psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
@@ -202,8 +177,7 @@ psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
         return( PSA_SUCCESS );
 }
 
-psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime,
-                                           mbedtls_svc_key_id_t key )
+psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime )
 {
     if ( PSA_KEY_LIFETIME_IS_VOLATILE( lifetime ) )
     {
@@ -214,16 +188,27 @@ psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime,
     {
         /* Persistent keys require storage support */
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C)
-        if( psa_is_key_id_valid( key,
-                                 psa_key_lifetime_is_external( lifetime ) ) )
-            return( PSA_SUCCESS );
-        else
-            return( PSA_ERROR_INVALID_ARGUMENT );
+        return( PSA_SUCCESS );
 #else /* MBEDTLS_PSA_CRYPTO_STORAGE_C */
-        (void) key;
         return( PSA_ERROR_NOT_SUPPORTED );
 #endif /* !MBEDTLS_PSA_CRYPTO_STORAGE_C */
     }
+}
+
+psa_status_t psa_validate_key_id( mbedtls_svc_key_id_t key, int vendor_ok )
+{
+    psa_key_id_t key_id = MBEDTLS_SVC_KEY_ID_GET_KEY_ID( key );
+
+    if( ( PSA_KEY_ID_USER_MIN <= key_id ) &&
+        ( key_id <= PSA_KEY_ID_USER_MAX ) )
+        return( PSA_SUCCESS );
+
+    if( vendor_ok &&
+        ( PSA_KEY_ID_VENDOR_MIN <= key_id ) &&
+        ( key_id <= PSA_KEY_ID_VENDOR_MAX ) )
+        return( PSA_SUCCESS );
+
+    return( PSA_ERROR_INVALID_ARGUMENT );
 }
 
 psa_status_t psa_open_key( mbedtls_svc_key_id_t key, psa_key_handle_t *handle )
@@ -234,8 +219,9 @@ psa_status_t psa_open_key( mbedtls_svc_key_id_t key, psa_key_handle_t *handle )
 
     *handle = 0;
 
-    if( ! psa_is_key_id_valid( key, 1 ) )
-        return( PSA_ERROR_INVALID_ARGUMENT );
+    status = psa_validate_key_id( key, 1 );
+    if( status != PSA_SUCCESS )
+        return( status );
 
     status = psa_get_empty_key_slot( handle, &slot );
     if( status != PSA_SUCCESS )
