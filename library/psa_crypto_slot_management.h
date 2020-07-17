@@ -28,6 +28,23 @@
  * The value is a compile-time constant for now, for simplicity. */
 #define PSA_KEY_SLOT_COUNT 32
 
+/** Range of transient key identifiers.
+ *
+ *  The last PSA_KEY_SLOT_COUNT identifiers of the implementation range
+ *  of key identifiers are reserved for transient key identifiers.
+ *  A transient key identifier is equal to PSA_KEY_ID_TRANSIENT_MIN plus the
+ *  index of the key slot containing the volatile key definition.
+ */
+
+/** The minimum value for a transient key identifier.
+ */
+#define PSA_KEY_ID_TRANSIENT_MIN  ( PSA_KEY_ID_VENDOR_MAX - \
+                                    PSA_KEY_SLOT_COUNT + 1 )
+
+/** The maximum value for a transient key identifier.
+ */
+#define PSA_KEY_ID_TRANSIENT_MAX  PSA_KEY_ID_VENDOR_MAX
+
 /** Access a key slot at the given handle.
  *
  * \param handle        Key handle to query.
@@ -62,15 +79,18 @@ void psa_wipe_all_key_slots( void );
  * This function returns a key slot that is available for use and is in its
  * ground state (all-bits-zero).
  *
- * \param[out] handle   On success, a slot number that can be used as a
- *                      handle to the slot.
- * \param[out] p_slot   On success, a pointer to the slot.
+ * \param[out] handle            On success, a slot number that can be used
+ *                               as a handle to the slot.
+ * \param[out] transient_key_id  On success, transient key identifier
+ *                               associated to the returned slot.
+ * \param[out] p_slot            On success, a pointer to the slot.
  *
  * \retval #PSA_SUCCESS
  * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
  * \retval #PSA_ERROR_BAD_STATE
  */
 psa_status_t psa_get_empty_key_slot( psa_key_handle_t *handle,
+                                     psa_key_id_t *transient_key_id,
                                      psa_key_slot_t **p_slot );
 
 /** Test whether a lifetime designates a key in an external cryptoprocessor.

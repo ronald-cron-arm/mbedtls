@@ -98,7 +98,8 @@ void psa_wipe_all_key_slots( void )
 }
 
 psa_status_t psa_get_empty_key_slot( psa_key_handle_t *handle,
-                                             psa_key_slot_t **p_slot )
+                                     psa_key_id_t *transient_key_id,
+                                     psa_key_slot_t **p_slot )
 {
     if( ! global_data.key_slots_initialized )
         return( PSA_ERROR_BAD_STATE );
@@ -107,7 +108,11 @@ psa_status_t psa_get_empty_key_slot( psa_key_handle_t *handle,
     {
         *p_slot = &global_data.key_slots[*handle - 1];
         if( ! psa_is_key_slot_occupied( *p_slot ) )
+        {
+            *transient_key_id = PSA_KEY_ID_TRANSIENT_MIN + ( *handle ) - 1;
+
             return( PSA_SUCCESS );
+        }
     }
     *p_slot = NULL;
     return( PSA_ERROR_INSUFFICIENT_MEMORY );
@@ -151,6 +156,19 @@ exit:
     return( status );
 }
 #endif /* defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) */
+
+static int psa_is_in_use_transient_key_id( psa_key_id_t key_id )
+{
+    psa_key_slot_t *slot;
+
+    if( ( key_id < PSA_KEY_ID_TRANSIENT_MIN ) ||
+        ( key_id > PSA_KEY_ID_TRANSIENT_MAX ) )
+        return( 0 );
+
+    slot = &global_data.key_slots[ key_id - PSA_KEY_ID_TRANSIENT_MIN ];
+
+    return( slot->attr.id == key_id );
+}
 
 psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
                                         psa_se_drv_table_entry_t **p_drv )
@@ -215,6 +233,7 @@ psa_status_t psa_open_key( mbedtls_svc_key_id_t key, psa_key_handle_t *handle )
 {
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C)
     psa_status_t status;
+    psa_key_id_t transient_key_id;
     psa_key_slot_t *slot;
 
     *handle = 0;
@@ -223,7 +242,7 @@ psa_status_t psa_open_key( mbedtls_svc_key_id_t key, psa_key_handle_t *handle )
     if( status != PSA_SUCCESS )
         return( status );
 
-    status = psa_get_empty_key_slot( handle, &slot );
+    status = psa_get_empty_key_slot( handle, &transient_key_id, &slot );
     if( status != PSA_SUCCESS )
         return( status );
 
