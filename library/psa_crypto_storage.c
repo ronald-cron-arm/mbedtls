@@ -64,8 +64,7 @@
  * and whose value is 0xFFFFFF52. */
 static psa_storage_uid_t psa_its_identifier_of_slot( PSA_KEY_ID_T key_id )
 {
-#if defined(MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID) && \
-    defined(PSA_CRYPTO_SECURE)
+#if defined(MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID)
     /* Encode the owner in the upper 32 bits. This means that if
      * owner values are nonzero (as they are on a PSA platform),
      * no key file will ever have a value less than 0x100000000, so

@@ -532,8 +532,8 @@ static int check_key_attributes(
 
     PSA_ASSERT( psa_get_key_attributes( handle, &actual_attributes ) );
 
-    TEST_EQUAL( psa_get_key_id( &actual_attributes ),
-                psa_get_key_id( reference_attributes ) );
+    TEST_ASSERT( PSA_KEY_ID_EQUAL( psa_get_key_id( &actual_attributes ),
+                                   psa_get_key_id( reference_attributes ) ) );
     TEST_EQUAL( psa_get_key_lifetime( &actual_attributes ),
                 psa_get_key_lifetime( reference_attributes ) );
     TEST_EQUAL( psa_get_key_type( &actual_attributes ),
@@ -761,12 +761,17 @@ exit:
 static void psa_purge_storage( void )
 {
     psa_key_id_t id;
+    PSA_KEY_ID_T key_id;
     psa_key_location_t location;
+
     /* The tests may have potentially created key ids from 1 to
      * MAX_KEY_ID_FOR_TEST. In addition, run the destroy function on key id
      * 0, which file-based storage uses as a temporary file. */
     for( id = 0; id <= MAX_KEY_ID_FOR_TEST; id++ )
-        psa_destroy_persistent_key( id );
+    {
+        key_id = (PSA_KEY_ID_T)PSA_KEY_ID_INIT( 1, id );
+        psa_destroy_persistent_key( key_id );
+    }
     /* Purge the transaction file. */
     psa_crypto_stop_transaction( );
     /* Purge driver persistent data. */

@@ -57,6 +57,9 @@ typedef uint16_t psa_key_handle_t;
 /* Building for the PSA Crypto service on a PSA platform. */
 /* A key owner is a PSA partition identifier. */
 typedef int32_t psa_key_owner_id_t;
+#else
+/* Default */
+typedef uint32_t psa_key_owner_id_t;
 #endif
 
 typedef struct
@@ -70,13 +73,19 @@ typedef struct
             (psa_key_owner_id_t)( owner_id ), \
             (psa_key_id_t)( owner_key_id ) }
 #define PSA_KEY_ID_GET_ID( key_id ) ( ( key_id ).owner_key_id )
+#define PSA_KEY_ID_GET_OWNER_ID( key_id ) ( ( key_id ).owner_id )
 
 #else /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */
 
 #define PSA_KEY_ID_T psa_key_id_t
 #define PSA_KEY_ID_INIT( unused, key_id ) ( (psa_key_id_t)( key_id ) )
 #define PSA_KEY_ID_GET_ID( key_id ) ( key_id )
+#define PSA_KEY_ID_GET_OWNER_ID( key_id ) ( 0 )
 
 #endif /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */
+
+#define PSA_KEY_ID_EQUAL( id1, id2 ) \
+    ( ( PSA_KEY_ID_GET_ID( id1 ) == PSA_KEY_ID_GET_ID( id2 ) ) && \
+      ( PSA_KEY_ID_GET_OWNER_ID( id1 ) == PSA_KEY_ID_GET_OWNER_ID( id2 ) ) )
 
 #endif /* PSA_CRYPTO_PLATFORM_H */
