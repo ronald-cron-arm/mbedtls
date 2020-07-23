@@ -62,8 +62,7 @@
  * for a purpose other than storing a key. Currently, the only such file
  * is the random seed file whose name is PSA_CRYPTO_ITS_RANDOM_SEED_UID
  * and whose value is 0xFFFFFF52. */
-static psa_storage_uid_t psa_its_identifier_of_slot(
-    psa_key_extended_id_t key_id )
+static psa_storage_uid_t psa_its_identifier_of_slot( PSA_KEY_ID_T key_id )
 {
 #if defined(MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID) && \
     defined(PSA_CRYPTO_SECURE)
@@ -88,8 +87,8 @@ static psa_storage_uid_t psa_its_identifier_of_slot(
  * This function reads data from a storage backend and returns the data in a
  * buffer.
  *
- * \param key               Persistent identifier of the key to be loaded. This
- *                          should be an occupied storage location.
+ * \param key_id            Identifier of the key to be loaded. This should be
+ *                          an occupied storage location.
  * \param[out] data         Buffer where the data is to be written.
  * \param data_size         Size of the \c data buffer in bytes.
  *
@@ -97,12 +96,12 @@ static psa_storage_uid_t psa_its_identifier_of_slot(
  * \retval PSA_ERROR_STORAGE_FAILURE
  * \retval PSA_ERROR_DOES_NOT_EXIST
  */
-static psa_status_t psa_crypto_storage_load( const psa_key_extended_id_t key,
+static psa_status_t psa_crypto_storage_load( const PSA_KEY_ID_T key_id,
                                              uint8_t *data,
                                              size_t data_size )
 {
     psa_status_t status;
-    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key );
+    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key_id );
     struct psa_storage_info_t data_identifier_info;
     size_t data_length = 0;
 
@@ -117,10 +116,10 @@ static psa_status_t psa_crypto_storage_load( const psa_key_extended_id_t key,
     return( status );
 }
 
-int psa_is_key_present_in_storage( const psa_key_extended_id_t key )
+int psa_is_key_present_in_storage( const PSA_KEY_ID_T key_id )
 {
     psa_status_t ret;
-    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key );
+    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key_id );
     struct psa_storage_info_t data_identifier_info;
 
     ret = psa_its_get_info( data_identifier, &data_identifier_info );
@@ -135,8 +134,8 @@ int psa_is_key_present_in_storage( const psa_key_extended_id_t key )
  *
  * This function stores the given data buffer to a persistent storage.
  *
- * \param key           Persistent identifier of the key to be stored. This
- *                      should be an unoccupied storage location.
+ * \param key_id        Identifier of the key to be stored. This should be an
+ *                      unoccupied storage location.
  * \param[in] data      Buffer containing the data to be stored.
  * \param data_length   The number of bytes
  *                      that make up the data.
@@ -146,15 +145,15 @@ int psa_is_key_present_in_storage( const psa_key_extended_id_t key )
  * \retval PSA_ERROR_STORAGE_FAILURE
  * \retval PSA_ERROR_ALREADY_EXISTS
  */
-static psa_status_t psa_crypto_storage_store( const psa_key_extended_id_t key,
+static psa_status_t psa_crypto_storage_store( const PSA_KEY_ID_T key_id,
                                               const uint8_t *data,
                                               size_t data_length )
 {
     psa_status_t status;
-    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key );
+    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key_id );
     struct psa_storage_info_t data_identifier_info;
 
-    if( psa_is_key_present_in_storage( key ) == 1 )
+    if( psa_is_key_present_in_storage( key_id ) == 1 )
         return( PSA_ERROR_ALREADY_EXISTS );
 
     status = psa_its_set( data_identifier, (uint32_t) data_length, data, 0 );
@@ -181,10 +180,10 @@ exit:
     return( status );
 }
 
-psa_status_t psa_destroy_persistent_key( const psa_key_extended_id_t key )
+psa_status_t psa_destroy_persistent_key( const PSA_KEY_ID_T key_id )
 {
     psa_status_t ret;
-    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key );
+    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key_id );
     struct psa_storage_info_t data_identifier_info;
 
     ret = psa_its_get_info( data_identifier, &data_identifier_info );
@@ -204,7 +203,7 @@ psa_status_t psa_destroy_persistent_key( const psa_key_extended_id_t key )
 /**
  * \brief Get data length for given key slot number.
  *
- * \param key               Persistent identifier whose stored data length
+ * \param key_id            Identifier of the key whose stored data length
  *                          is to be obtained.
  * \param[out] data_length  The number of bytes that make up the data.
  *
@@ -212,11 +211,11 @@ psa_status_t psa_destroy_persistent_key( const psa_key_extended_id_t key )
  * \retval PSA_ERROR_STORAGE_FAILURE
  */
 static psa_status_t psa_crypto_storage_get_data_length(
-    const psa_key_extended_id_t key,
+    const PSA_KEY_ID_T key_id,
     size_t *data_length )
 {
     psa_status_t status;
-    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key );
+    psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key_id );
     struct psa_storage_info_t data_identifier_info;
 
     status = psa_its_get_info( data_identifier, &data_identifier_info );

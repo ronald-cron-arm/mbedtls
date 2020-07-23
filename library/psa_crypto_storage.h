@@ -67,14 +67,14 @@ extern "C" {
  * This function checks if any key data or metadata exists for the key slot in
  * the persistent storage.
  *
- * \param key           Persistent identifier to check.
+ * \param key_id  Key identifier to check.
  *
  * \retval 0
  *         No persistent data present for slot number
  * \retval 1
  *         Persistent data present for slot number
  */
-int psa_is_key_present_in_storage( const psa_key_extended_id_t key );
+int psa_is_key_present_in_storage( const PSA_KEY_ID_T key_id );
 
 /**
  * \brief Format key data and metadata and save to a location for given key
@@ -135,15 +135,14 @@ psa_status_t psa_load_persistent_key( psa_core_key_attributes_t *attr,
 /**
  * \brief Remove persistent data for the given key slot number.
  *
- * \param key           Persistent identifier of the key to remove
- *                      from persistent storage.
+ * \param key_id  Identifier of the key to remove from persistent storage.
  *
  * \retval PSA_SUCCESS
  *         The key was successfully removed,
  *         or the key did not exist.
  * \retval PSA_ERROR_STORAGE_FAILURE
  */
-psa_status_t psa_destroy_persistent_key( const psa_key_extended_id_t key );
+psa_status_t psa_destroy_persistent_key( const PSA_KEY_ID_T key_id );
 
 /**
  * \brief Free the temporary buffer allocated by psa_load_persistent_key().

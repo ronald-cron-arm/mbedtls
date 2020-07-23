@@ -94,11 +94,6 @@ typedef struct
 
 #else /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */
 
-/* By default, a key extended identifier is just the application key
- * identifier.
- */
-typedef psa_app_key_id_t psa_key_extended_id_t;
-
 #define PSA_KEY_ID_T psa_key_id_t
 #define PSA_KEY_ID_INIT( unused, key_id ) ( (psa_key_id_t)( key_id ) )
 #define PSA_KEY_ID_GET_ID( key_id ) ( key_id )

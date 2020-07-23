@@ -165,16 +165,15 @@ exit:
  *
  * \return           1 if \p key_id is valid, otherwise 0.
  */
-static int psa_is_key_id_valid( psa_key_extended_id_t key_id, int vendor_ok )
+static int psa_is_key_id_valid( PSA_KEY_ID_T key_id, int vendor_ok )
 {
-    psa_app_key_id_t app_id = PSA_KEY_ID_GET_ID( key_id );
+    psa_app_key_id_t id = PSA_KEY_ID_GET_ID( key_id );
 
-    if( ( PSA_KEY_ID_USER_MIN <= app_id ) &&
-        ( app_id <= PSA_KEY_ID_USER_MAX ) )
+    if( ( PSA_KEY_ID_USER_MIN <= id ) && ( id <= PSA_KEY_ID_USER_MAX ) )
         return( 1 );
     else if( vendor_ok &&
-             ( PSA_KEY_ID_VENDOR_MIN <= app_id ) &&
-             ( app_id <= PSA_KEY_ID_VENDOR_MAX ) )
+             ( PSA_KEY_ID_VENDOR_MIN <= id ) &&
+             ( id <= PSA_KEY_ID_VENDOR_MAX ) )
         return( 1 );
     else
         return( 0 );
@@ -230,7 +229,7 @@ psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime,
     }
 }
 
-psa_status_t psa_open_key( psa_key_extended_id_t id, psa_key_handle_t *handle )
+psa_status_t psa_open_key( PSA_KEY_ID_T key_id, psa_key_handle_t *handle )
 {
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C)
     psa_status_t status;
@@ -238,7 +237,7 @@ psa_status_t psa_open_key( psa_key_extended_id_t id, psa_key_handle_t *handle )
 
     *handle = 0;
 
-    if( ! psa_is_key_id_valid( id, 1 ) )
+    if( ! psa_is_key_id_valid( key_id, 1 ) )
         return( PSA_ERROR_INVALID_ARGUMENT );
 
     status = psa_get_empty_key_slot( handle, &slot );
@@ -246,7 +245,7 @@ psa_status_t psa_open_key( psa_key_extended_id_t id, psa_key_handle_t *handle )
         return( status );
 
     slot->attr.lifetime = PSA_KEY_LIFETIME_PERSISTENT;
-    slot->attr.id = id;
+    slot->attr.id = key_id;
 
     status = psa_load_persistent_key_into_slot( slot );
     if( status != PSA_SUCCESS )
@@ -257,7 +256,7 @@ psa_status_t psa_open_key( psa_key_extended_id_t id, psa_key_handle_t *handle )
     return( status );
 
 #else /* defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) */
-    (void) id;
+    (void) key_id;
     *handle = 0;
     return( PSA_ERROR_NOT_SUPPORTED );
 #endif /* !defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) */
