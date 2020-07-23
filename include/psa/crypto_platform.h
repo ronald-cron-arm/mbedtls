@@ -46,6 +46,8 @@
 /* PSA requires several types which C99 provides in stdint.h. */
 #include <stdint.h>
 
+#include <psa/crypto.h>
+
 /* Integral type representing a key handle. */
 typedef uint16_t psa_key_handle_t;
 
@@ -68,6 +70,8 @@ typedef uint16_t psa_key_handle_t;
  * #psa_key_id_t. */
 typedef uint32_t psa_app_key_id_t;
 
+#define PSA_KEY_ID_T psa_key_id_t
+
 #if defined(MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID)
 
 #if defined(PSA_CRYPTO_SECURE)
@@ -82,7 +86,9 @@ typedef struct
     psa_key_id_t owner_key_id;
 } psa_key_extended_id_t;
 
-#define PSA_KEY_ID_INIT {0, 0}
+#define PSA_KEY_ID_INIT( owner_id, owner_key_id ) { \
+            (psa_key_owner_id_t)( owner_id ), \
+            (psa_key_id_t)( owner_key_id ) }
 #define PSA_KEY_ID_GET_ID( key_id ) ( ( key_id ).owner_key_id )
 
 /* Since crypto.h is used as part of the PSA Cryptography API specification,
@@ -99,6 +105,8 @@ typedef psa_key_extended_id_t psa_key_id_t;
  * identifier.
  */
 typedef psa_app_key_id_t psa_key_extended_id_t;
+
+#define PSA_KEY_ID_INIT( unused, key_id ) ( (psa_key_id_t)( key_id ) )
 #define PSA_KEY_ID_GET_ID( key_id ) ( key_id )
 
 #endif /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */

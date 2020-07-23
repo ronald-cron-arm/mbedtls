@@ -35,6 +35,12 @@
 #ifndef PSA_CRYPTO_TYPES_H
 #define PSA_CRYPTO_TYPES_H
 
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
+
 #include <stdint.h>
 
 /** \defgroup error Error codes
@@ -235,7 +241,6 @@ typedef uint32_t psa_key_location_t;
  * psa_key_id_t in crypto_platform.h instead of here. */
 #if !defined(MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID)
 typedef uint32_t psa_key_id_t;
-#define PSA_KEY_ID_INIT 0
 #endif
 
 /**@}*/

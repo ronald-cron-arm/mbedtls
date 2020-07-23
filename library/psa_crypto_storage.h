@@ -294,7 +294,7 @@ typedef union
         uint16_t unused1;
         psa_key_lifetime_t lifetime;
         psa_key_slot_number_t slot;
-        psa_key_id_t id;
+        PSA_KEY_ID_T id;
     } key;
 } psa_crypto_transaction_t;
 

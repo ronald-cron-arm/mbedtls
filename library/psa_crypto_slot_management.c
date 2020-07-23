@@ -207,7 +207,7 @@ psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
 }
 
 psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime,
-                                           psa_key_id_t key_id )
+                                           PSA_KEY_ID_T key_id )
 {
     if ( PSA_KEY_LIFETIME_IS_VOLATILE( lifetime ) )
     {

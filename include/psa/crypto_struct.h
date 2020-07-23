@@ -332,12 +332,12 @@ typedef struct
     psa_key_type_t type;
     psa_key_bits_t bits;
     psa_key_lifetime_t lifetime;
-    psa_key_id_t id;
+    PSA_KEY_ID_T id;
     psa_key_policy_t policy;
     psa_key_attributes_flag_t flags;
 } psa_core_key_attributes_t;
 
-#define PSA_CORE_KEY_ATTRIBUTES_INIT {PSA_KEY_TYPE_NONE, 0, PSA_KEY_LIFETIME_VOLATILE, PSA_KEY_ID_INIT, PSA_KEY_POLICY_INIT, 0}
+#define PSA_CORE_KEY_ATTRIBUTES_INIT {PSA_KEY_TYPE_NONE, 0, PSA_KEY_LIFETIME_VOLATILE, PSA_KEY_ID_INIT( 0, 0 ), PSA_KEY_POLICY_INIT, 0}
 
 struct psa_key_attributes_s
 {
@@ -362,14 +362,14 @@ static inline struct psa_key_attributes_s psa_key_attributes_init( void )
 }
 
 static inline void psa_set_key_id(psa_key_attributes_t *attributes,
-                                  psa_key_id_t id)
+                                  PSA_KEY_ID_T id)
 {
     attributes->core.id = id;
     if( attributes->core.lifetime == PSA_KEY_LIFETIME_VOLATILE )
         attributes->core.lifetime = PSA_KEY_LIFETIME_PERSISTENT;
 }
 
-static inline psa_key_id_t psa_get_key_id(
+static inline PSA_KEY_ID_T psa_get_key_id(
     const psa_key_attributes_t *attributes)
 {
     return( attributes->core.id );

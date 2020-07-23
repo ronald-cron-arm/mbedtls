@@ -330,7 +330,7 @@ void mock_import( int mock_alloc_return_value,
     psa_drv_se_key_management_t key_management;
     psa_key_lifetime_t lifetime = TEST_SE_PERSISTENT_LIFETIME;
     psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION( lifetime );
-    psa_key_id_t id = 1;
+    PSA_KEY_ID_T id = PSA_KEY_ID_INIT( 1, 1 );
     psa_key_handle_t handle = 0;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
     const uint8_t key_material[3] = {0xfa, 0xca, 0xde};
@@ -387,7 +387,7 @@ void mock_export( int mock_export_return_value, int expected_result )
     psa_drv_se_key_management_t key_management;
     psa_key_lifetime_t lifetime = TEST_SE_PERSISTENT_LIFETIME;
     psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION( lifetime );
-    psa_key_id_t id = 1;
+    PSA_KEY_ID_T id = PSA_KEY_ID_INIT( 1, 1 );
     psa_key_handle_t handle = 0;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
     const uint8_t key_material[3] = {0xfa, 0xca, 0xde};
@@ -441,7 +441,7 @@ void mock_generate( int mock_alloc_return_value,
     psa_drv_se_key_management_t key_management;
     psa_key_lifetime_t lifetime = TEST_SE_PERSISTENT_LIFETIME;
     psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION( lifetime );
-    psa_key_id_t id = 1;
+    PSA_KEY_ID_T id = PSA_KEY_ID_INIT( 1, 1 );
     psa_key_handle_t handle = 0;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
 
@@ -496,7 +496,7 @@ void mock_export_public( int mock_export_public_return_value,
     psa_drv_se_key_management_t key_management;
     psa_key_lifetime_t lifetime = TEST_SE_PERSISTENT_LIFETIME;
     psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION( lifetime );
-    psa_key_id_t id = 1;
+    PSA_KEY_ID_T id = PSA_KEY_ID_INIT( 1, 1 );
     psa_key_handle_t handle = 0;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
     const uint8_t key_material[3] = {0xfa, 0xca, 0xde};
@@ -546,7 +546,7 @@ void mock_sign( int mock_sign_return_value, int expected_result )
     psa_drv_se_asymmetric_t asymmetric;
     psa_key_lifetime_t lifetime = TEST_SE_PERSISTENT_LIFETIME;
     psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION( lifetime );
-    psa_key_id_t id = 1;
+    PSA_KEY_ID_T id = PSA_KEY_ID_INIT( 1, 1 );
     psa_key_handle_t handle = 0;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
     const uint8_t key_material[3] = {0xfa, 0xca, 0xde};
@@ -607,7 +607,7 @@ void mock_verify( int mock_verify_return_value, int expected_result )
     psa_drv_se_asymmetric_t asymmetric;
     psa_key_lifetime_t lifetime = TEST_SE_PERSISTENT_LIFETIME;
     psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION( lifetime );
-    psa_key_id_t id = 1;
+    PSA_KEY_ID_T id = PSA_KEY_ID_INIT( 1, 1 );
     psa_key_handle_t handle = 0;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
     const uint8_t key_material[3] = {0xfa, 0xca, 0xde};
