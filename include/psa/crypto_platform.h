@@ -68,7 +68,7 @@ typedef uint16_t psa_key_handle_t;
  * #psa_key_id_t. */
 typedef uint32_t psa_app_key_id_t;
 
-#if defined(MBEDTLS_PSA_CRYPTO_KEY_FILE_ID_ENCODES_OWNER)
+#if defined(MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID)
 
 #if defined(PSA_CRYPTO_SECURE)
 /* Building for the PSA Crypto service on a PSA platform. */
@@ -78,25 +78,29 @@ typedef int32_t psa_key_owner_id_t;
 
 typedef struct
 {
-    uint32_t key_id;
-    psa_key_owner_id_t owner;
-} psa_key_file_id_t;
-#define PSA_KEY_FILE_GET_KEY_ID( file_id ) ( ( file_id ).key_id )
+    psa_key_owner_id_t owner_id;
+    psa_key_id_t owner_key_id;
+} psa_key_extended_id_t;
+
+#define PSA_KEY_ID_INIT {0, 0}
+#define PSA_KEY_ID_GET_ID( key_id ) ( ( key_id ).owner_key_id )
 
 /* Since crypto.h is used as part of the PSA Cryptography API specification,
  * it must use standard types for things like the argument of psa_open_key().
  * If it wasn't for that constraint, psa_open_key() would take a
- * `psa_key_file_id_t` argument. As a workaround, make `psa_key_id_t` an
- * alias for `psa_key_file_id_t` when building for a multi-client service. */
-typedef psa_key_file_id_t psa_key_id_t;
-#define PSA_KEY_ID_INIT {0, 0}
+ * `psa_key_extended_id_t` argument. As a workaround, make `psa_key_id_t` an
+ * alias for `psa_key_extended_id_t` when building for a multi-client service.
+ */
+typedef psa_key_extended_id_t psa_key_id_t;
 
-#else /* !MBEDTLS_PSA_CRYPTO_KEY_FILE_ID_ENCODES_OWNER */
+#else /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */
 
-/* By default, a key file identifier is just the application key identifier. */
-typedef psa_app_key_id_t psa_key_file_id_t;
-#define PSA_KEY_FILE_GET_KEY_ID( id ) ( id )
+/* By default, a key extended identifier is just the application key
+ * identifier.
+ */
+typedef psa_app_key_id_t psa_key_extended_id_t;
+#define PSA_KEY_ID_GET_ID( key_id ) ( key_id )
 
-#endif /* !MBEDTLS_PSA_CRYPTO_KEY_FILE_ID_ENCODES_OWNER */
+#endif /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */
 
 #endif /* PSA_CRYPTO_PLATFORM_H */

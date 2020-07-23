@@ -74,7 +74,7 @@ extern "C" {
  * \retval 1
  *         Persistent data present for slot number
  */
-int psa_is_key_present_in_storage( const psa_key_file_id_t key );
+int psa_is_key_present_in_storage( const psa_key_extended_id_t key );
 
 /**
  * \brief Format key data and metadata and save to a location for given key
@@ -143,7 +143,7 @@ psa_status_t psa_load_persistent_key( psa_core_key_attributes_t *attr,
  *         or the key did not exist.
  * \retval PSA_ERROR_STORAGE_FAILURE
  */
-psa_status_t psa_destroy_persistent_key( const psa_key_file_id_t key );
+psa_status_t psa_destroy_persistent_key( const psa_key_extended_id_t key );
 
 /**
  * \brief Free the temporary buffer allocated by psa_load_persistent_key().
