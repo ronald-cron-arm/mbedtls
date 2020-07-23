@@ -151,27 +151,28 @@ exit:
     return( status );
 }
 
-/** Check whether a key identifier is acceptable.
+/** Check whether a key identifier is valid.
  *
  * For backward compatibility, key identifiers that were valid in a
  * past released version must remain valid, unless a migration path
  * is provided.
  *
- * \param file_id       The key identifier to check.
- * \param vendor_ok     Nonzero to allow key ids in the vendor range.
- *                      0 to allow only key ids in the application range.
+ * \param key_id     The key identifier to check.
+ * \param vendor_ok  Nonzero to allow key identifiers in the vendor range.
+ *                   0 to allow only key identifiers in the application range.
  *
- * \return              1 if \p file_id is acceptable, otherwise 0.
+ * \return           1 if \p key_id is valid, otherwise 0.
  */
-static int psa_is_key_id_valid( psa_key_file_id_t file_id,
-                                int vendor_ok )
+static int psa_is_key_id_valid( psa_key_extended_id_t key_id, int vendor_ok )
 {
-    psa_app_key_id_t key_id = PSA_KEY_FILE_GET_KEY_ID( file_id );
-    if( PSA_KEY_ID_USER_MIN <= key_id && key_id <= PSA_KEY_ID_USER_MAX )
+    psa_app_key_id_t app_id = PSA_KEY_ID_GET_ID( key_id );
+
+    if( ( PSA_KEY_ID_USER_MIN <= app_id ) &&
+        ( app_id <= PSA_KEY_ID_USER_MAX ) )
         return( 1 );
     else if( vendor_ok &&
-             PSA_KEY_ID_VENDOR_MIN <= key_id &&
-             key_id <= PSA_KEY_ID_VENDOR_MAX )
+             ( PSA_KEY_ID_VENDOR_MIN <= app_id ) &&
+             ( app_id <= PSA_KEY_ID_VENDOR_MAX ) )
         return( 1 );
     else
         return( 0 );
@@ -227,7 +228,7 @@ psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime,
     }
 }
 
-psa_status_t psa_open_key( psa_key_file_id_t id, psa_key_handle_t *handle )
+psa_status_t psa_open_key( psa_key_extended_id_t id, psa_key_handle_t *handle )
 {
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C)
     psa_status_t status;
@@ -291,14 +292,14 @@ void mbedtls_psa_get_stats( mbedtls_psa_stats_t *stats )
             ++stats->volatile_slots;
         else if( slot->attr.lifetime == PSA_KEY_LIFETIME_PERSISTENT )
         {
-            psa_app_key_id_t id = PSA_KEY_FILE_GET_KEY_ID(slot->attr.id);
+            psa_app_key_id_t id = PSA_KEY_ID_GET_ID( slot->attr.id );
             ++stats->persistent_slots;
             if( id > stats->max_open_internal_key_id )
                 stats->max_open_internal_key_id = id;
         }
         else
         {
-            psa_app_key_id_t id = PSA_KEY_FILE_GET_KEY_ID(slot->attr.id);
+            psa_app_key_id_t id = PSA_KEY_ID_GET_ID( slot->attr.id );
             ++stats->external_slots;
             if( id > stats->max_open_external_key_id )
                 stats->max_open_external_key_id = id;
