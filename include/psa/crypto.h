@@ -22,8 +22,6 @@
 #ifndef PSA_CRYPTO_H
 #define PSA_CRYPTO_H
 
-#include "crypto_platform.h"
-
 #include <stddef.h>
 
 #ifdef __DOXYGEN_ONLY__
@@ -56,6 +54,10 @@ extern "C" {
 /* The file "crypto_types.h" declares types that encode errors,
  * algorithms, key types, policies, etc. */
 #include "crypto_types.h"
+
+/* Include "crypto_platform.h" after "crypto_types.h" as it relies on
+ * `psa_key_id_t` defined by "crypto_types.h" */
+#include "crypto_platform.h"
 
 /** \defgroup version API version
  * @{
@@ -147,10 +149,10 @@ static psa_key_attributes_t psa_key_attributes_init(void);
  * but in this case it must evaluate each of its arguments exactly once.
  *
  * \param[out] attributes       The attribute structure to write to.
- * \param id                    The persistent identifier for the key.
+ * \param key_id                The persistent identifier for the key.
  */
 static void psa_set_key_id(psa_key_attributes_t *attributes,
-                           psa_key_id_t id);
+                           PSA_KEY_ID_T key_id);
 
 /** Set the location of a persistent key.
  *
@@ -192,7 +194,7 @@ static void psa_set_key_lifetime(psa_key_attributes_t *attributes,
  *         This value is unspecified if the attribute structure declares
  *         the key as volatile.
  */
-static psa_key_id_t psa_get_key_id(const psa_key_attributes_t *attributes);
+static PSA_KEY_ID_T psa_get_key_id(const psa_key_attributes_t *attributes);
 
 /** Retrieve the lifetime from key attributes.
  *
@@ -408,7 +410,7 @@ void psa_reset_key_attributes(psa_key_attributes_t *attributes);
  * portable to implementations that only permit a single key handle to be
  * opened. See also :ref:\`key-handles\`.
  *
- * \param id            The persistent identifier of the key.
+ * \param key_id        The persistent identifier of the key.
  * \param[out] handle   On success, a handle to the key.
  *
  * \retval #PSA_SUCCESS
@@ -420,9 +422,9 @@ void psa_reset_key_attributes(psa_key_attributes_t *attributes);
  *         number of open keys, the number of open key handles, or available
  *         memory.
  * \retval #PSA_ERROR_DOES_NOT_EXIST
- *         There is no persistent key with key identifier \p id.
+ *         There is no persistent key with key identifier \p key_id.
  * \retval #PSA_ERROR_INVALID_ARGUMENT
- *         \p id is not a valid persistent key identifier.
+ *         \p key_id is not a valid persistent key identifier.
  * \retval #PSA_ERROR_NOT_PERMITTED
  *         The specified key exists, but the application does not have the
  *         permission to access it. Note that this specification does not
@@ -436,8 +438,7 @@ void psa_reset_key_attributes(psa_key_attributes_t *attributes);
  *         It is implementation-dependent whether a failure to initialize
  *         results in this error code.
  */
-psa_status_t psa_open_key(psa_key_id_t id,
-                          psa_key_handle_t *handle);
+psa_status_t psa_open_key(PSA_KEY_ID_T key_id, psa_key_handle_t *handle);
 
 
 /** Close a key handle.

@@ -44,6 +44,11 @@
 /* PSA requires several types which C99 provides in stdint.h. */
 #include <stdint.h>
 
+#if ( defined(__ARMCC_VERSION) || defined(_MSC_VER) ) && \
+    !defined(inline) && !defined(__cplusplus)
+#define inline __inline
+#endif
+
 /* Integral type representing a key handle. */
 typedef uint16_t psa_key_handle_t;
 
@@ -66,6 +71,8 @@ typedef uint16_t psa_key_handle_t;
  * #psa_key_id_t. */
 typedef uint32_t psa_app_key_id_t;
 
+#define PSA_KEY_ID_T psa_key_id_t
+
 #if defined(MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID)
 
 #if defined(PSA_CRYPTO_SECURE)
@@ -80,8 +87,19 @@ typedef struct
     psa_key_id_t owner_key_id;
 } psa_key_extended_id_t;
 
-#define PSA_KEY_ID_INIT {0, 0}
+#define PSA_KEY_ID_INIT { 0, 0 }
 #define PSA_KEY_ID_GET_ID( key_id ) ( ( key_id ).owner_key_id )
+
+/** Utility to initialize an extended key identifier at runtime.
+ *
+ * \param owner_id Identifier of the key owner.
+ * \param key_id   Identifier of the key.
+ */
+static inline psa_key_extended_id_t psa_key_id_init(
+    psa_key_owner_id_t owner_id, psa_key_id_t key_id )
+{
+    return( (psa_key_extended_id_t){ owner_id, key_id } );
+}
 
 /* Since crypto.h is used as part of the PSA Cryptography API specification,
  * it must use standard types for things like the argument of psa_open_key().
@@ -97,8 +115,22 @@ typedef psa_key_extended_id_t psa_key_id_t;
  * identifier.
  */
 typedef psa_app_key_id_t psa_key_extended_id_t;
+
+#define PSA_KEY_ID_INIT ( 0 )
 #define PSA_KEY_ID_GET_ID( key_id ) ( key_id )
 
+/** Utility to initialize a key identifier at runtime.
+ *
+ * \param unused  Unused parameter.
+ * \param key_id  Identifier of the key.
+ */
+static inline psa_key_id_t psa_key_id_init(
+    unsigned int unused, psa_key_id_t key_id )
+{
+    (void)unused;
+
+    return( key_id );
+}
 #endif /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */
 
 #endif /* PSA_CRYPTO_PLATFORM_H */
