@@ -54,11 +54,9 @@ typedef uint16_t psa_key_handle_t;
 
 #if defined(MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID)
 
-#if defined(PSA_CRYPTO_SECURE)
 /* Building for the PSA Crypto service on a PSA platform. */
 /* A key owner is a PSA partition identifier. */
 typedef int32_t psa_key_owner_id_t;
-#endif
 
 typedef struct
 {
@@ -69,6 +67,7 @@ typedef struct
 #define PSA_KEY_ID_T psa_key_extended_id_t
 #define PSA_KEY_ID_INIT { 0, 0 }
 #define PSA_KEY_ID_GET_ID( key_id ) ( ( key_id ).owner_key_id )
+#define PSA_KEY_ID_GET_OWNER_ID( key_id ) ( ( key_id ).owner_id )
 
 /** Utility to initialize an extended key identifier at runtime.
  *
@@ -81,11 +80,27 @@ static inline psa_key_extended_id_t psa_key_id_init(
     return( (psa_key_extended_id_t){ owner_id, key_id } );
 }
 
+/** Compare two extended key identifier.
+ *
+ * \param id1 First key identifier.
+ * \param id2 Second key identifier.
+ *
+ * \return Non-zero if the two extended key identifier are equal, zero
+ *         otherwise.
+ */
+static inline int psa_key_id_equal(
+    psa_key_extended_id_t id1, psa_key_extended_id_t id2 )
+{
+    return( ( id1.owner_id == id2.owner_id ) &&
+            ( id1.owner_key_id == id2.owner_key_id ) );
+}
+
 #else /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */
 
 #define PSA_KEY_ID_T psa_key_id_t
 #define PSA_KEY_ID_INIT ( 0 )
 #define PSA_KEY_ID_GET_ID( key_id ) ( key_id )
+#define PSA_KEY_ID_GET_OWNER_ID( key_id ) ( 0 )
 
 /** Utility to initialize a key identifier at runtime.
  *
@@ -99,6 +114,21 @@ static inline psa_key_id_t psa_key_id_init(
 
     return( key_id );
 }
+
+/** Compare two key identifier.
+ *
+ * \param id1 First key identifier.
+ * \param id2 Second key identifier.
+ *
+ * \return Non-zero if the two extended key identifier are equal, zero
+ *         otherwise.
+ */
+static inline int psa_key_id_equal(
+    psa_key_id_t id1, psa_key_id_t id2 )
+{
+    return( id1 == id2 );
+}
+
 #endif /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */
 
 #endif /* PSA_CRYPTO_PLATFORM_H */
