@@ -102,11 +102,6 @@ static inline psa_key_extended_id_t psa_key_id_init(
 
 #else /* !MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID */
 
-/* By default, a key extended identifier is just the application key
- * identifier.
- */
-typedef psa_app_key_id_t psa_key_extended_id_t;
-
 #define PSA_KEY_ID_T psa_key_id_t
 #define PSA_KEY_ID_INIT ( 0 )
 #define PSA_KEY_ID_GET_ID( key_id ) ( key_id )
