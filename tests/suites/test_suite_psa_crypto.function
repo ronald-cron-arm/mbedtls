@@ -1314,17 +1314,21 @@ void static_checks( )
 /* END_CASE */
 
 /* BEGIN_CASE */
-void attributes_set_get( int id_arg, int lifetime_arg,
+void attributes_set_get( int owner_id_arg, int id_arg, int lifetime_arg,
                          int usage_flags_arg, int alg_arg,
                          int type_arg, int bits_arg )
 {
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-    PSA_KEY_ID_T id = PSA_KEY_ID_INIT( 1, id_arg );
+    PSA_KEY_ID_T id = PSA_KEY_ID_INIT( owner_id_arg, id_arg );
     psa_key_lifetime_t lifetime = lifetime_arg;
     psa_key_usage_t usage_flags = usage_flags_arg;
     psa_algorithm_t alg = alg_arg;
     psa_key_type_t type = type_arg;
     size_t bits = bits_arg;
+
+    #if !defined(MBEDTLS_PSA_CRYPTO_KEY_EXTENDED_ID)
+    (void) owner_id_arg;
+    #endif
 
     TEST_EQUAL( PSA_KEY_ID_GET_ID( psa_get_key_id( &attributes ) ), 0 );
     TEST_EQUAL( PSA_KEY_ID_GET_OWNER_ID( psa_get_key_id( &attributes ) ), 0 );
