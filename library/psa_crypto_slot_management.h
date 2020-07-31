@@ -22,6 +22,7 @@
 #define PSA_CRYPTO_SLOT_MANAGEMENT_H
 
 #include "psa/crypto.h"
+#include "psa_crypto_core.h"
 #include "psa_crypto_se.h"
 
 /* Number of key slots (plus one because 0 is not used).
@@ -79,8 +80,6 @@ void psa_wipe_all_key_slots( void );
  * This function returns a key slot that is available for use and is in its
  * ground state (all-bits-zero).
  *
- * \param[out] handle            On success, a slot number that can be used
- *                               as a handle to the slot.
  * \param[out] transient_key_id  On success, transient key identifier
  *                               associated to the returned slot.
  * \param[out] p_slot            On success, a pointer to the slot.
@@ -89,8 +88,7 @@ void psa_wipe_all_key_slots( void );
  * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
  * \retval #PSA_ERROR_BAD_STATE
  */
-psa_status_t psa_get_empty_key_slot( psa_key_handle_t *handle,
-                                     psa_key_id_t *transient_key_id,
+psa_status_t psa_get_empty_key_slot( psa_key_id_t *transient_key_id,
                                      psa_key_slot_t **p_slot );
 
 /** Test whether a lifetime designates a key in an external cryptoprocessor.

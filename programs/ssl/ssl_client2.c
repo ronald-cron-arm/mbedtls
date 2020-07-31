@@ -3350,8 +3350,10 @@ exit:
         status = psa_destroy_key( slot );
         if( status != PSA_SUCCESS )
         {
-            mbedtls_printf( "Failed to destroy key slot %u - error was %d",
-                            (unsigned) slot, (int) status );
+            mbedtls_printf( "Failed to destroy key slot %u-%u - error was %d",
+                            MBEDTLS_SVC_KEY_ID_GET_OWNER_ID( slot ),
+                            MBEDTLS_SVC_KEY_ID_GET_KEY_ID( slot ),
+                            (int) status );
             if( ret == 0 )
                 ret = MBEDTLS_ERR_SSL_HW_ACCEL_FAILED;
         }
