@@ -46,21 +46,20 @@
  */
 #define PSA_KEY_ID_TRANSIENT_MAX  PSA_KEY_ID_VENDOR_MAX
 
-/** Access a key slot at the given handle.
+/** Access a key slot for a given key identifier.
  *
- * \param handle        Key handle to query.
+ * \param key           Key identifier to query.
  * \param[out] p_slot   On success, `*p_slot` contains a pointer to the
- *                      key slot in memory designated by \p handle.
+ *                      key slot in memory designated by \p key.
  *
  * \retval PSA_SUCCESS
- *         Success: \p handle is a handle to `*p_slot`. Note that `*p_slot`
- *         may be empty or occupied.
+ *         Success: `*p_slot` contains the key identified by \p key.
  * \retval PSA_ERROR_INVALID_HANDLE
- *         \p handle is out of range or is not in use.
+ *         \p key is not a valid key identifier.
  * \retval PSA_ERROR_BAD_STATE
  *         The library has not been initialized.
  */
-psa_status_t psa_get_key_slot( psa_key_handle_t handle,
+psa_status_t psa_get_key_slot( mbedtls_svc_key_id_t key,
                                psa_key_slot_t **p_slot );
 
 /** Initialize the key slot structures.

@@ -108,7 +108,7 @@
  * as applicable.
  *
  * Implementations shall not return this error code to indicate that a
- * key handle is invalid, but shall return #PSA_ERROR_INVALID_HANDLE
+ * key identifier is invalid, but shall return #PSA_ERROR_INVALID_HANDLE
  * instead. */
 #define PSA_ERROR_BAD_STATE             ((psa_status_t)-137)
 
@@ -118,7 +118,7 @@
  * combination of parameters are recognized as invalid.
  *
  * Implementations shall not return this error code to indicate that a
- * key handle is invalid, but shall return #PSA_ERROR_INVALID_HANDLE
+ * key identifier is invalid, but shall return #PSA_ERROR_INVALID_HANDLE
  * instead.
  */
 #define PSA_ERROR_INVALID_ARGUMENT      ((psa_status_t)-135)
@@ -266,7 +266,7 @@
  * to read from a resource. */
 #define PSA_ERROR_INSUFFICIENT_DATA     ((psa_status_t)-143)
 
-/** The key handle is not valid. See also :ref:\`key-handles\`.
+/** The key identifier is not valid. See also :ref:\`key-handles\`.
  */
 #define PSA_ERROR_INVALID_HANDLE        ((psa_status_t)-136)
 
@@ -769,9 +769,9 @@
  *   an algorithm built from `PSA_xxx_SIGNATURE` and a specific hash. Each
  *   call to sign or verify a message may use a different hash.
  *   ```
- *   psa_sign_hash(handle, PSA_xxx_SIGNATURE(PSA_ALG_SHA_256), ...);
- *   psa_sign_hash(handle, PSA_xxx_SIGNATURE(PSA_ALG_SHA_512), ...);
- *   psa_sign_hash(handle, PSA_xxx_SIGNATURE(PSA_ALG_SHA3_256), ...);
+ *   psa_sign_hash(key, PSA_xxx_SIGNATURE(PSA_ALG_SHA_256), ...);
+ *   psa_sign_hash(key, PSA_xxx_SIGNATURE(PSA_ALG_SHA_512), ...);
+ *   psa_sign_hash(key, PSA_xxx_SIGNATURE(PSA_ALG_SHA3_256), ...);
  *   ```
  *
  * This value may not be used to build other algorithms that are
@@ -1561,7 +1561,7 @@
 
 /** The default lifetime for volatile keys.
  *
- * A volatile key only exists as long as the handle to it is not closed.
+ * A volatile key only exists as long as the identifier to it is not destroyed.
  * The key material is guaranteed to be erased on a power reset.
  *
  * A key with this lifetime is typically stored in the RAM area of the
