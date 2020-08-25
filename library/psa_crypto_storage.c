@@ -67,8 +67,9 @@ static psa_storage_uid_t psa_its_identifier_of_slot( PSA_KEY_ID_T key_id )
      * owner values are nonzero (as they are on a PSA platform),
      * no key file will ever have a value less than 0x100000000, so
      * the whole range 0..0xffffffff is available for non-key files. */
-    uint32_t unsigned_owner_id = (uint32_t) key_id.owner_id;
-    return( (uint64_t) unsigned_owner_id << 32 | key_id.owner_key_id );
+    uint32_t unsigned_owner_id = PSA_KEY_ID_GET_OWNER_ID( key_id );
+    return(  ( (uint64_t) unsigned_owner_id << 32 ) |
+             PSA_KEY_ID_GET_ID( key_id ) );
 #else
     /* Use the key identifier directly as a file name.
      * psa_is_key_id_valid() in psa_crypto_slot_management.c
