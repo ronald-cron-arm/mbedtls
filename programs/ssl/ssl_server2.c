@@ -1285,7 +1285,7 @@ struct _psk_entry
     size_t key_len;
     unsigned char key[MBEDTLS_PSK_MAX_LEN];
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
-    psa_key_handle_t slot;
+    mbedtls_svc_key_id_t slot;
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
     psk_entry *next;
 };
@@ -1301,9 +1301,9 @@ int psk_free( psk_entry *head )
     {
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
         psa_status_t status;
-        psa_key_handle_t const slot = head->slot;
+        mbedtls_svc_key_id_t const slot = head->slot;
 
-        if( ! psa_key_handle_is_null( slot ) )
+        if( ! mbedtls_svc_key_id_is_null( slot ) )
         {
             status = psa_destroy_key( slot );
             if( status != PSA_SUCCESS )
@@ -1376,7 +1376,7 @@ int psk_callback( void *p_info, mbedtls_ssl_context *ssl,
             memcmp( name, cur->name, name_len ) == 0 )
         {
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
-            if( ! psa_key_handle_is_null( cur->slot ) )
+            if( ! mbedtls_svc_key_id_is_null( cur->slot ) )
                 return( mbedtls_ssl_set_hs_psk_opaque( ssl, cur->slot ) );
             else
 #endif
@@ -1711,7 +1711,7 @@ int idle( mbedtls_net_context *fd,
 }
 
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
-static psa_status_t psa_setup_psk_key_slot( psa_key_handle_t *slot,
+static psa_status_t psa_setup_psk_key_slot( mbedtls_svc_key_id_t *slot,
                                             psa_algorithm_t alg,
                                             unsigned char *psk,
                                             size_t psk_len )
@@ -1795,7 +1795,7 @@ int main( int argc, char *argv[] )
 #if defined(MBEDTLS_KEY_EXCHANGE_SOME_PSK_ENABLED)
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
     psa_algorithm_t alg = 0;
-    psa_key_handle_t psk_slot = PSA_KEY_HANDLE_INIT;
+    mbedtls_svc_key_id_t psk_slot = MBEDTLS_SVC_KEY_ID_INIT;
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
     unsigned char psk[MBEDTLS_PSK_MAX_LEN];
     size_t psk_len = 0;
