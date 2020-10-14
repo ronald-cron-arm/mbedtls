@@ -112,9 +112,9 @@ void psa_wipe_all_key_slots( void )
 {
     size_t slot_idx;
 
-    for( slot_idx = 1; slot_idx <= PSA_KEY_SLOT_COUNT; slot_idx++ )
+    for( slot_idx = 0; slot_idx < PSA_KEY_SLOT_COUNT; slot_idx++ )
     {
-        psa_key_slot_t *slot = &global_data.key_slots[ slot_idx - 1 ];
+        psa_key_slot_t *slot = &global_data.key_slots[ slot_idx ];
         (void) psa_wipe_key_slot( slot );
     }
     global_data.key_slots_initialized = 0;
@@ -327,9 +327,9 @@ void mbedtls_psa_get_stats( mbedtls_psa_stats_t *stats )
 
     memset( stats, 0, sizeof( *stats ) );
 
-    for( slot_idx = 1; slot_idx <= PSA_KEY_SLOT_COUNT; slot_idx++ )
+    for( slot_idx = 0; slot_idx < PSA_KEY_SLOT_COUNT; slot_idx++ )
     {
-        const psa_key_slot_t *slot = &global_data.key_slots[ slot_idx - 1 ];
+        const psa_key_slot_t *slot = &global_data.key_slots[ slot_idx ];
         if( ! psa_is_key_slot_occupied( slot ) )
         {
             ++stats->empty_slots;
