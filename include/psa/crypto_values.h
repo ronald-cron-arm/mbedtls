@@ -1756,32 +1756,6 @@ static inline int mbedtls_svc_key_id_is_null( mbedtls_svc_key_id_t key )
 
 #endif /* !MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
 
-#define PSA_KEY_HANDLE_INIT MBEDTLS_SVC_KEY_ID_INIT
-
-/** Compare two handles.
- *
- * \param handle1  First handle.
- * \param handle2  Second handle.
- *
- * \return Non-zero if the two handles are equal, zero otherwise.
- */
-static inline int psa_key_handle_equal( psa_key_handle_t handle1,
-                                        psa_key_handle_t handle2 )
-{
-    return( mbedtls_svc_key_id_equal( handle1, handle2 ) );
-}
-
-/** Check wether an handle is null.
- *
- * \param handle  Handle
- *
- * \return Non-zero if the handle is null, zero otherwise.
- */
-static inline int psa_key_handle_is_null( psa_key_handle_t handle )
-{
-    return( mbedtls_svc_key_id_is_null( handle ) );
-}
-
 /**@}*/
 
 /** \defgroup policy Key policies
