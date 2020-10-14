@@ -46,18 +46,36 @@
  */
 #define PSA_KEY_ID_TRANSIENT_MAX  PSA_KEY_ID_VENDOR_MAX
 
-/** Access a key slot for a given key identifier.
+/** Retrieve the description of a key given its identifier.
+ *
+ *  The descriptions of volatile keys and loaded persistent keys are
+ *  stored in key slots. This function returns a pointer to the key slot
+ *  containing the description of a key given its identifier.
+ *
+ *  In case of a persistent key, the function loads the description of the key
+ *  into a key slot if not already done.
  *
  * \param key           Key identifier to query.
  * \param[out] p_slot   On success, `*p_slot` contains a pointer to the
- *                      key slot in memory designated by \p key.
+ *                      key slot containing the description of the key
+ *                      identified by \p key.
  *
  * \retval PSA_SUCCESS
- *         Success: `*p_slot` contains the key identified by \p key.
- * \retval PSA_ERROR_INVALID_HANDLE
- *         \p key is not a valid key identifier.
+ *         The pointer to the key slot containing the description of the key
+ *         identified by \p key was returned.
  * \retval PSA_ERROR_BAD_STATE
  *         The library has not been initialized.
+ * \retval PSA_ERROR_INVALID_HANDLE
+ *         \p key is not a valid key identifier.
+ * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
+ *         \p key is a persistent key identifier. The implementation does not
+ *         have sufficient resources to load the persistent key. This can be
+ *         due to a lack of empty key slot, or available memory.
+ * \retval #PSA_ERROR_DOES_NOT_EXIST
+ *         There is no key with key identifier \p key.
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_STORAGE_FAILURE
+ * \retval #PSA_ERROR_DATA_CORRUPT
  */
 psa_status_t psa_get_key_slot( mbedtls_svc_key_id_t key,
                                psa_key_slot_t **p_slot );
