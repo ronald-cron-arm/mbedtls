@@ -51,6 +51,22 @@ typedef struct
 
 static psa_global_data_t global_data;
 
+psa_status_t psa_validate_key_id( mbedtls_svc_key_id_t key, int vendor_ok )
+{
+    psa_key_id_t key_id = MBEDTLS_SVC_KEY_ID_GET_KEY_ID( key );
+
+    if( ( PSA_KEY_ID_USER_MIN <= key_id ) &&
+        ( key_id <= PSA_KEY_ID_USER_MAX ) )
+        return( PSA_SUCCESS );
+
+    if( vendor_ok &&
+        ( PSA_KEY_ID_VENDOR_MIN <= key_id ) &&
+        ( key_id <= PSA_KEY_ID_VENDOR_MAX ) )
+        return( PSA_SUCCESS );
+
+    return( PSA_ERROR_INVALID_HANDLE );
+}
+
 static psa_key_slot_t* psa_get_slot_from_transient_key_id(
     mbedtls_svc_key_id_t key )
 {
@@ -249,22 +265,6 @@ psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime )
         return( PSA_ERROR_NOT_SUPPORTED );
 #endif /* !MBEDTLS_PSA_CRYPTO_STORAGE_C */
     }
-}
-
-psa_status_t psa_validate_key_id( mbedtls_svc_key_id_t key, int vendor_ok )
-{
-    psa_key_id_t key_id = MBEDTLS_SVC_KEY_ID_GET_KEY_ID( key );
-
-    if( ( PSA_KEY_ID_USER_MIN <= key_id ) &&
-        ( key_id <= PSA_KEY_ID_USER_MAX ) )
-        return( PSA_SUCCESS );
-
-    if( vendor_ok &&
-        ( PSA_KEY_ID_VENDOR_MIN <= key_id ) &&
-        ( key_id <= PSA_KEY_ID_VENDOR_MAX ) )
-        return( PSA_SUCCESS );
-
-    return( PSA_ERROR_INVALID_HANDLE );
 }
 
 psa_status_t psa_open_key( mbedtls_svc_key_id_t key, psa_key_handle_t *handle )
