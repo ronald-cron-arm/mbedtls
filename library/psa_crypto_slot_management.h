@@ -46,6 +46,21 @@
  */
 #define PSA_KEY_ID_TRANSIENT_MAX  PSA_KEY_ID_VENDOR_MAX
 
+/** Test whether a key identifier is a transient key identifier.
+ *
+ * \param key_id  Key identifier to test.
+ *
+ * \retval 1
+ *         The key identifier is a transient key identifier.
+ * \retval 0
+ *         The key identifier is not a transient key identifier.
+ */
+static inline int psa_key_id_is_transient( psa_key_id_t key_id )
+{
+    return( ( key_id >= PSA_KEY_ID_TRANSIENT_MIN ) &&
+            ( key_id <= PSA_KEY_ID_TRANSIENT_MAX ) );
+}
+
 /** Retrieve the description of a key given its identifier.
  *
  *  The descriptions of volatile keys and loaded persistent keys are
