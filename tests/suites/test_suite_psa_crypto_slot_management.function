@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "test/psa_crypto_helpers.h"
+#include "psa_crypto_slot_management.h"
 #include "psa_crypto_storage.h"
 
 typedef enum
@@ -657,6 +658,7 @@ void invalid_handle( int handle_construction,
 {
     psa_key_handle_t valid_handle = PSA_KEY_HANDLE_INIT;
     psa_key_handle_t invalid_handle = PSA_KEY_HANDLE_INIT;
+    psa_key_id_t key_id;
     psa_status_t close_status = close_status_arg;
     psa_status_t usage_status = usage_status_arg;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
@@ -680,8 +682,26 @@ void invalid_handle( int handle_construction,
             invalid_handle = PSA_KEY_HANDLE_INIT;
             break;
         case INVALID_HANDLE_UNOPENED:
+
+            /*
+             * MBEDTLS_SVC_KEY_ID_GET_KEY_ID( valid_handle ) is a transient
+             * key identifier as the imported key is a volatile key. Transient
+             * key identifier are in the range from PSA_KEY_ID_TRANSIENT_MIN
+             * to PSA_KEY_ID_TRANSIENT_MAX included. Thus pick a key identifier
+             * in the range from PSA_KEY_ID_TRANSIENT_MIN to
+             * PSA_KEY_ID_TRANSIENT_MAX different from
+             * MBEDTLS_SVC_KEY_ID_GET_KEY_ID( valid_handle ) to build an
+             * unopened and thus invalid identifier.
+             */
+
+            if( MBEDTLS_SVC_KEY_ID_GET_KEY_ID( valid_handle ) ==
+                PSA_KEY_ID_TRANSIENT_MIN )
+                key_id = PSA_KEY_ID_TRANSIENT_MIN + 1;
+            else
+                key_id = MBEDTLS_SVC_KEY_ID_GET_KEY_ID( valid_handle ) - 1;
+
             invalid_handle =
-                mbedtls_svc_key_id_make( 0, PSA_KEY_ID_VENDOR_MIN );
+                mbedtls_svc_key_id_make( 0, key_id );
             break;
         case INVALID_HANDLE_CLOSED:
             PSA_ASSERT( psa_import_key( &attributes,
