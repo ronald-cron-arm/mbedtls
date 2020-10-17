@@ -216,6 +216,7 @@ void persistent_slot_lifecycle( int lifetime_arg, int owner_id_arg, int id_arg,
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
     psa_key_attributes_t read_attributes = PSA_KEY_ATTRIBUTES_INIT;
     uint8_t *reexported = NULL;
+    size_t reexported_length = -1;
 
 #if defined(MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER)
     mbedtls_svc_key_id_t wrong_owner_id =
@@ -270,21 +271,68 @@ void persistent_slot_lifecycle( int lifetime_arg, int owner_id_arg, int id_arg,
     TEST_EQUAL( psa_get_key_enrollment_algorithm( &attributes ), alg2 );
     TEST_EQUAL( psa_get_key_type( &attributes ), type );
 
-    /* Do something that invalidates the key. */
+    /*
+     * Do something that wipes key data in volatile memory or destroy the
+     * key.
+     */
     if( ! invalidate_key( close_method, id ) )
         goto exit;
     if( ! invalidate_psa( close_method ) )
         goto exit;
 
-    /*
-     * Test that the key handle and identifier are now not refering to an
-     * existing key.
-     */
-    TEST_EQUAL( psa_get_key_attributes( handle, &read_attributes ),
-                PSA_ERROR_DOES_NOT_EXIST );
-    TEST_EQUAL( psa_close_key( handle ), PSA_ERROR_DOES_NOT_EXIST );
-    TEST_EQUAL( psa_get_key_attributes( id, &read_attributes ),
-                PSA_ERROR_DOES_NOT_EXIST );
+    /* Try to reaccess the key. If we destroyed it, check that it doesn't
+     * exist. Otherwise check that it still exists and has the expected
+     * content. */
+    switch( close_method )
+    {
+        case CLOSE_BY_CLOSE:
+        case CLOSE_BY_CLOSE_WITH_SHUTDOWN:
+        case CLOSE_BY_SHUTDOWN:
+            PSA_ASSERT( psa_open_key( id, &handle ) );
+            PSA_ASSERT( psa_get_key_attributes( id, &read_attributes ) );
+            TEST_EQUAL( psa_get_key_lifetime( &attributes ),
+                        psa_get_key_lifetime( &read_attributes ) );
+            TEST_ASSERT( mbedtls_svc_key_id_equal(
+                             psa_get_key_id( &attributes ),
+                             psa_get_key_id( &read_attributes ) ) );
+            TEST_EQUAL( psa_get_key_usage_flags( &attributes ), usage_flags );
+            TEST_EQUAL( psa_get_key_algorithm( &attributes ),
+                        psa_get_key_algorithm( &read_attributes ) );
+            TEST_EQUAL( psa_get_key_enrollment_algorithm( &attributes ),
+                        psa_get_key_enrollment_algorithm( &read_attributes ) );
+            TEST_EQUAL( psa_get_key_type( &attributes ),
+                        psa_get_key_type( &read_attributes ) );
+            TEST_EQUAL( psa_get_key_bits( &attributes ),
+                        psa_get_key_bits( &read_attributes ) );
+            if( usage_flags & PSA_KEY_USAGE_EXPORT )
+            {
+                ASSERT_ALLOC( reexported, key_data->len );
+                PSA_ASSERT( psa_export_key( id, reexported, key_data->len,
+                                            &reexported_length ) );
+                ASSERT_COMPARE( key_data->x, key_data->len,
+                                reexported, reexported_length );
+            }
+            else
+            {
+                TEST_EQUAL( psa_export_key( id, NULL, 0, &reexported_length ),
+                            PSA_ERROR_NOT_PERMITTED );
+            }
+            PSA_ASSERT( psa_close_key( handle ) );
+            break;
+
+        case CLOSE_BY_DESTROY:
+        case CLOSE_BY_DESTROY_WITH_SHUTDOWN:
+            /*
+             * Test that the key handle and identifier are now not refering to an
+             * existing key.
+             */
+            TEST_EQUAL( psa_get_key_attributes( handle, &read_attributes ),
+                        PSA_ERROR_DOES_NOT_EXIST );
+            TEST_EQUAL( psa_close_key( handle ), PSA_ERROR_DOES_NOT_EXIST );
+            TEST_EQUAL( psa_get_key_attributes( id, &read_attributes ),
+                        PSA_ERROR_DOES_NOT_EXIST );
+            break;
+    }
 
 exit:
     PSA_DONE( );
