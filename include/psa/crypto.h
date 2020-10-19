@@ -484,7 +484,7 @@ psa_status_t psa_purge_key(mbedtls_svc_key_id_t key);
  *                            both sets of restrictions apply, as
  *                            described in the documentation of this function.
  * \param[out] target_key   On success, an identifier for the newly created
- *                          key. PSA_KEY_ID_NULL on failure.
+ *                          key. \c 0 on failure.
  *
  * \retval #PSA_SUCCESS
  * \retval #PSA_ERROR_INVALID_HANDLE
@@ -534,18 +534,17 @@ psa_status_t psa_copy_key(mbedtls_svc_key_id_t source_key,
  * If a key is currently in use in a multipart operation, then destroying the
  * key will cause the multipart operation to fail.
  *
- * \param key  Identifier of the key to erase. If this is PSA_KEY_ID_NULL,
- *             do nothing and return PSA_SUCCESS.
+ * \param key  Identifier of the key to erase. If this is \c 0, do nothing and
+ *             return PSA_SUCCESS.
  *
  * \retval #PSA_SUCCESS
  *         \p key was a valid identifier and the key material that it
- *         referred to has been erased. Alternatively, \p key is \c
- *         PSA_KEY_ID_NULL.
+ *         referred to has been erased. Alternatively, \p key is \c 0.
  * \retval #PSA_ERROR_NOT_PERMITTED
  *         The key cannot be erased because it is
  *         read-only, either due to a policy or due to physical restrictions.
  * \retval #PSA_ERROR_INVALID_HANDLE
- *         \p key is not a valid identifier nor \c PSA_KEY_ID_NULL.
+ *         \p key is not a valid identifier nor \c 0.
  * \retval #PSA_ERROR_COMMUNICATION_FAILURE
  *         There was an failure in communication with the cryptoprocessor.
  *         The key material may still be present in the cryptoprocessor.
@@ -599,7 +598,7 @@ psa_status_t psa_destroy_key(mbedtls_svc_key_id_t key);
  *                          If the key size in \p attributes is nonzero,
  *                          it must be equal to the size from \p data.
  * \param[out] key          On success, an identifier to the newly created key.
- *                          \c PSA_KEY_ID_NULL on failure.
+ *                          \c 0 on failure.
  * \param[in] data    Buffer containing the key data. The content of this
  *                    buffer is interpreted according to the type declared
  *                    in \p attributes.
@@ -3530,7 +3529,7 @@ psa_status_t psa_key_derivation_output_bytes(
  * \param[in] attributes    The attributes for the new key.
  * \param[in,out] operation The key derivation operation object to read from.
  * \param[out] key          On success, an identifier for the newly created
- *                          key. PSA_KEY_ID_NULL on failure.
+ *                          key. \c 0 on failure.
  *
  * \retval #PSA_SUCCESS
  *         Success.
@@ -3706,7 +3705,7 @@ psa_status_t psa_generate_random(uint8_t *output,
  *
  * \param[in] attributes    The attributes for the new key.
  * \param[out] key          On success, an identifier for the newly created
- *                          key. PSA_KEY_ID_NULL on failure.
+ *                          key. \c 0 on failure.
  *
  * \retval #PSA_SUCCESS
  *         Success.

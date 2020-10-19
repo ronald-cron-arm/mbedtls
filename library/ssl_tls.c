@@ -520,7 +520,7 @@ static int tls_prf_generic( mbedtls_md_type_t md_type,
      * this PRF is also used to derive an IV, in particular in EAP-TLS,
      * and for this use case it makes sense to have a 0-length "secret".
      * Since the key API doesn't allow importing a key of length 0,
-     * keep master_key=NULL, which setup_psa_key_derivation() understands
+     * keep master_key=0, which setup_psa_key_derivation() understands
      * to mean a 0-length "secret" input. */
     if( slen != 0 )
     {
