@@ -33,7 +33,7 @@
  *
  *  The last PSA_KEY_SLOT_COUNT identifiers of the implementation range
  *  of key identifiers are reserved for transient key identifiers.
- *  A transient key identifier is equal to PSA_KEY_ID_TRANSIENT_MIN plus the
+ *  A transient key identifier is equal to #PSA_KEY_ID_TRANSIENT_MIN plus the
  *  index of the key slot containing the volatile key definition.
  */
 
@@ -75,12 +75,12 @@ static inline int psa_key_id_is_transient( psa_key_id_t key_id )
  *                      key slot containing the description of the key
  *                      identified by \p key.
  *
- * \retval PSA_SUCCESS
+ * \retval #PSA_SUCCESS
  *         The pointer to the key slot containing the description of the key
  *         identified by \p key was returned.
- * \retval PSA_ERROR_BAD_STATE
+ * \retval #PSA_ERROR_BAD_STATE
  *         The library has not been initialized.
- * \retval PSA_ERROR_INVALID_HANDLE
+ * \retval #PSA_ERROR_INVALID_HANDLE
  *         \p key is not a valid key identifier.
  * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
  *         \p key is a persistent key identifier. The implementation does not
@@ -97,7 +97,7 @@ psa_status_t psa_get_key_slot( mbedtls_svc_key_id_t key,
 
 /** Initialize the key slot structures.
  *
- * \retval PSA_SUCCESS
+ * \retval #PSA_SUCCESS
  *         Currently this function always succeeds.
  */
 psa_status_t psa_initialize_key_slots( void );
