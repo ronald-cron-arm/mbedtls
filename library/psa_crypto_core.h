@@ -130,10 +130,10 @@ static inline void psa_key_slot_clear_bits( psa_key_slot_t *slot,
  *
  * \param[in,out] slot  The key slot to wipe.
  *
- * \retval PSA_SUCCESS
+ * \retval #PSA_SUCCESS
  *         Success. This includes the case of a key slot that was
  *         already fully wiped.
- * \retval PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
  */
 psa_status_t psa_wipe_key_slot( psa_key_slot_t *slot );
 
@@ -152,10 +152,10 @@ psa_status_t psa_wipe_key_slot( psa_key_slot_t *slot );
  * \param[in] data      Buffer containing the key material to parse and import.
  * \param data_length   Size of \p data in bytes.
  *
- * \retval PSA_SUCCESS
- * \retval PSA_ERROR_INVALID_ARGUMENT
- * \retval PSA_ERROR_NOT_SUPPORTED
- * \retval PSA_ERROR_INSUFFICIENT_MEMORY
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
  */
 psa_status_t psa_import_key_into_slot( psa_key_slot_t *slot,
                                        const uint8_t *data,
