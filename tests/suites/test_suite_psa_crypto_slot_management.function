@@ -166,6 +166,7 @@ void transient_slot_lifecycle( int owner_id_arg,
     TEST_ASSERT( ! mbedtls_svc_key_id_is_null( key ) );
     PSA_ASSERT( psa_get_key_attributes( key, &attributes ) );
     TEST_EQUAL( psa_get_key_type( &attributes ), type );
+    psa_reset_key_attributes( &attributes );
 
     #if defined(MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER)
     {
@@ -181,6 +182,14 @@ void transient_slot_lifecycle( int owner_id_arg,
                     PSA_ERROR_DOES_NOT_EXIST );
     }
     #endif
+
+    /* Purge the key and make sure that it is still valid, as purging a
+     * volatile key shouldn't invalidate/destroy it.
+     */
+    PSA_ASSERT( psa_purge_key( key ) );
+    PSA_ASSERT( psa_get_key_attributes( key, &attributes ) );
+    TEST_EQUAL( psa_get_key_type( &attributes ), type );
+    psa_reset_key_attributes( &attributes );
 
     /* Do something that invalidates the key. */
     if( ! invalidate_key( close_method, key ) )
