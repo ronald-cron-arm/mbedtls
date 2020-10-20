@@ -571,8 +571,8 @@ static psa_status_t run( enum program_mode mode,
 
 exit:
     /* Destroy any remaining key. Deinitializing the crypto library would do
-     * this anyway, but explicitly destroying leys makes the code easier
-     * to reuse. */
+     * this anyway since they are volatile keys, but explicitly destroying
+     * keys makes the code easier. */
     (void) psa_destroy_key( derivation_key );
     (void) psa_destroy_key( wrapping_key );
     /* Deinitialize the PSA crypto library. */
