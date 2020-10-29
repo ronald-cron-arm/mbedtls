@@ -45,13 +45,15 @@
 
 #if !defined(MBEDTLS_PSA_CRYPTO_C) || !defined(MBEDTLS_AES_C) || \
     !defined(MBEDTLS_CIPHER_MODE_CBC) || !defined(MBEDTLS_CIPHER_MODE_CTR) || \
-    !defined(MBEDTLS_CIPHER_MODE_WITH_PADDING)
+    !defined(MBEDTLS_CIPHER_MODE_WITH_PADDING) || \
+    defined(MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER)
 int main( void )
 {
     printf( "MBEDTLS_PSA_CRYPTO_C and/or MBEDTLS_AES_C and/or "
             "MBEDTLS_CIPHER_MODE_CBC and/or MBEDTLS_CIPHER_MODE_CTR "
             "and/or MBEDTLS_CIPHER_MODE_WITH_PADDING "
-            "not defined.\r\n" );
+            "not defined and/or MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER"
+            " defined.\r\n" );
     return( 0 );
 }
 #else
@@ -92,7 +94,7 @@ exit:
     return( status );
 }
 
-static psa_status_t cipher_encrypt( mbedtls_svc_key_id_t key,
+static psa_status_t cipher_encrypt( psa_key_id_t key,
                                     psa_algorithm_t alg,
                                     uint8_t * iv,
                                     size_t iv_size,
@@ -123,7 +125,7 @@ exit:
     return( status );
 }
 
-static psa_status_t cipher_decrypt( mbedtls_svc_key_id_t key,
+static psa_status_t cipher_decrypt( psa_key_id_t key,
                                     psa_algorithm_t alg,
                                     const uint8_t * iv,
                                     size_t iv_size,
@@ -165,7 +167,7 @@ cipher_example_encrypt_decrypt_aes_cbc_nopad_1_block( void )
 
     psa_status_t status;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-    mbedtls_svc_key_id_t key = MBEDTLS_SVC_KEY_ID_INIT;
+    psa_key_id_t key = 0;
     size_t output_len = 0;
     uint8_t iv[block_size];
     uint8_t input[block_size];
@@ -215,7 +217,7 @@ static psa_status_t cipher_example_encrypt_decrypt_aes_cbc_pkcs7_multi( void )
 
     psa_status_t status;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-    mbedtls_svc_key_id_t key = MBEDTLS_SVC_KEY_ID_INIT;
+    psa_key_id_t key = 0;
     size_t output_len = 0;
     uint8_t iv[block_size], input[input_size],
             encrypt[input_size + block_size], decrypt[input_size + block_size];
@@ -262,7 +264,7 @@ static psa_status_t cipher_example_encrypt_decrypt_aes_ctr_multi( void )
 
     psa_status_t status;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-    mbedtls_svc_key_id_t key = MBEDTLS_SVC_KEY_ID_INIT;
+    psa_key_id_t key = 0;
     size_t output_len = 0;
     uint8_t iv[block_size], input[input_size], encrypt[input_size],
             decrypt[input_size];
