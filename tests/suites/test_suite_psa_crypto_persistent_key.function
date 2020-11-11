@@ -66,6 +66,7 @@ void format_storage_data_check( data_t *key_data,
                     file_data, file_data_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     mbedtls_free( file_data );
 }
 /* END_CASE */
@@ -110,6 +111,7 @@ void parse_storage_data_check( data_t *file_data,
                     key_data, key_data_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     mbedtls_free( key_data );
 }
 /* END_CASE */
@@ -136,6 +138,7 @@ void save_large_persistent_key( int data_length_arg, int expected_status )
         PSA_ASSERT( psa_destroy_key( key_id ) );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     mbedtls_free( data );
     PSA_DONE();
     psa_destroy_persistent_key( key_id );
@@ -189,6 +192,7 @@ void persistent_key_destroy( int owner_id_arg, int key_id_arg, int restart,
     PSA_ASSERT( psa_destroy_key( key_id ) );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     PSA_DONE();
     psa_destroy_persistent_key( key_id );
 }

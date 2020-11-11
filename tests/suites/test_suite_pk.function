@@ -119,6 +119,7 @@ mbedtls_svc_key_id_t pk_psa_genkey( void )
     PSA_ASSERT( psa_generate_key( &attributes, &key ) );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     return( key );
 }
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
@@ -200,6 +201,7 @@ void pk_psa_utils(  )
     TEST_ASSERT( PSA_SUCCESS == psa_destroy_key( key ) );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     mbedtls_pk_free( &pk ); /* redundant except upon error */
     mbedtls_pk_free( &pk2 );
     PSA_DONE( );
@@ -1289,6 +1291,7 @@ void pk_psa_sign( int grpid_arg,
                             hash, sizeof hash, sig, sig_len ) == 0 );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     mbedtls_pk_free( &pk );
     PSA_DONE( );
 }

@@ -389,6 +389,7 @@ void mock_import( int mock_alloc_return_value,
         TEST_ASSERT( mock_destroy_data.called == 1 );
     }
 exit:
+    psa_reset_key_attributes( &attributes );
     PSA_DONE( );
     mock_teardown( );
 }
@@ -441,6 +442,7 @@ void mock_export( int mock_export_return_value, int expected_result )
     TEST_ASSERT( mock_destroy_data.called == 1 );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     PSA_DONE( );
     mock_teardown( );
 }
@@ -509,6 +511,7 @@ void mock_generate( int mock_alloc_return_value,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     PSA_DONE( );
     mock_teardown( );
 }
@@ -559,6 +562,7 @@ void mock_export_public( int mock_export_public_return_value,
     TEST_ASSERT( mock_destroy_data.called == 1 );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     PSA_DONE( );
     mock_teardown( );
 }
@@ -620,6 +624,7 @@ void mock_sign( int mock_sign_return_value, int expected_result )
     TEST_ASSERT( mock_destroy_data.called == 1 );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     PSA_DONE( );
     mock_teardown( );
 }
@@ -679,6 +684,7 @@ void mock_verify( int mock_verify_return_value, int expected_result )
     TEST_ASSERT( mock_destroy_data.called == 1 );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     PSA_DONE( );
     mock_teardown( );
 }

@@ -198,6 +198,9 @@ void validate_module_init_key_based( int count )
     status = psa_import_key( &attributes, data, sizeof( data ), &key );
     TEST_EQUAL( status, PSA_ERROR_BAD_STATE );
     TEST_ASSERT( mbedtls_svc_key_id_is_null( key ) );
+
+exit:
+    psa_reset_key_attributes( &attributes );
 }
 /* END_CASE */
 

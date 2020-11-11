@@ -303,6 +303,7 @@ void cipher_encrypt( int alg_arg, int key_type_arg,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     mbedtls_free( output );
     psa_destroy_key( key );
@@ -388,6 +389,7 @@ void cipher_encrypt_multipart( int alg_arg, int key_type_arg,
                     output, total_output_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     mbedtls_free( output );
     psa_destroy_key( key );
@@ -475,6 +477,7 @@ void cipher_decrypt_multipart( int alg_arg, int key_type_arg,
                     output, total_output_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     mbedtls_free( output );
     psa_destroy_key( key );
@@ -567,6 +570,7 @@ void cipher_decrypt( int alg_arg, int key_type_arg,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     mbedtls_free( output );
     psa_destroy_key( key );
@@ -737,6 +741,7 @@ void cipher_entry_points( int alg_arg, int key_type_arg,
     psa_cipher_abort( &operation );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     mbedtls_free( output );
     psa_destroy_key( key );

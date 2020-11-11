@@ -327,6 +327,7 @@ int exercise_mac_setup( psa_key_type_t key_type,
     return( 1 );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_destroy_key( key );
     return( 0 );
 }
@@ -361,6 +362,7 @@ int exercise_cipher_setup( psa_key_type_t key_type,
     return( 1 );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_destroy_key( key );
     return( 0 );
 }
@@ -447,6 +449,7 @@ static int exercise_cipher_key( mbedtls_svc_key_id_t key,
             iv_length = PSA_BLOCK_CIPHER_BLOCK_SIZE(
                 psa_get_key_type( &attributes ) );
             maybe_invalid_padding = ! PSA_ALG_IS_STREAM_CIPHER( alg );
+            psa_reset_key_attributes( &attributes );
         }
         PSA_ASSERT( psa_cipher_decrypt_setup( &operation, key, alg ) );
         PSA_ASSERT( psa_cipher_set_iv( &operation,
@@ -1371,6 +1374,9 @@ void attributes_set_get( int owner_id_arg, int id_arg, int lifetime_arg,
     TEST_EQUAL( psa_get_key_algorithm( &attributes ), 0 );
     TEST_EQUAL( psa_get_key_type( &attributes ), 0 );
     TEST_EQUAL( psa_get_key_bits( &attributes ), 0 );
+
+exit:
+    psa_reset_key_attributes( &attributes );
 }
 /* END_CASE */
 
@@ -1400,6 +1406,9 @@ void persistence_attributes( int id1_arg, int owner_id1_arg, int lifetime_arg,
     TEST_ASSERT( mbedtls_svc_key_id_equal(
                      psa_get_key_id( &attributes ), expected_id ) );
     TEST_EQUAL( psa_get_key_lifetime( &attributes ), expected_lifetime );
+
+exit:
+    psa_reset_key_attributes( &attributes );
 }
 /* END_CASE */
 
@@ -1440,6 +1449,9 @@ void slot_number_attribute( )
     psa_reset_key_attributes( &attributes );
     TEST_EQUAL( psa_get_key_slot_number( &attributes, &slot_number ),
                 PSA_ERROR_INVALID_ARGUMENT );
+
+exit:
+    psa_reset_key_attributes( &attributes );
 }
 /* END_CASE */
 
@@ -1482,6 +1494,7 @@ void import_with_policy( int type_arg,
 
 exit:
     psa_destroy_key( key );
+    psa_reset_key_attributes( &attributes );
     psa_reset_key_attributes( &got_attributes );
     PSA_DONE( );
 }
@@ -1521,6 +1534,7 @@ void import_with_data( data_t *data, int type_arg,
 
 exit:
     psa_destroy_key( key );
+    psa_reset_key_attributes( &attributes );
     psa_reset_key_attributes( &got_attributes );
     PSA_DONE( );
 }
@@ -1569,6 +1583,7 @@ void import_large_key( int type_arg, int byte_size_arg,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_destroy_key( key );
     PSA_DONE( );
     mbedtls_free( buffer );
@@ -1608,6 +1623,7 @@ void import_rsa_made_up( int bits_arg, int keypair, int expected_status_arg )
         PSA_ASSERT( psa_destroy_key( key ) );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     mbedtls_free( buffer );
     PSA_DONE( );
 }
@@ -1700,6 +1716,7 @@ destroy:
 exit:
     mbedtls_free( exported );
     mbedtls_free( reexported );
+    psa_reset_key_attributes( &attributes );
     psa_reset_key_attributes( &got_attributes );
     PSA_DONE( );
 }
@@ -1795,6 +1812,7 @@ void import_and_exercise_key( data_t *data,
 
 exit:
     psa_destroy_key( key );
+    psa_reset_key_attributes( &attributes );
     psa_reset_key_attributes( &got_attributes );
     PSA_DONE( );
 }
@@ -1924,6 +1942,7 @@ void mac_key_policy( int policy_usage,
         TEST_EQUAL( status, PSA_ERROR_NOT_PERMITTED );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_mac_abort( &operation );
     psa_destroy_key( key );
     PSA_DONE( );
@@ -1967,6 +1986,7 @@ void cipher_key_policy( int policy_usage,
         TEST_EQUAL( status, PSA_ERROR_NOT_PERMITTED );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     psa_destroy_key( key );
     PSA_DONE( );
@@ -2029,6 +2049,7 @@ void aead_key_policy( int policy_usage,
         TEST_EQUAL( status, PSA_ERROR_NOT_PERMITTED );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_destroy_key( key );
     PSA_DONE( );
 }
@@ -2145,6 +2166,7 @@ void asymmetric_signature_key_policy( int policy_usage,
         TEST_EQUAL( status, PSA_ERROR_NOT_PERMITTED );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_destroy_key( key );
     PSA_DONE( );
 }
@@ -2193,6 +2215,7 @@ void derive_key_policy( int policy_usage,
         TEST_EQUAL( status, PSA_ERROR_NOT_PERMITTED );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_key_derivation_abort( &operation );
     psa_destroy_key( key );
     PSA_DONE( );
@@ -2229,6 +2252,7 @@ void agreement_key_policy( int policy_usage,
     TEST_EQUAL( status, expected_status );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_key_derivation_abort( &operation );
     psa_destroy_key( key );
     PSA_DONE( );
@@ -2267,6 +2291,8 @@ void key_policy_alg2( int key_type_arg, data_t *key_data,
         goto exit;
 
 exit:
+    psa_reset_key_attributes( &attributes );
+    psa_reset_key_attributes( &got_attributes );
     psa_destroy_key( key );
     PSA_DONE( );
 }
@@ -2301,6 +2327,7 @@ void raw_agreement_key_policy( int policy_usage,
     TEST_EQUAL( status, expected_status );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_key_derivation_abort( &operation );
     psa_destroy_key( key );
     PSA_DONE( );
@@ -3019,6 +3046,7 @@ void mac_bad_order( )
     PSA_ASSERT( psa_destroy_key( key ) );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     PSA_DONE( );
 }
 /* END_CASE */
@@ -3090,6 +3118,7 @@ void mac_sign( int key_type_arg,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_mac_abort( &operation );
     psa_destroy_key( key );
     PSA_DONE( );
@@ -3166,6 +3195,7 @@ void mac_verify( int key_type_arg,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_mac_abort( &operation );
     psa_destroy_key( key );
     PSA_DONE( );
@@ -3400,6 +3430,7 @@ void cipher_bad_order( )
     PSA_ASSERT( psa_destroy_key( key ) );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     PSA_DONE( );
 }
@@ -3463,6 +3494,7 @@ void cipher_encrypt( int alg_arg, int key_type_arg,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     mbedtls_free( output );
     psa_destroy_key( key );
@@ -3536,6 +3568,7 @@ void cipher_encrypt_multipart( int alg_arg, int key_type_arg,
                     output, total_output_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     mbedtls_free( output );
     psa_destroy_key( key );
@@ -3610,6 +3643,7 @@ void cipher_decrypt_multipart( int alg_arg, int key_type_arg,
                     output, total_output_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     mbedtls_free( output );
     psa_destroy_key( key );
@@ -3675,6 +3709,7 @@ void cipher_decrypt( int alg_arg, int key_type_arg,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation );
     mbedtls_free( output );
     psa_destroy_key( key );
@@ -3763,6 +3798,7 @@ void cipher_verify_output( int alg_arg, int key_type_arg,
     ASSERT_COMPARE( input->x, input->len, output2, output2_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation1 );
     psa_cipher_abort( &operation2 );
     mbedtls_free( output1 );
@@ -3874,6 +3910,7 @@ void cipher_verify_output_multipart( int alg_arg,
     ASSERT_COMPARE( input->x, input->len, output2, output2_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_cipher_abort( &operation1 );
     psa_cipher_abort( &operation2 );
     mbedtls_free( output1 );
@@ -3952,6 +3989,7 @@ void aead_encrypt_decrypt( int key_type_arg, data_t *key_data,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_destroy_key( key );
     mbedtls_free( output_data );
     mbedtls_free( output_data2 );
@@ -4003,6 +4041,7 @@ void aead_encrypt( int key_type_arg, data_t *key_data,
                     output_data, output_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_destroy_key( key );
     mbedtls_free( output_data );
     PSA_DONE( );
@@ -4059,6 +4098,7 @@ void aead_decrypt( int key_type_arg, data_t *key_data,
                         output_data, output_length );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_destroy_key( key );
     mbedtls_free( output_data );
     PSA_DONE( );
@@ -4762,6 +4802,7 @@ void derive_input( int alg_arg,
     TEST_EQUAL( actual_output_status, expected_output_status );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_key_derivation_abort( &operation );
     for( i = 0; i < ARRAY_LENGTH( keys ); i++ )
         psa_destroy_key( keys[i] );
@@ -4815,6 +4856,7 @@ void test_derive_invalid_key_derivation_state( int alg_arg )
                 PSA_ERROR_INSUFFICIENT_DATA );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_key_derivation_abort( &operation );
     psa_destroy_key( key );
     PSA_DONE( );
@@ -4958,6 +5000,7 @@ void derive_output( int alg_arg,
     PSA_ASSERT( psa_key_derivation_abort( &operation ) );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     mbedtls_free( output_buffer );
     psa_key_derivation_abort( &operation );
     for( i = 0; i < ARRAY_LENGTH( keys ); i++ )
@@ -5023,6 +5066,7 @@ void derive_full( int alg_arg,
     PSA_ASSERT( psa_key_derivation_abort( &operation ) );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_key_derivation_abort( &operation );
     psa_destroy_key( key );
     PSA_DONE( );
@@ -5083,6 +5127,7 @@ void derive_key_exercise( int alg_arg,
 
 exit:
     psa_key_derivation_abort( &operation );
+    psa_reset_key_attributes( &attributes );
     psa_reset_key_attributes( &got_attributes );
     psa_destroy_key( base_key );
     psa_destroy_key( derived_key );
@@ -5162,6 +5207,8 @@ void derive_key_export( int alg_arg,
                     export_buffer, capacity );
 
 exit:
+    psa_reset_key_attributes( &base_attributes );
+    psa_reset_key_attributes( &derived_attributes );
     mbedtls_free( output_buffer );
     mbedtls_free( export_buffer );
     psa_key_derivation_abort( &operation );
@@ -5209,6 +5256,8 @@ void derive_key( int alg_arg,
                 expected_status );
 
 exit:
+    psa_reset_key_attributes( &base_attributes );
+    psa_reset_key_attributes( &derived_attributes );
     psa_key_derivation_abort( &operation );
     psa_destroy_key( base_key );
     psa_destroy_key( derived_key );
@@ -5259,6 +5308,7 @@ void key_agreement_setup( int alg_arg,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_key_derivation_abort( &operation );
     psa_destroy_key( our_key );
     PSA_DONE( );
@@ -5296,6 +5346,7 @@ void raw_key_agreement( int alg_arg,
                     expected_output->x, expected_output->len );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     mbedtls_free( output );
     psa_destroy_key( our_key );
     PSA_DONE( );
@@ -5356,6 +5407,7 @@ void key_agreement_capacity( int alg_arg,
                 PSA_ERROR_INSUFFICIENT_DATA );
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_key_derivation_abort( &operation );
     psa_destroy_key( our_key );
     PSA_DONE( );
@@ -5415,6 +5467,7 @@ void key_agreement_output( int alg_arg,
     }
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_key_derivation_abort( &operation );
     psa_destroy_key( our_key );
     PSA_DONE( );
@@ -5513,6 +5566,7 @@ void generate_key( int type_arg,
         goto exit;
 
 exit:
+    psa_reset_key_attributes( &attributes );
     psa_reset_key_attributes( &got_attributes );
     psa_destroy_key( key );
     PSA_DONE( );
