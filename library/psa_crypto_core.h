@@ -30,6 +30,8 @@
 #include "psa/crypto.h"
 #include "psa/crypto_se_driver.h"
 
+#include <mbedtls/ctr_drbg.h>
+
 /** The data structure representing a key slot, containing key material
  * and metadata for one key.
  */
@@ -207,5 +209,11 @@ psa_status_t psa_copy_key_material_into_slot( psa_key_slot_t *slot,
  * \return              The corresponding PSA error code
  */
 psa_status_t mbedtls_to_psa_error( int ret );
+
+/** Get the PSA CTR_DRBG context
+ *
+ * \return A pointer to the PSA CTR_DRBG context
+ */
+mbedtls_ctr_drbg_context *psa_get_ctr_drbg_context( void );
 
 #endif /* PSA_CRYPTO_CORE_H */
