@@ -125,6 +125,11 @@ typedef struct
 
 static psa_global_data_t global_data;
 
+mbedtls_ctr_drbg_context *psa_get_ctr_drbg_context( void )
+{
+    return( &global_data.ctr_drbg );
+}
+
 #define GUARD_MODULE_INITIALIZED        \
     if( global_data.initialized == 0 )  \
         return( PSA_ERROR_BAD_STATE );
