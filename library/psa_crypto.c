@@ -548,10 +548,9 @@ static psa_status_t psa_check_rsa_key_byte_aligned(
  *                          contents of the context and the context itself
  *                          when done.
  */
-static psa_status_t psa_load_rsa_representation( psa_key_type_t type,
-                                                 const uint8_t *data,
-                                                 size_t data_length,
-                                                 mbedtls_rsa_context **p_rsa )
+static psa_status_t mbedtls_psa_rsa_load_representation(
+    psa_key_type_t type, const uint8_t *data, size_t data_length,
+    mbedtls_rsa_context **p_rsa )
 {
     psa_status_t status;
     mbedtls_pk_context ctx;
@@ -688,10 +687,10 @@ static psa_status_t psa_import_rsa_key( psa_key_slot_t *slot,
     mbedtls_rsa_context *rsa = NULL;
 
     /* Parse input */
-    status = psa_load_rsa_representation( slot->attr.type,
-                                          data,
-                                          data_length,
-                                          &rsa );
+    status = mbedtls_psa_rsa_load_representation( slot->attr.type,
+                                                  data,
+                                                  data_length,
+                                                  &rsa );
     if( status != PSA_SUCCESS )
         goto exit;
 
@@ -751,10 +750,9 @@ exit:
  *                          contents of the context and the context itself
  *                          when done.
  */
-static psa_status_t psa_load_ecp_representation( psa_key_type_t type,
-                                                 const uint8_t *data,
-                                                 size_t data_length,
-                                                 mbedtls_ecp_keypair **p_ecp )
+static psa_status_t mbedtls_psa_ecp_load_representation(
+    psa_key_type_t type, const uint8_t *data, size_t data_length,
+    mbedtls_ecp_keypair **p_ecp )
 {
     mbedtls_ecp_group_id grp_id = MBEDTLS_ECP_DP_NONE;
     psa_status_t status;
@@ -921,10 +919,10 @@ static psa_status_t psa_import_ecp_key( psa_key_slot_t *slot,
     mbedtls_ecp_keypair *ecp = NULL;
 
     /* Parse input */
-    status = psa_load_ecp_representation( slot->attr.type,
-                                          data,
-                                          data_length,
-                                          &ecp );
+    status = mbedtls_psa_ecp_load_representation( slot->attr.type,
+                                                  data,
+                                                  data_length,
+                                                  &ecp );
     if( status != PSA_SUCCESS )
         goto exit;
 
@@ -1620,10 +1618,11 @@ psa_status_t psa_get_key_attributes( mbedtls_svc_key_id_t key,
             {
                 mbedtls_rsa_context *rsa = NULL;
 
-                status = psa_load_rsa_representation( slot->attr.type,
-                                                      slot->key.data,
-                                                      slot->key.bytes,
-                                                      &rsa );
+                status = mbedtls_psa_rsa_load_representation(
+                             slot->attr.type,
+                             slot->key.data,
+                             slot->key.bytes,
+                             &rsa );
                 if( status != PSA_SUCCESS )
                     break;
 
@@ -1752,11 +1751,10 @@ static psa_status_t psa_internal_export_key( const psa_key_slot_t *slot,
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_KEY_PAIR) || \
     defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_PUBLIC_KEY)
             mbedtls_rsa_context *rsa = NULL;
-            status = psa_load_rsa_representation(
-                                    slot->attr.type,
-                                    slot->key.data,
-                                    slot->key.bytes,
-                                    &rsa );
+            status = mbedtls_psa_rsa_load_representation( slot->attr.type,
+                                                          slot->key.data,
+                                                          slot->key.bytes,
+                                                          &rsa );
             if( status != PSA_SUCCESS )
                 return( status );
 
@@ -1781,11 +1779,10 @@ static psa_status_t psa_internal_export_key( const psa_key_slot_t *slot,
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR) || \
     defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY)
             mbedtls_ecp_keypair *ecp = NULL;
-            status = psa_load_ecp_representation(
-                                    slot->attr.type,
-                                    slot->key.data,
-                                    slot->key.bytes,
-                                    &ecp );
+            status = mbedtls_psa_ecp_load_representation( slot->attr.type,
+                                                          slot->key.data,
+                                                          slot->key.bytes,
+                                                          &ecp );
             if( status != PSA_SUCCESS )
                 return( status );
 
@@ -2254,11 +2251,11 @@ static psa_status_t psa_validate_optional_attributes(
             mbedtls_mpi actual, required;
             int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
 
-            psa_status_t status = psa_load_rsa_representation(
-                                    slot->attr.type,
-                                    slot->key.data,
-                                    slot->key.bytes,
-                                    &rsa );
+            psa_status_t status = mbedtls_psa_rsa_load_representation(
+                                      slot->attr.type,
+                                      slot->key.data,
+                                      slot->key.bytes,
+                                      &rsa );
             if( status != PSA_SUCCESS )
                 return( status );
 
@@ -3951,10 +3948,10 @@ psa_status_t psa_sign_hash( mbedtls_svc_key_id_t key,
     {
         mbedtls_rsa_context *rsa = NULL;
 
-        status = psa_load_rsa_representation( slot->attr.type,
-                                              slot->key.data,
-                                              slot->key.bytes,
-                                              &rsa );
+        status = mbedtls_psa_rsa_load_representation( slot->attr.type,
+                                                      slot->key.data,
+                                                      slot->key.bytes,
+                                                      &rsa );
         if( status != PSA_SUCCESS )
             goto exit;
 
@@ -3983,10 +3980,10 @@ psa_status_t psa_sign_hash( mbedtls_svc_key_id_t key,
             )
         {
             mbedtls_ecp_keypair *ecp = NULL;
-            status = psa_load_ecp_representation( slot->attr.type,
-                                                  slot->key.data,
-                                                  slot->key.bytes,
-                                                  &ecp );
+            status = mbedtls_psa_ecp_load_representation( slot->attr.type,
+                                                          slot->key.data,
+                                                          slot->key.bytes,
+                                                          &ecp );
             if( status != PSA_SUCCESS )
                 goto exit;
             status = psa_ecdsa_sign( ecp,
@@ -4061,10 +4058,10 @@ psa_status_t psa_verify_hash( mbedtls_svc_key_id_t key,
     {
         mbedtls_rsa_context *rsa = NULL;
 
-        status = psa_load_rsa_representation( slot->attr.type,
-                                              slot->key.data,
-                                              slot->key.bytes,
-                                              &rsa );
+        status = mbedtls_psa_rsa_load_representation( slot->attr.type,
+                                                      slot->key.data,
+                                                      slot->key.bytes,
+                                                      &rsa );
         if( status != PSA_SUCCESS )
             goto exit;
 
@@ -4086,10 +4083,10 @@ psa_status_t psa_verify_hash( mbedtls_svc_key_id_t key,
         if( PSA_ALG_IS_ECDSA( alg ) )
         {
             mbedtls_ecp_keypair *ecp = NULL;
-            status = psa_load_ecp_representation( slot->attr.type,
-                                                  slot->key.data,
-                                                  slot->key.bytes,
-                                                  &ecp );
+            status = mbedtls_psa_ecp_load_representation( slot->attr.type,
+                                                          slot->key.data,
+                                                          slot->key.bytes,
+                                                          &ecp );
             if( status != PSA_SUCCESS )
                 goto exit;
             status = psa_ecdsa_verify( ecp,
@@ -4170,10 +4167,10 @@ psa_status_t psa_asymmetric_encrypt( mbedtls_svc_key_id_t key,
     if( PSA_KEY_TYPE_IS_RSA( slot->attr.type ) )
     {
         mbedtls_rsa_context *rsa = NULL;
-        status = psa_load_rsa_representation( slot->attr.type,
-                                              slot->key.data,
-                                              slot->key.bytes,
-                                              &rsa );
+        status = mbedtls_psa_rsa_load_representation( slot->attr.type,
+                                                      slot->key.data,
+                                                      slot->key.bytes,
+                                                      &rsa );
         if( status != PSA_SUCCESS )
             goto rsa_exit;
 
@@ -4276,10 +4273,10 @@ psa_status_t psa_asymmetric_decrypt( mbedtls_svc_key_id_t key,
     if( slot->attr.type == PSA_KEY_TYPE_RSA_KEY_PAIR )
     {
         mbedtls_rsa_context *rsa = NULL;
-        status = psa_load_rsa_representation( slot->attr.type,
-                                              slot->key.data,
-                                              slot->key.bytes,
-                                              &rsa );
+        status = mbedtls_psa_rsa_load_representation( slot->attr.type,
+                                                      slot->key.data,
+                                                      slot->key.bytes,
+                                                      &rsa );
         if( status != PSA_SUCCESS )
             goto exit;
 
@@ -6141,10 +6138,11 @@ static psa_status_t psa_key_agreement_ecdh( const uint8_t *peer_key,
     psa_ecc_family_t curve = mbedtls_ecc_group_to_psa( our_key->grp.id, &bits );
     mbedtls_ecdh_init( &ecdh );
 
-    status = psa_load_ecp_representation( PSA_KEY_TYPE_ECC_PUBLIC_KEY(curve),
-                                          peer_key,
-                                          peer_key_length,
-                                          &their_key );
+    status = mbedtls_psa_ecp_load_representation(
+                 PSA_KEY_TYPE_ECC_PUBLIC_KEY(curve),
+                 peer_key,
+                 peer_key_length,
+                 &their_key );
     if( status != PSA_SUCCESS )
         goto exit;
 
@@ -6196,11 +6194,11 @@ static psa_status_t psa_key_agreement_raw_internal( psa_algorithm_t alg,
             if( ! PSA_KEY_TYPE_IS_ECC_KEY_PAIR( private_key->attr.type ) )
                 return( PSA_ERROR_INVALID_ARGUMENT );
             mbedtls_ecp_keypair *ecp = NULL;
-            psa_status_t status = psa_load_ecp_representation(
-                                    private_key->attr.type,
-                                    private_key->key.data,
-                                    private_key->key.bytes,
-                                    &ecp );
+            psa_status_t status = mbedtls_psa_ecp_load_representation(
+                                      private_key->attr.type,
+                                      private_key->key.data,
+                                      private_key->key.bytes,
+                                      &ecp );
             if( status != PSA_SUCCESS )
                 return( status );
             status = psa_key_agreement_ecdh( peer_key, peer_key_length,
