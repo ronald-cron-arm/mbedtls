@@ -727,8 +727,8 @@ exit:
     }
 
     /* On success, store the allocated export-formatted key. */
-    slot->data.key.data = output;
-    slot->data.key.bytes = data_length;
+    slot->key.data = output;
+    slot->key.bytes = data_length;
 
     return( PSA_SUCCESS );
 }
@@ -961,8 +961,8 @@ exit:
     }
 
     /* On success, store the allocated export-formatted key. */
-    slot->data.key.data = output;
-    slot->data.key.bytes = data_length;
+    slot->key.data = output;
+    slot->key.bytes = data_length;
 
     return( PSA_SUCCESS );
 }
@@ -995,14 +995,14 @@ static inline size_t psa_get_key_slot_bits( const psa_key_slot_t *slot )
 static psa_status_t psa_allocate_buffer_to_slot( psa_key_slot_t *slot,
                                                  size_t buffer_length )
 {
-    if( slot->data.key.data != NULL )
+    if( slot->key.data != NULL )
         return( PSA_ERROR_ALREADY_EXISTS );
 
-    slot->data.key.data = mbedtls_calloc( 1, buffer_length );
-    if( slot->data.key.data == NULL )
+    slot->key.data = mbedtls_calloc( 1, buffer_length );
+    if( slot->key.data == NULL )
         return( PSA_ERROR_INSUFFICIENT_MEMORY );
 
-    slot->data.key.bytes = buffer_length;
+    slot->key.bytes = buffer_length;
     return( PSA_SUCCESS );
 }
 
@@ -1015,7 +1015,7 @@ psa_status_t psa_copy_key_material_into_slot( psa_key_slot_t *slot,
     if( status != PSA_SUCCESS )
         return( status );
 
-    memcpy( slot->data.key.data, data, data_length );
+    memcpy( slot->key.data, data, data_length );
     return( PSA_SUCCESS );
 }
 
@@ -1320,22 +1320,14 @@ static psa_status_t psa_get_and_lock_transparent_key_slot_with_policy(
 /** Wipe key data from a slot. Preserve metadata such as the policy. */
 static psa_status_t psa_remove_key_data_from_memory( psa_key_slot_t *slot )
 {
-#if defined(MBEDTLS_PSA_CRYPTO_SE_C)
-    if( psa_key_slot_is_external( slot ) )
-    {
-        /* No key material to clean. */
-    }
-    else
-#endif /* MBEDTLS_PSA_CRYPTO_SE_C */
-    {
-        /* Data pointer will always be either a valid pointer or NULL in an
-         * initialized slot, so we can just free it. */
-        if( slot->data.key.data != NULL )
-            mbedtls_platform_zeroize( slot->data.key.data, slot->data.key.bytes);
-        mbedtls_free( slot->data.key.data );
-        slot->data.key.data = NULL;
-        slot->data.key.bytes = 0;
-    }
+    /* Data pointer will always be either a valid pointer or NULL in an
+     * initialized slot, so we can just free it. */
+    if( slot->key.data != NULL )
+        mbedtls_platform_zeroize( slot->key.data, slot->key.bytes);
+
+    mbedtls_free( slot->key.data );
+    slot->key.data = NULL;
+    slot->key.bytes = 0;
 
     return( PSA_SUCCESS );
 }
@@ -1420,7 +1412,7 @@ psa_status_t psa_destroy_key( mbedtls_svc_key_id_t key )
          * three actions. */
         psa_crypto_prepare_transaction( PSA_CRYPTO_TRANSACTION_DESTROY_KEY );
         psa_crypto_transaction.key.lifetime = slot->attr.lifetime;
-        psa_crypto_transaction.key.slot = slot->data.se.slot_number;
+        psa_crypto_transaction.key.slot = psa_key_slot_get_slot_number( slot );
         psa_crypto_transaction.key.id = slot->attr.id;
         status = psa_crypto_save_transaction( );
         if( status != PSA_SUCCESS )
@@ -1437,7 +1429,8 @@ psa_status_t psa_destroy_key( mbedtls_svc_key_id_t key )
             goto exit;
         }
 
-        status = psa_destroy_se_key( driver, slot->data.se.slot_number );
+        status = psa_destroy_se_key( driver,
+                                     psa_key_slot_get_slot_number( slot ) );
         if( overall_status == PSA_SUCCESS )
             overall_status = status;
     }
@@ -1593,7 +1586,8 @@ psa_status_t psa_get_key_attributes( mbedtls_svc_key_id_t key,
 
 #if defined(MBEDTLS_PSA_CRYPTO_SE_C)
     if( psa_key_slot_is_external( slot ) )
-        psa_set_key_slot_number( attributes, slot->data.se.slot_number );
+        psa_set_key_slot_number( attributes,
+                                 psa_key_slot_get_slot_number( slot ) );
 #endif /* MBEDTLS_PSA_CRYPTO_SE_C */
 
     switch( slot->attr.type )
@@ -1614,8 +1608,8 @@ psa_status_t psa_get_key_attributes( mbedtls_svc_key_id_t key,
                 mbedtls_rsa_context *rsa = NULL;
 
                 status = psa_load_rsa_representation( slot->attr.type,
-                                                      slot->data.key.data,
-                                                      slot->data.key.bytes,
+                                                      slot->key.data,
+                                                      slot->key.bytes,
                                                       &rsa );
                 if( status != PSA_SUCCESS )
                     break;
@@ -1661,12 +1655,12 @@ static psa_status_t psa_internal_export_key_buffer( const psa_key_slot_t *slot,
                                                     size_t data_size,
                                                     size_t *data_length )
 {
-    if( slot->data.key.bytes > data_size )
+    if( slot->key.bytes > data_size )
         return( PSA_ERROR_BUFFER_TOO_SMALL );
-    memcpy( data, slot->data.key.data, slot->data.key.bytes );
-    memset( data + slot->data.key.bytes, 0,
-            data_size - slot->data.key.bytes );
-    *data_length = slot->data.key.bytes;
+    memcpy( data, slot->key.data, slot->key.bytes );
+    memset( data + slot->key.bytes, 0,
+            data_size - slot->key.bytes );
+    *data_length = slot->key.bytes;
     return( PSA_SUCCESS );
 }
 
@@ -1704,7 +1698,7 @@ static psa_status_t psa_internal_export_key( const psa_key_slot_t *slot,
         if( method == NULL )
             return( PSA_ERROR_NOT_SUPPORTED );
         return( method( drv_context,
-                        slot->data.se.slot_number,
+                        psa_key_slot_get_slot_number( slot ),
                         data, data_size, data_length ) );
     }
 #endif /* MBEDTLS_PSA_CRYPTO_SE_C */
@@ -1745,8 +1739,8 @@ static psa_status_t psa_internal_export_key( const psa_key_slot_t *slot,
             mbedtls_rsa_context *rsa = NULL;
             status = psa_load_rsa_representation(
                                     slot->attr.type,
-                                    slot->data.key.data,
-                                    slot->data.key.bytes,
+                                    slot->key.data,
+                                    slot->key.bytes,
                                     &rsa );
             if( status != PSA_SUCCESS )
                 return( status );
@@ -1774,8 +1768,8 @@ static psa_status_t psa_internal_export_key( const psa_key_slot_t *slot,
             mbedtls_ecp_keypair *ecp = NULL;
             status = psa_load_ecp_representation(
                                     slot->attr.type,
-                                    slot->data.key.data,
-                                    slot->data.key.bytes,
+                                    slot->key.data,
+                                    slot->key.bytes,
                                     &ecp );
             if( status != PSA_SUCCESS )
                 return( status );
@@ -2048,8 +2042,9 @@ static psa_status_t psa_start_key_creation(
      * we can roll back to a state where the key doesn't exist. */
     if( *p_drv != NULL )
     {
+        psa_key_slot_number_t slot_number;
         status = psa_find_se_slot_for_key( attributes, method, *p_drv,
-                                           &slot->data.se.slot_number );
+                                           &slot_number );
         if( status != PSA_SUCCESS )
             return( status );
 
@@ -2057,7 +2052,7 @@ static psa_status_t psa_start_key_creation(
         {
             psa_crypto_prepare_transaction( PSA_CRYPTO_TRANSACTION_CREATE_KEY );
             psa_crypto_transaction.key.lifetime = slot->attr.lifetime;
-            psa_crypto_transaction.key.slot = slot->data.se.slot_number;
+            psa_crypto_transaction.key.slot = slot_number;
             psa_crypto_transaction.key.id = slot->attr.id;
             status = psa_crypto_save_transaction( );
             if( status != PSA_SUCCESS )
@@ -2066,6 +2061,9 @@ static psa_status_t psa_start_key_creation(
                 return( status );
             }
         }
+
+        status = psa_copy_key_material_into_slot(
+            slot, (uint8_t *)( &slot_number ), sizeof( slot_number ) );
     }
 
     if( *p_drv == NULL && method == PSA_KEY_CREATION_REGISTER )
@@ -2117,13 +2115,15 @@ static psa_status_t psa_finish_key_creation(
         if( driver != NULL )
         {
             psa_se_key_data_storage_t data;
+            psa_key_slot_number_t slot_number =
+                psa_key_slot_get_slot_number( slot ) ;
+
 #if defined(static_assert)
-            static_assert( sizeof( slot->data.se.slot_number ) ==
+            static_assert( sizeof( slot_number ) ==
                            sizeof( data.slot_number ),
                            "Slot number size does not match psa_se_key_data_storage_t" );
 #endif
-            memcpy( &data.slot_number, &slot->data.se.slot_number,
-                    sizeof( slot->data.se.slot_number ) );
+            memcpy( &data.slot_number, &slot_number, sizeof( slot_number ) );
             status = psa_save_persistent_key( &slot->attr,
                                               (uint8_t*) &data,
                                               sizeof( data ) );
@@ -2134,8 +2134,8 @@ static psa_status_t psa_finish_key_creation(
             /* Key material is saved in export representation in the slot, so
              * just pass the slot buffer for storage. */
             status = psa_save_persistent_key( &slot->attr,
-                                              slot->data.key.data,
-                                              slot->data.key.bytes );
+                                              slot->key.data,
+                                              slot->key.bytes );
         }
     }
 #endif /* defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) */
@@ -2241,8 +2241,8 @@ static psa_status_t psa_validate_optional_attributes(
 
             psa_status_t status = psa_load_rsa_representation(
                                     slot->attr.type,
-                                    slot->data.key.data,
-                                    slot->data.key.bytes,
+                                    slot->key.data,
+                                    slot->key.bytes,
                                     &rsa );
             if( status != PSA_SUCCESS )
                 return( status );
@@ -2322,8 +2322,8 @@ psa_status_t psa_import_key( const psa_key_attributes_t *attributes,
         }
         status = drv->key_management->p_import(
             psa_get_se_driver_context( driver ),
-            slot->data.se.slot_number, attributes, data, data_length,
-            &bits );
+            psa_key_slot_get_slot_number( slot ),
+            attributes, data, data_length, &bits );
         if( status != PSA_SUCCESS )
             goto exit;
         if( bits > PSA_MAX_KEY_BITS )
@@ -2391,8 +2391,8 @@ static psa_status_t psa_copy_key_material( const psa_key_slot_t *source,
                                            psa_key_slot_t *target )
 {
     psa_status_t status = psa_copy_key_material_into_slot( target,
-                                                           source->data.key.data,
-                                                           source->data.key.bytes );
+                                                           source->key.data,
+                                                           source->key.bytes );
     if( status != PSA_SUCCESS )
         return( status );
 
@@ -3205,7 +3205,7 @@ static int psa_cmac_setup( psa_mac_operation_t *operation,
         return( ret );
 
     ret = mbedtls_cipher_cmac_starts( &operation->ctx.cmac,
-                                      slot->data.key.data,
+                                      slot->key.data,
                                       key_bits );
     return( ret );
 }
@@ -3351,8 +3351,8 @@ static psa_status_t psa_mac_setup( psa_mac_operation_t *operation,
         }
 
         status = psa_hmac_setup_internal( &operation->ctx.hmac,
-                                          slot->data.key.data,
-                                          slot->data.key.bytes,
+                                          slot->key.data,
+                                          slot->key.bytes,
                                           hash_alg );
     }
     else
@@ -3938,8 +3938,8 @@ psa_status_t psa_sign_hash( mbedtls_svc_key_id_t key,
         mbedtls_rsa_context *rsa = NULL;
 
         status = psa_load_rsa_representation( slot->attr.type,
-                                              slot->data.key.data,
-                                              slot->data.key.bytes,
+                                              slot->key.data,
+                                              slot->key.bytes,
                                               &rsa );
         if( status != PSA_SUCCESS )
             goto exit;
@@ -3970,8 +3970,8 @@ psa_status_t psa_sign_hash( mbedtls_svc_key_id_t key,
         {
             mbedtls_ecp_keypair *ecp = NULL;
             status = psa_load_ecp_representation( slot->attr.type,
-                                                  slot->data.key.data,
-                                                  slot->data.key.bytes,
+                                                  slot->key.data,
+                                                  slot->key.bytes,
                                                   &ecp );
             if( status != PSA_SUCCESS )
                 goto exit;
@@ -4048,8 +4048,8 @@ psa_status_t psa_verify_hash( mbedtls_svc_key_id_t key,
         mbedtls_rsa_context *rsa = NULL;
 
         status = psa_load_rsa_representation( slot->attr.type,
-                                              slot->data.key.data,
-                                              slot->data.key.bytes,
+                                              slot->key.data,
+                                              slot->key.bytes,
                                               &rsa );
         if( status != PSA_SUCCESS )
             goto exit;
@@ -4073,8 +4073,8 @@ psa_status_t psa_verify_hash( mbedtls_svc_key_id_t key,
         {
             mbedtls_ecp_keypair *ecp = NULL;
             status = psa_load_ecp_representation( slot->attr.type,
-                                                  slot->data.key.data,
-                                                  slot->data.key.bytes,
+                                                  slot->key.data,
+                                                  slot->key.bytes,
                                                   &ecp );
             if( status != PSA_SUCCESS )
                 goto exit;
@@ -4157,8 +4157,8 @@ psa_status_t psa_asymmetric_encrypt( mbedtls_svc_key_id_t key,
     {
         mbedtls_rsa_context *rsa = NULL;
         status = psa_load_rsa_representation( slot->attr.type,
-                                              slot->data.key.data,
-                                              slot->data.key.bytes,
+                                              slot->key.data,
+                                              slot->key.bytes,
                                               &rsa );
         if( status != PSA_SUCCESS )
             goto rsa_exit;
@@ -4263,8 +4263,8 @@ psa_status_t psa_asymmetric_decrypt( mbedtls_svc_key_id_t key,
     {
         mbedtls_rsa_context *rsa = NULL;
         status = psa_load_rsa_representation( slot->attr.type,
-                                              slot->data.key.data,
-                                              slot->data.key.bytes,
+                                              slot->key.data,
+                                              slot->key.bytes,
                                               &rsa );
         if( status != PSA_SUCCESS )
             goto exit;
@@ -4424,8 +4424,8 @@ static psa_status_t psa_cipher_setup( psa_cipher_operation_t *operation,
     {
         /* Two-key Triple-DES is 3-key Triple-DES with K1=K3 */
         uint8_t keys[24];
-        memcpy( keys, slot->data.key.data, 16 );
-        memcpy( keys + 16, slot->data.key.data, 8 );
+        memcpy( keys, slot->key.data, 16 );
+        memcpy( keys + 16, slot->key.data, 8 );
         ret = mbedtls_cipher_setkey( &operation->ctx.cipher,
                                      keys,
                                      192, cipher_operation );
@@ -4434,7 +4434,7 @@ static psa_status_t psa_cipher_setup( psa_cipher_operation_t *operation,
 #endif
     {
         ret = mbedtls_cipher_setkey( &operation->ctx.cipher,
-                                     slot->data.key.data,
+                                     slot->key.data,
                                      (int) key_bits, cipher_operation );
     }
     if( ret != 0 )
@@ -4933,7 +4933,7 @@ static psa_status_t psa_aead_setup( aead_operation_t *operation,
             mbedtls_ccm_init( &operation->ctx.ccm );
             status = mbedtls_to_psa_error(
                 mbedtls_ccm_setkey( &operation->ctx.ccm, cipher_id,
-                                    operation->slot->data.key.data,
+                                    operation->slot->key.data,
                                     (unsigned int) key_bits ) );
             if( status != 0 )
                 goto cleanup;
@@ -4955,7 +4955,7 @@ static psa_status_t psa_aead_setup( aead_operation_t *operation,
             mbedtls_gcm_init( &operation->ctx.gcm );
             status = mbedtls_to_psa_error(
                 mbedtls_gcm_setkey( &operation->ctx.gcm, cipher_id,
-                                    operation->slot->data.key.data,
+                                    operation->slot->key.data,
                                     (unsigned int) key_bits ) );
             if( status != 0 )
                 goto cleanup;
@@ -4975,7 +4975,7 @@ static psa_status_t psa_aead_setup( aead_operation_t *operation,
             mbedtls_chachapoly_init( &operation->ctx.chachapoly );
             status = mbedtls_to_psa_error(
                 mbedtls_chachapoly_setkey( &operation->ctx.chachapoly,
-                                           operation->slot->data.key.data ) );
+                                           operation->slot->key.data ) );
             if( status != 0 )
                 goto cleanup;
             break;
@@ -6098,8 +6098,8 @@ psa_status_t psa_key_derivation_input_key(
 
     status = psa_key_derivation_input_internal( operation,
                                                 step, slot->attr.type,
-                                                slot->data.key.data,
-                                                slot->data.key.bytes );
+                                                slot->key.data,
+                                                slot->key.bytes );
 
     unlock_status = psa_unlock_key_slot( slot );
 
@@ -6184,8 +6184,8 @@ static psa_status_t psa_key_agreement_raw_internal( psa_algorithm_t alg,
             mbedtls_ecp_keypair *ecp = NULL;
             psa_status_t status = psa_load_ecp_representation(
                                     private_key->attr.type,
-                                    private_key->data.key.data,
-                                    private_key->data.key.bytes,
+                                    private_key->key.data,
+                                    private_key->key.bytes,
                                     &ecp );
             if( status != PSA_SUCCESS )
                 return( status );
@@ -6419,16 +6419,16 @@ static psa_status_t psa_generate_key_internal(
         if( status != PSA_SUCCESS )
             return( status );
 
-        status = psa_generate_random( slot->data.key.data,
-                                      slot->data.key.bytes );
+        status = psa_generate_random( slot->key.data,
+                                      slot->key.bytes );
         if( status != PSA_SUCCESS )
             return( status );
 
         slot->attr.bits = (psa_key_bits_t) bits;
 #if defined(MBEDTLS_DES_C)
         if( type == PSA_KEY_TYPE_DES )
-            psa_des_set_key_parity( slot->data.key.data,
-                                    slot->data.key.bytes );
+            psa_des_set_key_parity( slot->key.data,
+                                    slot->key.bytes );
 #endif /* MBEDTLS_DES_C */
     }
     else
@@ -6472,9 +6472,9 @@ static psa_status_t psa_generate_key_internal(
 
         status = psa_export_rsa_key( type,
                                      &rsa,
-                                     slot->data.key.data,
+                                     slot->key.data,
                                      bytes,
-                                     &slot->data.key.bytes );
+                                     &slot->key.bytes );
         mbedtls_rsa_free( &rsa );
         if( status != PSA_SUCCESS )
             psa_remove_key_data_from_memory( slot );
@@ -6518,11 +6518,11 @@ static psa_status_t psa_generate_key_internal(
         }
 
         status = mbedtls_to_psa_error(
-            mbedtls_ecp_write_key( &ecp, slot->data.key.data, bytes ) );
+            mbedtls_ecp_write_key( &ecp, slot->key.data, bytes ) );
 
         mbedtls_ecp_keypair_free( &ecp );
         if( status != PSA_SUCCESS ) {
-            memset( slot->data.key.data, 0, bytes );
+            memset( slot->key.data, 0, bytes );
             psa_remove_key_data_from_memory( slot );
         }
         return( status );
