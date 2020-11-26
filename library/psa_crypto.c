@@ -616,11 +616,11 @@ exit:
  * \param[in] data_size     The length of the buffer to export to
  * \param[out] data_length  The amount of bytes written to \p data
  */
-static psa_status_t psa_export_rsa_key( psa_key_type_t type,
-                                        mbedtls_rsa_context *rsa,
-                                        uint8_t *data,
-                                        size_t data_size,
-                                        size_t *data_length )
+static psa_status_t mbedtls_psa_rsa_export_key( psa_key_type_t type,
+                                                mbedtls_rsa_context *rsa,
+                                                uint8_t *data,
+                                                size_t data_size,
+                                                size_t *data_length )
 {
 #if defined(MBEDTLS_PK_WRITE_C)
     int ret;
@@ -708,11 +708,11 @@ static psa_status_t psa_import_rsa_key( psa_key_slot_t *slot,
         goto exit;
     }
 
-    status = psa_export_rsa_key( slot->attr.type,
-                                 rsa,
-                                 output,
-                                 data_length,
-                                 &data_length);
+    status = mbedtls_psa_rsa_export_key( slot->attr.type,
+                                         rsa,
+                                         output,
+                                         data_length,
+                                         &data_length);
 exit:
     /* Always free the RSA object */
     mbedtls_rsa_free( rsa );
@@ -854,11 +854,11 @@ exit:
  * \param[in] data_size     The length of the buffer to export to
  * \param[out] data_length  The amount of bytes written to \p data
  */
-static psa_status_t psa_export_ecp_key( psa_key_type_t type,
-                                        mbedtls_ecp_keypair *ecp,
-                                        uint8_t *data,
-                                        size_t data_size,
-                                        size_t *data_length )
+static psa_status_t mbedtls_psa_ecp_export_key( psa_key_type_t type,
+                                                mbedtls_ecp_keypair *ecp,
+                                                uint8_t *data,
+                                                size_t data_size,
+                                                size_t *data_length )
 {
     psa_status_t status;
 
@@ -941,11 +941,11 @@ static psa_status_t psa_import_ecp_key( psa_key_slot_t *slot,
         goto exit;
     }
 
-    status = psa_export_ecp_key( slot->attr.type,
-                                 ecp,
-                                 output,
-                                 data_length,
-                                 &data_length);
+    status = mbedtls_psa_ecp_export_key( slot->attr.type,
+                                         ecp,
+                                         output,
+                                         data_length,
+                                         &data_length);
 exit:
     /* Always free the PK object (will also free contained ECP context) */
     mbedtls_ecp_keypair_free( ecp );
@@ -1758,11 +1758,11 @@ static psa_status_t psa_internal_export_key( const psa_key_slot_t *slot,
             if( status != PSA_SUCCESS )
                 return( status );
 
-            status = psa_export_rsa_key( PSA_KEY_TYPE_RSA_PUBLIC_KEY,
-                                         rsa,
-                                         data,
-                                         data_size,
-                                         data_length );
+            status = mbedtls_psa_rsa_export_key( PSA_KEY_TYPE_RSA_PUBLIC_KEY,
+                                                 rsa,
+                                                 data,
+                                                 data_size,
+                                                 data_length );
 
             mbedtls_rsa_free( rsa );
             mbedtls_free( rsa );
@@ -1786,13 +1786,13 @@ static psa_status_t psa_internal_export_key( const psa_key_slot_t *slot,
             if( status != PSA_SUCCESS )
                 return( status );
 
-            status = psa_export_ecp_key( PSA_KEY_TYPE_ECC_PUBLIC_KEY(
-                                            PSA_KEY_TYPE_ECC_GET_FAMILY(
-                                                slot->attr.type ) ),
-                                         ecp,
-                                         data,
-                                         data_size,
-                                         data_length );
+            status = mbedtls_psa_ecp_export_key(
+                PSA_KEY_TYPE_ECC_PUBLIC_KEY(
+                    PSA_KEY_TYPE_ECC_GET_FAMILY( slot->attr.type ) ),
+                ecp,
+                data,
+                data_size,
+                data_length );
 
             mbedtls_ecp_keypair_free( ecp );
             mbedtls_free( ecp );
@@ -6482,11 +6482,11 @@ static psa_status_t psa_generate_key_internal(
             return( status );
         }
 
-        status = psa_export_rsa_key( type,
-                                     &rsa,
-                                     slot->key.data,
-                                     bytes,
-                                     &slot->key.bytes );
+        status = mbedtls_psa_rsa_export_key( type,
+                                             &rsa,
+                                             slot->key.data,
+                                             bytes,
+                                             &slot->key.bytes );
         mbedtls_rsa_free( &rsa );
         if( status != PSA_SUCCESS )
             psa_remove_key_data_from_memory( slot );
