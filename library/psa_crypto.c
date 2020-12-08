@@ -3365,6 +3365,82 @@ cleanup:
 #endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) ||
         * defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA) */
 
+static psa_status_t psa_sign_hash_internal(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer, size_t key_buffer_size,
+    psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
+    uint8_t *signature, size_t signature_size, size_t *signature_length )
+{
+    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+
+#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) || \
+    defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)
+    if( attributes->core.type == PSA_KEY_TYPE_RSA_KEY_PAIR )
+    {
+        mbedtls_rsa_context *rsa = NULL;
+
+        status = psa_crypto_rsa_load_representation( attributes->core.type,
+                                                     key_buffer,
+                                                     key_buffer_size,
+                                                     &rsa );
+        if( status != PSA_SUCCESS )
+            goto exit;
+
+        status = psa_rsa_sign( rsa,
+                               alg,
+                               hash, hash_length,
+                               signature, signature_size,
+                               signature_length );
+
+        mbedtls_rsa_free( rsa );
+        mbedtls_free( rsa );
+    }
+    else
+#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||
+        * defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS) */
+    if( PSA_KEY_TYPE_IS_ECC( attributes->core.type ) )
+    {
+#if defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) || \
+    defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA)
+        if(
+#if defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA)
+            PSA_ALG_IS_ECDSA( alg )
+#else
+            PSA_ALG_IS_RANDOMIZED_ECDSA( alg )
+#endif
+            )
+        {
+            mbedtls_ecp_keypair *ecp = NULL;
+            status = psa_crypto_ecp_load_representation( attributes->core.type,
+                                                         key_buffer,
+                                                         key_buffer_size,
+                                                         &ecp );
+            if( status != PSA_SUCCESS )
+                goto exit;
+            status = psa_ecdsa_sign( ecp,
+                                     alg,
+                                     hash, hash_length,
+                                     signature, signature_size,
+                                     signature_length );
+            mbedtls_ecp_keypair_free( ecp );
+            mbedtls_free( ecp );
+        }
+        else
+#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) ||
+        * defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA) */
+        {
+            status = PSA_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    else
+    {
+        status = PSA_ERROR_NOT_SUPPORTED;
+    }
+
+exit:
+    return( status );
+}
+
 psa_status_t psa_sign_hash( mbedtls_svc_key_id_t key,
                             psa_algorithm_t alg,
                             const uint8_t *hash,
@@ -3408,70 +3484,13 @@ psa_status_t psa_sign_hash( mbedtls_svc_key_id_t key,
         psa_key_lifetime_is_external( slot->attr.lifetime ) )
         goto exit;
 
-    /* If the operation was not supported by any accelerator, try fallback. */
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) || \
-    defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)
-    if( slot->attr.type == PSA_KEY_TYPE_RSA_KEY_PAIR )
-    {
-        mbedtls_rsa_context *rsa = NULL;
-
-        status = psa_crypto_rsa_load_representation( slot->attr.type,
-                                                     slot->key.data,
-                                                     slot->key.bytes,
-                                                     &rsa );
-        if( status != PSA_SUCCESS )
-            goto exit;
-
-        status = psa_rsa_sign( rsa,
-                               alg,
-                               hash, hash_length,
-                               signature, signature_size,
-                               signature_length );
-
-        mbedtls_rsa_free( rsa );
-        mbedtls_free( rsa );
-    }
-    else
-#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||
-        * defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS) */
-    if( PSA_KEY_TYPE_IS_ECC( slot->attr.type ) )
-    {
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) || \
-    defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA)
-        if(
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA)
-            PSA_ALG_IS_ECDSA( alg )
-#else
-            PSA_ALG_IS_RANDOMIZED_ECDSA( alg )
-#endif
-            )
-        {
-            mbedtls_ecp_keypair *ecp = NULL;
-            status = psa_crypto_ecp_load_representation( slot->attr.type,
-                                                         slot->key.data,
-                                                         slot->key.bytes,
-                                                         &ecp );
-            if( status != PSA_SUCCESS )
-                goto exit;
-            status = psa_ecdsa_sign( ecp,
-                                     alg,
-                                     hash, hash_length,
-                                     signature, signature_size,
-                                     signature_length );
-            mbedtls_ecp_keypair_free( ecp );
-            mbedtls_free( ecp );
-        }
-        else
-#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) ||
-        * defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA) */
-        {
-            status = PSA_ERROR_INVALID_ARGUMENT;
-        }
-    }
-    else
-    {
-        status = PSA_ERROR_NOT_SUPPORTED;
-    }
+    psa_key_attributes_t attributes = {
+      .core = slot->attr
+    };
+    status = psa_sign_hash_internal(
+        &attributes, slot->key.data, slot->key.bytes,
+        alg, hash, hash_length,
+        signature, signature_size, signature_length );
 
 exit:
     /* Fill the unused part of the output buffer (the whole buffer on error,
@@ -3489,6 +3508,75 @@ exit:
     unlock_status = psa_unlock_key_slot( slot );
 
     return( ( status == PSA_SUCCESS ) ? unlock_status : status );
+}
+
+static psa_status_t psa_verify_hash_internal(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer, size_t key_buffer_size,
+    psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
+    const uint8_t *signature, size_t signature_length )
+{
+    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+
+#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) || \
+    defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)
+    if( PSA_KEY_TYPE_IS_RSA( attributes->core.type ) )
+    {
+        mbedtls_rsa_context *rsa = NULL;
+
+        status = psa_crypto_rsa_load_representation( attributes->core.type,
+                                                     key_buffer,
+                                                     key_buffer_size,
+                                                     &rsa );
+        if( status != PSA_SUCCESS )
+            goto exit;
+
+        status = psa_rsa_verify( rsa,
+                                 alg,
+                                 hash, hash_length,
+                                 signature, signature_length );
+        mbedtls_rsa_free( rsa );
+        mbedtls_free( rsa );
+        goto exit;
+    }
+    else
+#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||
+        * defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS) */
+    if( PSA_KEY_TYPE_IS_ECC( attributes->core.type ) )
+    {
+#if defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) || \
+    defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA)
+        if( PSA_ALG_IS_ECDSA( alg ) )
+        {
+            mbedtls_ecp_keypair *ecp = NULL;
+            status = psa_crypto_ecp_load_representation( attributes->core.type,
+                                                         key_buffer,
+                                                         key_buffer_size,
+                                                         &ecp );
+            if( status != PSA_SUCCESS )
+                goto exit;
+            status = psa_ecdsa_verify( ecp,
+                                       hash, hash_length,
+                                       signature, signature_length );
+            mbedtls_ecp_keypair_free( ecp );
+            mbedtls_free( ecp );
+            goto exit;
+        }
+        else
+#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) ||
+        * defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA) */
+        {
+            status =  PSA_ERROR_INVALID_ARGUMENT;
+            goto exit;
+        }
+    }
+    else
+    {
+        status = PSA_ERROR_NOT_SUPPORTED;
+    }
+
+exit:
+    return( status );
 }
 
 psa_status_t psa_verify_hash( mbedtls_svc_key_id_t key,
@@ -3519,62 +3607,13 @@ psa_status_t psa_verify_hash( mbedtls_svc_key_id_t key,
         psa_key_lifetime_is_external( slot->attr.lifetime ) )
         goto exit;
 
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) || \
-    defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)
-    if( PSA_KEY_TYPE_IS_RSA( slot->attr.type ) )
-    {
-        mbedtls_rsa_context *rsa = NULL;
-
-        status = psa_crypto_rsa_load_representation( slot->attr.type,
-                                                     slot->key.data,
-                                                     slot->key.bytes,
-                                                     &rsa );
-        if( status != PSA_SUCCESS )
-            goto exit;
-
-        status = psa_rsa_verify( rsa,
-                                 alg,
-                                 hash, hash_length,
-                                 signature, signature_length );
-        mbedtls_rsa_free( rsa );
-        mbedtls_free( rsa );
-        goto exit;
-    }
-    else
-#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||
-        * defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS) */
-    if( PSA_KEY_TYPE_IS_ECC( slot->attr.type ) )
-    {
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) || \
-    defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA)
-        if( PSA_ALG_IS_ECDSA( alg ) )
-        {
-            mbedtls_ecp_keypair *ecp = NULL;
-            status = psa_crypto_ecp_load_representation( slot->attr.type,
-                                                         slot->key.data,
-                                                         slot->key.bytes,
-                                                         &ecp );
-            if( status != PSA_SUCCESS )
-                goto exit;
-            status = psa_ecdsa_verify( ecp,
-                                       hash, hash_length,
-                                       signature, signature_length );
-            mbedtls_ecp_keypair_free( ecp );
-            mbedtls_free( ecp );
-            goto exit;
-        }
-        else
-#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) ||
-        * defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA) */
-        {
-            status =  PSA_ERROR_INVALID_ARGUMENT;
-            goto exit;
-        }
-    }
-    else
-    {
-        status = PSA_ERROR_NOT_SUPPORTED;
-    }
+    psa_key_attributes_t attributes = {
+      .core = slot->attr
+    };
+    status = psa_verify_hash_internal(
+        &attributes, slot->key.data, slot->key.bytes,
+        alg, hash, hash_length,
+        signature, signature_length );
 
 exit:
     unlock_status = psa_unlock_key_slot( slot );
