@@ -51,10 +51,22 @@
 #define BUILTIN_KEY_TYPE_RSA_PUBLIC_KEY  1
 #endif
 
+#if ( defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||  \
+      ( defined(PSA_CRYPTO_DRIVER_TEST) &&                   \
+        defined(MBEDTLS_PSA_ACCEL_ALG_RSA_PKCS1V15_SIGN) ) )
+#define BUILTIN_ALG_RSA_PKCS1V15_SIGN  1
+#endif
+
+#if ( defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS) ||  \
+      ( defined(PSA_CRYPTO_DRIVER_TEST) &&         \
+        defined(MBEDTLS_PSA_ACCEL_ALG_RSA_PSS) ) )
+#define BUILTIN_ALG_RSA_PSS 1
+#endif
+
 #if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT) || \
-    defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) || \
     defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_OAEP) || \
-    defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS) || \
+    defined(BUILTIN_ALG_RSA_PKCS1V15_SIGN) || \
+    defined(BUILTIN_ALG_RSA_PSS) || \
     defined(BUILTIN_KEY_TYPE_RSA_KEY_PAIR) || \
     defined(BUILTIN_KEY_TYPE_RSA_PUBLIC_KEY)
 
@@ -130,9 +142,9 @@ exit:
     return( status );
 }
 #endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT) ||
-        * defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||
         * defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_OAEP) ||
-        * defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS) ||
+        * defined(BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||
+        * defined(BUILTIN_ALG_RSA_PSS) ||
         * defined(BUILTIN_KEY_TYPE_RSA_KEY_PAIR) ||
         * defined(BUILTIN_KEY_TYPE_RSA_PUBLIC_KEY) */
 
@@ -319,8 +331,7 @@ static psa_status_t rsa_generate_key(
 /* Sign/verify hashes */
 /****************************************************************/
 
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) || \
-    defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)
+#if defined(BUILTIN_ALG_RSA_PKCS1V15_SIGN) || defined(BUILTIN_ALG_RSA_PSS)
 
 /* Decode the hash algorithm from alg and store the mbedtls encoding in
  * md_alg. Verify that the hash length is acceptable. */
@@ -340,7 +351,7 @@ static psa_status_t psa_rsa_decode_md_type( psa_algorithm_t alg,
         return( PSA_ERROR_INVALID_ARGUMENT );
 #endif
 
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN)
+#if defined(BUILTIN_ALG_RSA_PKCS1V15_SIGN)
     /* For PKCS#1 v1.5 signature, if using a hash, the hash length
      * must be correct. */
     if( PSA_ALG_IS_RSA_PKCS1V15_SIGN( alg ) &&
@@ -351,21 +362,21 @@ static psa_status_t psa_rsa_decode_md_type( psa_algorithm_t alg,
         if( mbedtls_md_get_size( md_info ) != hash_length )
             return( PSA_ERROR_INVALID_ARGUMENT );
     }
-#endif /* MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN */
+#endif /* BUILTIN_ALG_RSA_PKCS1V15_SIGN */
 
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)
+#if defined(BUILTIN_ALG_RSA_PSS)
     /* PSS requires a hash internally. */
     if( PSA_ALG_IS_RSA_PSS( alg ) )
     {
         if( md_info == NULL )
             return( PSA_ERROR_NOT_SUPPORTED );
     }
-#endif /* MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS */
+#endif /* BUILTIN_ALG_RSA_PSS */
 
     return( PSA_SUCCESS );
 }
 
-psa_status_t psa_crypto_rsa_sign_hash(
+static psa_status_t rsa_sign_hash(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size,
     psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
@@ -393,7 +404,7 @@ psa_status_t psa_crypto_rsa_sign_hash(
         goto exit;
     }
 
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN)
+#if defined(BUILTIN_ALG_RSA_PKCS1V15_SIGN)
     if( PSA_ALG_IS_RSA_PKCS1V15_SIGN( alg ) )
     {
         mbedtls_rsa_set_padding( rsa, MBEDTLS_RSA_PKCS_V15,
@@ -408,8 +419,8 @@ psa_status_t psa_crypto_rsa_sign_hash(
                                       signature );
     }
     else
-#endif /* MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN */
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)
+#endif /* BUILTIN_ALG_RSA_PKCS1V15_SIGN */
+#if defined(BUILTIN_ALG_RSA_PSS)
     if( PSA_ALG_IS_RSA_PSS( alg ) )
     {
         mbedtls_rsa_set_padding( rsa, MBEDTLS_RSA_PKCS_V21, md_alg );
@@ -423,7 +434,7 @@ psa_status_t psa_crypto_rsa_sign_hash(
                                            signature );
     }
     else
-#endif /* MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS */
+#endif /* BUILTIN_ALG_RSA_PSS */
     {
         status = PSA_ERROR_INVALID_ARGUMENT;
         goto exit;
@@ -440,7 +451,7 @@ exit:
     return( status );
 }
 
-psa_status_t psa_crypto_rsa_verify_hash(
+static psa_status_t rsa_verify_hash(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size,
     psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
@@ -468,7 +479,7 @@ psa_status_t psa_crypto_rsa_verify_hash(
         goto exit;
     }
 
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN)
+#if defined(BUILTIN_ALG_RSA_PKCS1V15_SIGN)
     if( PSA_ALG_IS_RSA_PKCS1V15_SIGN( alg ) )
     {
         mbedtls_rsa_set_padding( rsa, MBEDTLS_RSA_PKCS_V15,
@@ -483,8 +494,8 @@ psa_status_t psa_crypto_rsa_verify_hash(
                                         signature );
     }
     else
-#endif /* MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN */
-#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)
+#endif /* BUILTIN_ALG_RSA_PKCS1V15_SIGN */
+#if defined(BUILTIN_ALG_RSA_PSS)
     if( PSA_ALG_IS_RSA_PSS( alg ) )
     {
         mbedtls_rsa_set_padding( rsa, MBEDTLS_RSA_PKCS_V21, md_alg );
@@ -498,7 +509,7 @@ psa_status_t psa_crypto_rsa_verify_hash(
                                              signature );
     }
     else
-#endif /* MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS */
+#endif /* BUILTIN_ALG_RSA_PSS */
     {
         status = PSA_ERROR_INVALID_ARGUMENT;
         goto exit;
@@ -518,8 +529,8 @@ exit:
     return( status );
 }
 
-#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||
-        * defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS) */
+#endif /* defined(BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||
+        * defined(BUILTIN_ALG_RSA_PSS) */
 
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_KEY_PAIR) || \
     defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_PUBLIC_KEY)
@@ -556,6 +567,36 @@ psa_status_t psa_crypto_rsa_generate_key(
                               key_buffer_length ) );
 }
 #endif /* defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_KEY_PAIR) */
+
+#if defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) || \
+    defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)
+psa_status_t psa_crypto_rsa_sign_hash(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer, size_t key_buffer_size,
+    psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
+    uint8_t *signature, size_t signature_size, size_t *signature_length )
+{
+    return( rsa_sign_hash(
+                attributes,
+                key_buffer, key_buffer_size,
+                alg, hash, hash_length,
+                signature, signature_size, signature_length ) );
+}
+
+psa_status_t psa_crypto_rsa_verify_hash(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer, size_t key_buffer_size,
+    psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
+    const uint8_t *signature, size_t signature_length )
+{
+    return( rsa_verify_hash(
+                attributes,
+                key_buffer, key_buffer_size,
+                alg, hash, hash_length,
+                signature, signature_length ) );
+}
+#endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN) ||
+        * defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS) */
 
 /*
  * BEYOND THIS POINT, TEST DRIVER ENTRY POINTS ONLY.
@@ -598,6 +639,36 @@ psa_status_t mbedtls_transparent_test_driver_rsa_generate_key(
                               key_buffer_length ) );
 }
 #endif /* defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_RSA_KEY_PAIR) */
+
+#if defined(MBEDTLS_PSA_ACCEL_ALG_RSA_PKCS1V15_SIGN) || \
+    defined(MBEDTLS_PSA_ACCEL_ALG_RSA_PSS)
+psa_status_t mbedtls_transparent_test_driver_rsa_sign_hash(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer, size_t key_buffer_size,
+    psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
+    uint8_t *signature, size_t signature_size, size_t *signature_length )
+{
+    return( rsa_sign_hash(
+                attributes,
+                key_buffer, key_buffer_size,
+                alg, hash, hash_length,
+                signature, signature_size, signature_length ) );
+}
+
+psa_status_t mbedtls_transparent_test_driver_rsa_verify_hash(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer, size_t key_buffer_size,
+    psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
+    const uint8_t *signature, size_t signature_length )
+{
+    return( rsa_verify_hash(
+                attributes,
+                key_buffer, key_buffer_size,
+                alg, hash, hash_length,
+                signature, signature_length ) );
+}
+#endif /* defined(MBEDTLS_PSA_ACCEL_ALG_RSA_PKCS1V15_SIGN) ||
+        * defined(MBEDTLS_PSA_ACCEL_ALG_RSA_PSS) */
 
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 
