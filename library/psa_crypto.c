@@ -3454,7 +3454,7 @@ psa_status_t psa_cipher_generate_iv( psa_cipher_operation_t *operation,
 
     if( operation->mbedtls_in_use == 0 )
     {
-        status = psa_driver_wrapper_cipher_generate_iv( &operation->ctx.driver,
+        status = psa_driver_wrapper_cipher_generate_iv( operation,
                                                         iv,
                                                         iv_size,
                                                         iv_length );
@@ -3493,7 +3493,7 @@ psa_status_t psa_cipher_set_iv( psa_cipher_operation_t *operation,
 
     if( operation->mbedtls_in_use == 0 )
     {
-        status = psa_driver_wrapper_cipher_set_iv( &operation->ctx.driver,
+        status = psa_driver_wrapper_cipher_set_iv( operation,
                                                    iv,
                                                    iv_length );
     }
@@ -3529,7 +3529,7 @@ psa_status_t psa_cipher_update( psa_cipher_operation_t *operation,
 
     if( operation->mbedtls_in_use == 0 )
     {
-        status = psa_driver_wrapper_cipher_update( &operation->ctx.driver,
+        status = psa_driver_wrapper_cipher_update( operation,
                                                    input,
                                                    input_length,
                                                    output,
@@ -3570,7 +3570,7 @@ psa_status_t psa_cipher_finish( psa_cipher_operation_t *operation,
 
     if( operation->mbedtls_in_use == 0 )
     {
-        status = psa_driver_wrapper_cipher_finish( &operation->ctx.driver,
+        status = psa_driver_wrapper_cipher_finish( operation,
                                                    output,
                                                    output_size,
                                                    output_length );
@@ -3610,7 +3610,7 @@ psa_status_t psa_cipher_abort( psa_cipher_operation_t *operation )
         return( PSA_ERROR_BAD_STATE );
 
     if( operation->mbedtls_in_use == 0 )
-        psa_driver_wrapper_cipher_abort( &operation->ctx.driver );
+        psa_driver_wrapper_cipher_abort( operation );
     else
         mbedtls_psa_cipher_abort( operation );
 
