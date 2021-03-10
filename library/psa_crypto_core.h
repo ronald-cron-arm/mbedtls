@@ -214,15 +214,6 @@ psa_status_t psa_copy_key_material_into_slot( psa_key_slot_t *slot,
  */
 psa_status_t mbedtls_to_psa_error( int ret );
 
-/** Get Mbed TLS MD information of a hash algorithm given its PSA identifier
- *
- * \param[in] alg  PSA hash algorithm identifier
- *
- * \return  The Mbed TLS MD information of the hash algorithm. \c NULL if the
- *          PSA hash algorithm is not supported.
- */
-const mbedtls_md_info_t *mbedtls_md_info_from_psa( psa_algorithm_t alg );
-
 /** Import a key in binary format.
  *
  * \note The signature of this function is that of a PSA driver
