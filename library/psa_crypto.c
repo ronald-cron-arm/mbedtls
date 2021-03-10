@@ -3357,7 +3357,7 @@ static psa_status_t psa_cipher_setup( psa_cipher_operation_t *operation,
                               PSA_KEY_USAGE_DECRYPT );
 
     /* A context must be freshly initialized before it can be set up. */
-    if( operation->alg != 0 )
+    if( operation->id != 0 )
         return( PSA_ERROR_BAD_STATE );
 
     /* The requested algorithm must be one that can be processed by cipher. */
@@ -3369,11 +3369,12 @@ static psa_status_t psa_cipher_setup( psa_cipher_operation_t *operation,
     if( status != PSA_SUCCESS )
         goto exit;
 
-    /* Initialize the operation struct members, except for alg. The alg member
+    /* Initialize the operation struct members, except for id. The id member
      * is used to indicate to psa_cipher_abort that there are resources to free,
-     * so we only set it after resources have been allocated/initialized. */
+     * so we only set it (in the driver wrapper) after resources have been
+     * allocated/initialized. */
+    operation->alg = alg;
     operation->iv_set = 0;
-    operation->mbedtls_in_use = 0;
     operation->iv_size = 0;
     operation->block_size = 0;
     if( alg == PSA_ALG_ECB_NO_PADDING )
@@ -3398,13 +3399,6 @@ static psa_status_t psa_cipher_setup( psa_cipher_operation_t *operation,
                                                           slot->key.data,
                                                           slot->key.bytes,
                                                           alg );
-
-    if( status == PSA_SUCCESS )
-    {
-       /* Once the driver context is initialized, it needs to be freed using
-        * psa_cipher_abort. Indicate this through setting alg. */
-        operation->alg = alg;
-    }
 
 exit:
     if( status != PSA_SUCCESS )
@@ -3436,7 +3430,7 @@ psa_status_t psa_cipher_generate_iv( psa_cipher_operation_t *operation,
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 
-    if( operation->alg == 0 )
+    if( operation->id == 0 )
     {
         return( PSA_ERROR_BAD_STATE );
     }
@@ -3465,7 +3459,7 @@ psa_status_t psa_cipher_set_iv( psa_cipher_operation_t *operation,
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 
-    if( operation->alg == 0 )
+    if( operation->id == 0 )
     {
         return( PSA_ERROR_BAD_STATE );
     }
@@ -3495,7 +3489,7 @@ psa_status_t psa_cipher_update( psa_cipher_operation_t *operation,
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 
-    if( operation->alg == 0 )
+    if( operation->id == 0 )
     {
         return( PSA_ERROR_BAD_STATE );
     }
@@ -3523,7 +3517,7 @@ psa_status_t psa_cipher_finish( psa_cipher_operation_t *operation,
 {
     psa_status_t status = PSA_ERROR_GENERIC_ERROR;
 
-    if( operation->alg == 0 )
+    if( operation->id == 0 )
     {
         return( PSA_ERROR_BAD_STATE );
     }
@@ -3549,7 +3543,7 @@ psa_status_t psa_cipher_finish( psa_cipher_operation_t *operation,
 
 psa_status_t psa_cipher_abort( psa_cipher_operation_t *operation )
 {
-    if( operation->alg == 0 )
+    if( operation->id == 0 )
     {
         /* The object has (apparently) been initialized but it is not (yet)
          * in use. It's ok to call abort on such an object, and there's
@@ -3564,9 +3558,9 @@ psa_status_t psa_cipher_abort( psa_cipher_operation_t *operation )
 
     psa_driver_wrapper_cipher_abort( operation );
 
+    operation->id = 0;
     operation->alg = 0;
     operation->iv_set = 0;
-    operation->mbedtls_in_use = 0;
     operation->iv_size = 0;
     operation->block_size = 0;
     operation->iv_required = 0;
