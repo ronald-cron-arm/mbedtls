@@ -38,25 +38,26 @@
 
 #include <string.h>
 
-test_driver_key_management_hooks_t test_driver_key_management_hooks =
-    TEST_DRIVER_KEY_MANAGEMENT_INIT;
+mbedtls_test_driver_key_management_hooks_t
+    mbedtls_test_driver_key_management_hooks = MBEDTLS_TEST_DRIVER_KEY_MANAGEMENT_INIT;
 
-psa_status_t test_transparent_generate_key(
+psa_status_t mbedtls_test_transparent_generate_key(
     const psa_key_attributes_t *attributes,
     uint8_t *key, size_t key_size, size_t *key_length )
 {
-    ++test_driver_key_management_hooks.hits;
+    ++mbedtls_test_driver_key_management_hooks.hits;
 
-    if( test_driver_key_management_hooks.forced_status != PSA_SUCCESS )
-        return( test_driver_key_management_hooks.forced_status );
+    if( mbedtls_test_driver_key_management_hooks.forced_status != PSA_SUCCESS )
+        return( mbedtls_test_driver_key_management_hooks.forced_status );
 
-    if( test_driver_key_management_hooks.forced_output != NULL )
+    if( mbedtls_test_driver_key_management_hooks.forced_output != NULL )
     {
-        if( test_driver_key_management_hooks.forced_output_length > key_size )
+        if( mbedtls_test_driver_key_management_hooks.forced_output_length >
+            key_size )
             return( PSA_ERROR_BUFFER_TOO_SMALL );
-        memcpy( key, test_driver_key_management_hooks.forced_output,
-                test_driver_key_management_hooks.forced_output_length );
-        *key_length = test_driver_key_management_hooks.forced_output_length;
+        memcpy( key, mbedtls_test_driver_key_management_hooks.forced_output,
+                mbedtls_test_driver_key_management_hooks.forced_output_length );
+        *key_length = mbedtls_test_driver_key_management_hooks.forced_output_length;
         return( PSA_SUCCESS );
     }
 
@@ -83,7 +84,7 @@ psa_status_t test_transparent_generate_key(
     }
 }
 
-psa_status_t test_opaque_generate_key(
+psa_status_t mbedtls_test_opaque_generate_key(
     const psa_key_attributes_t *attributes,
     uint8_t *key, size_t key_size, size_t *key_length )
 {
@@ -94,7 +95,7 @@ psa_status_t test_opaque_generate_key(
     return( PSA_ERROR_NOT_SUPPORTED );
 }
 
-psa_status_t test_transparent_import_key(
+psa_status_t mbedtls_test_transparent_import_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *data,
     size_t data_length,
@@ -103,10 +104,10 @@ psa_status_t test_transparent_import_key(
     size_t *key_buffer_length,
     size_t *bits)
 {
-    ++test_driver_key_management_hooks.hits;
+    ++mbedtls_test_driver_key_management_hooks.hits;
 
-    if( test_driver_key_management_hooks.forced_status != PSA_SUCCESS )
-        return( test_driver_key_management_hooks.forced_status );
+    if( mbedtls_test_driver_key_management_hooks.forced_status != PSA_SUCCESS )
+        return( mbedtls_test_driver_key_management_hooks.forced_status );
 
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     psa_key_type_t type = psa_get_key_type( attributes );
@@ -149,7 +150,7 @@ psa_status_t test_transparent_import_key(
     return( status );
 }
 
-psa_status_t test_opaque_export_key(
+psa_status_t mbedtls_test_opaque_export_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *key, size_t key_length,
     uint8_t *data, size_t data_size, size_t *data_length )
@@ -163,23 +164,24 @@ psa_status_t test_opaque_export_key(
     return( PSA_ERROR_NOT_SUPPORTED );
 }
 
-psa_status_t test_transparent_export_public_key(
+psa_status_t mbedtls_test_transparent_export_public_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size,
     uint8_t *data, size_t data_size, size_t *data_length )
 {
-    ++test_driver_key_management_hooks.hits;
+    ++mbedtls_test_driver_key_management_hooks.hits;
 
-    if( test_driver_key_management_hooks.forced_status != PSA_SUCCESS )
-        return( test_driver_key_management_hooks.forced_status );
+    if( mbedtls_test_driver_key_management_hooks.forced_status != PSA_SUCCESS )
+        return( mbedtls_test_driver_key_management_hooks.forced_status );
 
-    if( test_driver_key_management_hooks.forced_output != NULL )
+    if( mbedtls_test_driver_key_management_hooks.forced_output != NULL )
     {
-        if( test_driver_key_management_hooks.forced_output_length > data_size )
+        if( mbedtls_test_driver_key_management_hooks.forced_output_length >
+            data_size )
             return( PSA_ERROR_BUFFER_TOO_SMALL );
-        memcpy( data, test_driver_key_management_hooks.forced_output,
-                test_driver_key_management_hooks.forced_output_length );
-        *data_length = test_driver_key_management_hooks.forced_output_length;
+        memcpy( data, mbedtls_test_driver_key_management_hooks.forced_output,
+                mbedtls_test_driver_key_management_hooks.forced_output_length );
+        *data_length = mbedtls_test_driver_key_management_hooks.forced_output_length;
         return( PSA_SUCCESS );
     }
 
@@ -218,7 +220,7 @@ psa_status_t test_transparent_export_public_key(
     return( status );
 }
 
-psa_status_t test_opaque_export_public_key(
+psa_status_t mbedtls_test_opaque_export_public_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *key, size_t key_length,
     uint8_t *data, size_t data_size, size_t *data_length )

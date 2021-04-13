@@ -39,41 +39,44 @@ typedef struct {
     /* Count the amount of times one of the key management driver functions
      * is called. */
     unsigned long hits;
-} test_driver_key_management_hooks_t;
+} mbedtls_test_driver_key_management_hooks_t;
 
-#define TEST_DRIVER_KEY_MANAGEMENT_INIT { NULL, 0, PSA_SUCCESS, 0 }
-static inline test_driver_key_management_hooks_t test_driver_key_management_hooks_init( void )
+#define MBEDTLS_TEST_DRIVER_KEY_MANAGEMENT_INIT { NULL, 0, PSA_SUCCESS, 0 }
+static inline mbedtls_test_driver_key_management_hooks_t
+    mbedtls_test_driver_key_management_hooks_init( void )
 {
-    const test_driver_key_management_hooks_t v = TEST_DRIVER_KEY_MANAGEMENT_INIT;
+    const mbedtls_test_driver_key_management_hooks_t
+        v = MBEDTLS_TEST_DRIVER_KEY_MANAGEMENT_INIT;
     return( v );
 }
 
-extern test_driver_key_management_hooks_t test_driver_key_management_hooks;
+extern mbedtls_test_driver_key_management_hooks_t
+    mbedtls_test_driver_key_management_hooks;
 
-psa_status_t test_transparent_generate_key(
+psa_status_t mbedtls_test_transparent_generate_key(
     const psa_key_attributes_t *attributes,
     uint8_t *key, size_t key_size, size_t *key_length );
 
-psa_status_t test_opaque_generate_key(
+psa_status_t mbedtls_test_opaque_generate_key(
     const psa_key_attributes_t *attributes,
     uint8_t *key, size_t key_size, size_t *key_length );
 
-psa_status_t test_opaque_export_key(
+psa_status_t mbedtls_test_opaque_export_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *key, size_t key_length,
     uint8_t *data, size_t data_size, size_t *data_length );
 
-psa_status_t test_transparent_export_public_key(
+psa_status_t mbedtls_test_transparent_export_public_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *key, size_t key_length,
     uint8_t *data, size_t data_size, size_t *data_length );
 
-psa_status_t test_opaque_export_public_key(
+psa_status_t mbedtls_test_opaque_export_public_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *key, size_t key_length,
     uint8_t *data, size_t data_size, size_t *data_length );
 
-psa_status_t test_transparent_import_key(
+psa_status_t mbedtls_test_transparent_import_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *data,
     size_t data_length,
