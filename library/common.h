@@ -50,4 +50,8 @@
 #define MBEDTLS_STATIC_TESTABLE static
 #endif
 
+#if defined(MBEDTLS_TEST_HOOKS)
+extern void mbedtls_test_fail( const char *test, int line_no, const char* filename );
+#endif
+
 #endif /* MBEDTLS_LIBRARY_COMMON_H */

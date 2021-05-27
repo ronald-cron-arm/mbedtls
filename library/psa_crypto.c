@@ -1025,6 +1025,10 @@ psa_status_t psa_wipe_key_slot( psa_key_slot_t *slot )
      */
     if( slot->lock_count != 1 )
     {
+#ifdef MBEDTLS_TEST_HOOKS
+        mbedtls_test_fail( "Unexpected lock count while wipping key slot",
+                           __LINE__, __FILE__ );
+#endif
         status = PSA_ERROR_CORRUPTION_DETECTED;
     }
 

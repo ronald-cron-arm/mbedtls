@@ -409,6 +409,10 @@ psa_status_t psa_unlock_key_slot( psa_key_slot_t *slot )
         return( PSA_SUCCESS );
     }
 
+#ifdef MBEDTLS_TEST_HOOKS
+        mbedtls_test_fail( "Unexpected null lock count while unlocking key slot",
+                           __LINE__, __FILE__ );
+#endif
     return( PSA_ERROR_CORRUPTION_DETECTED );
 }
 
