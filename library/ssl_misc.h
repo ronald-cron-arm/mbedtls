@@ -1460,6 +1460,7 @@ static inline int mbedtls_ssl_get_psk( const mbedtls_ssl_context *ssl,
     return( 0 );
 }
 
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL)
 /* Check if we have any PSK to offer, returns 0 if PSK is available. Assign the
    psk and ticket if pointers are present.  */
 static inline int mbedtls_ssl_get_psk_to_offer( const mbedtls_ssl_context *ssl,
@@ -1503,6 +1504,7 @@ static inline int mbedtls_ssl_get_psk_to_offer( const mbedtls_ssl_context *ssl,
 
     return( 1 );
 }
+#endif /* MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL */
 
 
 #if defined(MBEDTLS_USE_PSA_CRYPTO)

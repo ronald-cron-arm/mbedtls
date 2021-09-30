@@ -3758,8 +3758,8 @@ int mbedtls_ssl_setup( mbedtls_ssl_context *ssl,
             ssl->in_iv = ssl->in_buf + 13;
             ssl->in_msg = ssl->in_buf + 13;
         }
-#endif /* MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL */
     }
+#endif /* MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL */
 #endif /* !MBEDTLS_SSL_USE_MPS */
 
 #if defined(MBEDTLS_SSL_DTLS_SRTP)
@@ -6068,9 +6068,11 @@ int mbedtls_ssl_handshake_step( mbedtls_ssl_context *ssl )
     if( ssl == NULL || ssl->conf == NULL )
         return( MBEDTLS_ERR_SSL_BAD_INPUT_DATA );
 
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL)
     ret = mbedtls_ssl_handle_pending_alert( ssl );
     if( ret != 0 )
         goto cleanup;
+#endif /* MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL */
 
 #if defined(MBEDTLS_SSL_CLI_C)
     if( ssl->conf->endpoint == MBEDTLS_SSL_IS_CLIENT )
@@ -6101,6 +6103,7 @@ int mbedtls_ssl_handshake_step( mbedtls_ssl_context *ssl )
     }
 #endif
 
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL)
     if( ret != 0 )
     {
         int alert_ret;
@@ -6122,6 +6125,7 @@ cleanup:
      */
     ret = mbedtls_ssl_mps_remap_error( ret );
 #endif /* MBEDTLS_SSL_USE_MPS */
+#endif /* MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL */
 
     return( ret );
 }
@@ -7770,7 +7774,7 @@ int mbedtls_ssl_check_sig_hash( const mbedtls_ssl_context *ssl,
     if( ssl->conf->sig_hashes == NULL )
         return( -1 );
 
-    for( cur = ssl->conf->sig_hashes; *cur != SIGNATURE_NONE; cur++ )
+    for( cur = ssl->conf->sig_hashes; *cur != MBEDTLS_MD_NONE; cur++ )
         if( *cur == ( int )md )
             return( 0 );
 

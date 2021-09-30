@@ -1289,7 +1289,7 @@
  *
  * TODO: Document
  */
-#define MBEDTLS_SSL_USE_MPS
+//#define MBEDTLS_SSL_USE_MPS
 
 /**
  * \def MBEDTLS_SSL_DTLS_CONNECTION_ID
@@ -1468,7 +1468,7 @@
  *
  * Comment this macro to disable support for TLS 1.2 / DTLS 1.2
  */
-//#define MBEDTLS_SSL_PROTO_TLS1_2
+#define MBEDTLS_SSL_PROTO_TLS1_2
 
 /**
  * \def MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL
@@ -1487,7 +1487,7 @@
  * Uncomment this macro to enable experimental and partial
  * functionality specific to TLS 1.3.
  */
-#define MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL
+//#define MBEDTLS_SSL_PROTO_TLS1_3_EXPERIMENTAL
 
 /* \def MBEDTLS_SSL_TLS13_COMPATIBILITY_MODE
  *
@@ -1508,7 +1508,7 @@
  * Requires: MBEDTLS_SSL_PROTO_TLS1_3
  *
  */
-#define MBEDTLS_SSL_TLS13_COMPATIBILITY_MODE
+//#define MBEDTLS_SSL_TLS13_COMPATIBILITY_MODE
 
 /**
 *  \def MBEDTLS_SSL_EARLY_DATA_MAX_DELAY
@@ -1526,7 +1526,7 @@
 * Allows to add functionality for TLS/DTLS 1.3 Zero-RTT.
 *
 */
-#define MBEDTLS_ZERO_RTT
+//#define MBEDTLS_ZERO_RTT
 
 /**
 * \def MBEDTLS_SSL_DEBUG_HANDSHAKE_HASHES
@@ -1562,7 +1562,7 @@
 *  - be able to issue tickets by TLS 1.3 servers, and
 *  - use them in TLS 1.3 clients.
 */
-#define MBEDTLS_SSL_NEW_SESSION_TICKET
+//#define MBEDTLS_SSL_NEW_SESSION_TICKET
 
 
 /**
@@ -1679,7 +1679,7 @@
  *
  * Comment this macro to disable support for SSL session tickets
  */
-//#define MBEDTLS_SSL_SESSION_TICKETS
+#define MBEDTLS_SSL_SESSION_TICKETS
 
 /**
  * \def MBEDTLS_SSL_EXPORT_KEYS
