@@ -5544,7 +5544,6 @@ run_test    "Not supported version check: srv max TLS 1.0" \
             "$G_SRV --priority=NORMAL:-VERS-TLS-ALL:+VERS-TLS1.0" \
             "$P_CLI" \
             1 \
-            -s "Error in protocol version" \
             -c "Handshake protocol not within min/max boundaries" \
             -S "Version: TLS1.0" \
             -C "Protocol is TLSv1.0"
@@ -5554,7 +5553,6 @@ run_test    "Not supported version check: srv max TLS 1.1" \
             "$G_SRV --priority=NORMAL:-VERS-TLS-ALL:+VERS-TLS1.1" \
             "$P_CLI" \
             1 \
-            -s "Error in protocol version" \
             -c "Handshake protocol not within min/max boundaries" \
             -S "Version: TLS1.1" \
             -C "Protocol is TLSv1.1"
@@ -9617,20 +9615,6 @@ run_test    "TLS 1.3: Test gnutls tls1_3 feature" \
             -s "Version: TLS1.3" \
             -c "Version: TLS1.3"
 
-# TLS1.3 test cases
-# TODO: remove or rewrite this test case if #4832 is resolved.
-requires_config_enabled MBEDTLS_SSL_PROTO_TLS1_2
-requires_config_enabled MBEDTLS_SSL_PROTO_TLS1_3
-skip_handshake_stage_check
-run_test    "TLS 1.3: Not supported version check: tls12 and tls13" \
-            "$P_SRV debug_level=1 min_version=tls12 max_version=tls13" \
-            "$P_CLI debug_level=1 min_version=tls12 max_version=tls13" \
-            1 \
-            -s "SSL - The requested feature is not available" \
-            -c "SSL - The requested feature is not available" \
-            -s "Hybrid TLS 1.2 + TLS 1.3 configurations are not yet supported" \
-            -c "Hybrid TLS 1.2 + TLS 1.3 configurations are not yet supported"
-
 requires_config_enabled MBEDTLS_SSL_PROTO_TLS1_3
 run_test    "TLS 1.3: handshake dispatch test: tls13 only" \
             "$P_SRV debug_level=2 min_version=tls13 max_version=tls13" \
@@ -9673,36 +9657,16 @@ run_test    "TLS 1.3: minimal feature sets - openssl" \
 
 requires_gnutls_tls1_3
 requires_gnutls_next_no_ticket
+requires_config_enabled MBEDTLS_SSL_PROTO_TLS1_2
 requires_config_enabled MBEDTLS_SSL_PROTO_TLS1_3
 requires_config_enabled MBEDTLS_SSL_TLS1_3_COMPATIBILITY_MODE
 requires_config_enabled MBEDTLS_DEBUG_C
 requires_config_enabled MBEDTLS_SSL_CLI_C
 run_test    "TLS 1.3: minimal feature sets - gnutls" \
-            "$G_NEXT_SRV --debug=4 --priority=NORMAL:-VERS-ALL:+VERS-TLS1.3:+CIPHER-ALL:%NO_TICKETS --disable-client-cert" \
-            "$P_CLI debug_level=3 min_version=tls13 max_version=tls13" \
+            "$G_NEXT_SRV --debug=4 --priority=NORMAL:-VERS-ALL:+VERS-TLS1.2:+CIPHER-ALL:%NO_TICKETS --disable-client-cert" \
+            "$P_CLI debug_level=3 min_version=tls12 max_version=tls13" \
             0 \
-            -s "SERVER HELLO was queued"    \
-            -c "tls13 client state: MBEDTLS_SSL_HELLO_REQUEST(0)"               \
-            -c "tls13 client state: MBEDTLS_SSL_SERVER_HELLO(2)"                \
-            -c "tls13 client state: MBEDTLS_SSL_ENCRYPTED_EXTENSIONS(19)"       \
-            -c "tls13 client state: MBEDTLS_SSL_CERTIFICATE_REQUEST(5)"         \
-            -c "tls13 client state: MBEDTLS_SSL_SERVER_CERTIFICATE(3)"          \
-            -c "tls13 client state: MBEDTLS_SSL_CERTIFICATE_VERIFY(9)"          \
-            -c "tls13 client state: MBEDTLS_SSL_SERVER_FINISHED(13)"            \
-            -c "tls13 client state: MBEDTLS_SSL_CLIENT_FINISHED(11)"            \
-            -c "tls13 client state: MBEDTLS_SSL_FLUSH_BUFFERS(14)"              \
-            -c "tls13 client state: MBEDTLS_SSL_HANDSHAKE_WRAPUP(15)"           \
-            -c "<= ssl_tls13_process_server_hello" \
-            -c "server hello, chosen ciphersuite: ( 1301 ) - TLS1-3-AES-128-GCM-SHA256" \
-            -c "ECDH curve: x25519"         \
-            -c "=> ssl_tls13_process_server_hello" \
-            -c "<= parse encrypted extensions"      \
-            -c "Certificate verification flags clear" \
-            -c "=> parse certificate verify"          \
-            -c "<= parse certificate verify"          \
-            -c "mbedtls_ssl_tls13_process_certificate_verify() returned 0" \
-            -c "<= parse finished message" \
-            -c "Protocol is TLSv1.3" \
+            -c "Protocol is TLSv1.2" \
             -c "HTTP/1.0 200 OK"
 
 requires_config_enabled MBEDTLS_SSL_PROTO_TLS1_3

@@ -46,11 +46,33 @@
 
 #define DEBUG_BUF_SIZE      512
 
+#ifdef ENABLE_SSL_LOGS
+static void my_debug( void *ctx, int level,
+               const char *file, int line,
+               const char *str )
+{
+    const char *p, *basename;
+
+    /* Extract basename from file */
+    for( p = basename = file; *p != '\0'; p++ )
+        if( *p == '/' || *p == '\\' )
+            basename = p + 1;
+
+    mbedtls_fprintf( (FILE *) ctx, "%s:%04d: |%d| %s",
+                     basename, line, level, str );
+    fflush( (FILE *) ctx  );
+}
+#endif
+
 static int debug_threshold = 0;
 
 void mbedtls_debug_set_threshold( int threshold )
 {
+#ifdef ENABLE_SSL_LOGS
+    (void)threshold;
+#else
     debug_threshold = threshold;
+#endif
 }
 
 /*
@@ -85,11 +107,22 @@ void mbedtls_debug_print_msg( const mbedtls_ssl_context *ssl, int level,
 
     if( NULL == ssl              ||
         NULL == ssl->conf        ||
+#ifndef ENABLE_SSL_LOGS
         NULL == ssl->conf->f_dbg ||
+#endif
         level > debug_threshold )
     {
         return;
     }
+
+#ifdef ENABLE_SSL_LOGS
+    if( ssl->conf->f_dbg == NULL )
+    {
+        mbedtls_ssl_config *conf = (mbedtls_ssl_config *)ssl->conf;
+        conf->f_dbg = my_debug;
+        conf->p_dbg = (void *)stderr;
+    }
+#endif
 
     va_start( argp, format );
     ret = mbedtls_vsnprintf( str, DEBUG_BUF_SIZE, format, argp );

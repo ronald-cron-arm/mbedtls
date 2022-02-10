@@ -1499,7 +1499,7 @@
  * Uncomment this macro to enable the support for TLS 1.3.
  *
  */
-//#define MBEDTLS_SSL_PROTO_TLS1_3
+#define MBEDTLS_SSL_PROTO_TLS1_3
 
 /**
  * \def MBEDTLS_SSL_TLS1_3_COMPATIBILITY_MODE
@@ -1521,7 +1521,7 @@
  * effect on the build.
  *
  */
-//#define MBEDTLS_SSL_TLS1_3_COMPATIBILITY_MODE
+#define MBEDTLS_SSL_TLS1_3_COMPATIBILITY_MODE
 
 /**
  * \def MBEDTLS_SSL_PROTO_DTLS
@@ -3200,7 +3200,7 @@
  * Note: On systems lacking division instructions,
  *       a power of two should be preferred.
  */
-//#define MBEDTLS_SSL_CID_TLS1_3_PADDING_GRANULARITY 16
+#define MBEDTLS_SSL_CID_TLS1_3_PADDING_GRANULARITY 1
 
 /** \def MBEDTLS_SSL_OUT_CONTENT_LEN
  *
