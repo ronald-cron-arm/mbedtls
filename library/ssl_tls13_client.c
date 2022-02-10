@@ -617,8 +617,8 @@ static int ssl_tls13_write_client_hello_cipher_suites(
         ciphersuite_info = mbedtls_ssl_ciphersuite_from_id( cipher_suite );
         if( ciphersuite_info == NULL )
             continue;
-        if( !( MBEDTLS_SSL_MINOR_VERSION_4 >= ciphersuite_info->min_minor_ver &&
-               MBEDTLS_SSL_MINOR_VERSION_4 <= ciphersuite_info->max_minor_ver ) )
+        if( ( ciphersuite_info->min_minor_ver > ssl->conf->max_minor_ver ) ||
+            ( ciphersuite_info->max_minor_ver < ssl->conf->min_minor_ver ) )
             continue;
 
         MBEDTLS_SSL_DEBUG_MSG( 3, ( "client hello, add ciphersuite: %04x, %s",
