@@ -637,6 +637,7 @@ static int ssl_generate_random( mbedtls_ssl_context *ssl )
 static int ssl_tls12_prepare_client_hello( mbedtls_ssl_context *ssl )
 {
     int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    size_t session_id_len;
 
     if( ssl->conf->f_rng == NULL )
     {
@@ -647,6 +648,43 @@ static int ssl_tls12_prepare_client_hello( mbedtls_ssl_context *ssl )
     ret = ssl_generate_random( ssl );
     if( ret != 0 )
         return( ret );
+
+    /* Prepare session identifier */
+    session_id_len = ssl->session_negotiate->id_len;
+
+    if( session_id_len < 16 || session_id_len > 32 ||
+#if defined(MBEDTLS_SSL_RENEGOTIATION)
+        ssl->renego_status != MBEDTLS_SSL_INITIAL_HANDSHAKE ||
+#endif
+        ssl->handshake->resume == 0 )
+    {
+        session_id_len = 0;
+    }
+
+#if defined(MBEDTLS_SSL_SESSION_TICKETS)
+    /*
+     * RFC 5077 section 3.4: "When presenting a ticket, the client MAY
+     * generate and include a Session ID in the TLS ClientHello."
+     */
+#if defined(MBEDTLS_SSL_RENEGOTIATION)
+    if( ssl->renego_status == MBEDTLS_SSL_INITIAL_HANDSHAKE )
+#endif
+    {
+        if( ssl->session_negotiate->ticket != NULL &&
+                ssl->session_negotiate->ticket_len != 0 )
+        {
+            ret = ssl->conf->f_rng( ssl->conf->p_rng,
+                                    ssl->session_negotiate->id, 32 );
+
+            if( ret != 0 )
+                return( ret );
+
+            session_id_len = 32;
+        }
+    }
+#endif /* MBEDTLS_SSL_SESSION_TICKETS */
+
+    ssl->session_negotiate->id_len = session_id_len;
 
     return( 0 );
 }
@@ -725,6 +763,7 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
     unsigned char *p, *q;
     const unsigned char *end;
 
+    size_t session_id_len;
     const int *ciphersuites;
     const mbedtls_ssl_ciphersuite_t *ciphersuite_info;
 #if defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_ECDSA_C) || \
@@ -754,13 +793,9 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
 
     /*
      * Check if there's enough space for the first part of the ClientHello
-     * consisting of the 38 bytes described below, the session identifier (at
-     * most 32 bytes) and its length (1 byte).
-     *
-     * Use static upper bounds instead of the actual values
-     * to allow the compiler to optimize this away.
+     * consisting of the 38 bytes described below.
      */
-    MBEDTLS_SSL_CHK_BUF_PTR( buf, end, 38 + 1 + 32 );
+    MBEDTLS_SSL_CHK_BUF_PTR( buf, end, 38 );
 
     /*
      * The 38 first bytes of the ClientHello:
@@ -809,53 +844,14 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
      *
      * opaque SessionID<0..32>;
      */
-    n = ssl->session_negotiate->id_len;
+    session_id_len = ssl->session_negotiate->id_len;
+    MBEDTLS_SSL_CHK_BUF_PTR( p, end, session_id_len );
+    *p++ = session_id_len;
+    memcpy( p, ssl->session_negotiate->id, session_id_len );
+    p += session_id_len;
 
-    if( n < 16 || n > 32 ||
-#if defined(MBEDTLS_SSL_RENEGOTIATION)
-        ssl->renego_status != MBEDTLS_SSL_INITIAL_HANDSHAKE ||
-#endif
-        ssl->handshake->resume == 0 )
-    {
-        n = 0;
-    }
-
-#if defined(MBEDTLS_SSL_SESSION_TICKETS)
-    /*
-     * RFC 5077 section 3.4: "When presenting a ticket, the client MAY
-     * generate and include a Session ID in the TLS ClientHello."
-     */
-#if defined(MBEDTLS_SSL_RENEGOTIATION)
-    if( ssl->renego_status == MBEDTLS_SSL_INITIAL_HANDSHAKE )
-#endif
-    {
-        if( ssl->session_negotiate->ticket != NULL &&
-                ssl->session_negotiate->ticket_len != 0 )
-        {
-            ret = ssl->conf->f_rng( ssl->conf->p_rng,
-                                    ssl->session_negotiate->id, 32 );
-
-            if( ret != 0 )
-                return( ret );
-
-            ssl->session_negotiate->id_len = n = 32;
-        }
-    }
-#endif /* MBEDTLS_SSL_SESSION_TICKETS */
-
-    /*
-     * The first check of the output buffer size above (
-     * MBEDTLS_SSL_CHK_BUF_PTR( buf, end, 38 + 1 + 32 );)
-     * has checked that there is enough space in the output buffer for the
-     * session identifier length byte and the session identifier (n <= 32).
-     */
-    *p++ = (unsigned char) n;
-
-    for( i = 0; i < n; i++ )
-        *p++ = ssl->session_negotiate->id[i];
-
-    MBEDTLS_SSL_DEBUG_MSG( 3, ( "client hello, session id len.: %" MBEDTLS_PRINTF_SIZET, n ) );
-    MBEDTLS_SSL_DEBUG_BUF( 3,   "client hello, session id", buf + 39, n );
+    MBEDTLS_SSL_DEBUG_BUF( 3, "client hello, session id",
+                              ssl->session_negotiate->id, session_id_len );
 
     /*
      * ...
