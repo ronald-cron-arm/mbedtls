@@ -147,10 +147,6 @@ static int ssl_write_client_hello_body( mbedtls_ssl_context *ssl,
 
     *out_len = 0;
 
-    /* Bet on TLS 1.3 even if we may go for TLS 1.2 eventually */
-    ssl->major_ver = MBEDTLS_SSL_MAJOR_VERSION_3;
-    ssl->minor_ver = MBEDTLS_SSL_MINOR_VERSION_4;
-
     /*
      * Write legacy_version
      *    ProtocolVersion legacy_version = 0x0303;    // TLS v1.2
@@ -279,6 +275,18 @@ static int ssl_prepare_client_hello( mbedtls_ssl_context *ssl )
     {
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "no RNG provided" ) );
         return( MBEDTLS_ERR_SSL_NO_RNG );
+    }
+
+    /* Bet on the highest configured version if we are not in a TLS 1.2
+     * renegotiation.
+     * TODO What about the session resumption case ?
+     */
+#if defined(MBEDTLS_SSL_RENEGOTIATION)
+    if( ssl->renego_status == MBEDTLS_SSL_INITIAL_HANDSHAKE )
+#endif
+    {
+        ssl->major_ver = ssl->conf->min_major_ver;
+        ssl->minor_ver = ssl->conf->max_minor_ver;
     }
 
     if( ( ret = ssl->conf->f_rng( ssl->conf->p_rng,
