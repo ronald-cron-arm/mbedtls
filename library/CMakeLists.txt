@@ -100,6 +100,7 @@ set(src_tls
     ssl_cache.c
     ssl_ciphersuites.c
     ssl_cli.c
+    ssl_client.c
     ssl_cookie.c
     ssl_msg.c
     ssl_srv.c

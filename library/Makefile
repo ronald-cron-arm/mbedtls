@@ -169,6 +169,7 @@ OBJS_TLS= \
 	  ssl_cache.o \
 	  ssl_ciphersuites.o \
 	  ssl_cli.o \
+	  ssl_client.o \
 	  ssl_cookie.o \
 	  ssl_msg.o \
 	  ssl_srv.o \
