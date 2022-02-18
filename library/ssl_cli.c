@@ -634,6 +634,23 @@ static int ssl_generate_random( mbedtls_ssl_context *ssl )
     return( 0 );
 }
 
+static int ssl_tls12_prepare_client_hello( mbedtls_ssl_context *ssl )
+{
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+
+    if( ssl->conf->f_rng == NULL )
+    {
+        MBEDTLS_SSL_DEBUG_MSG( 1, ( "no RNG provided" ) );
+        return( MBEDTLS_ERR_SSL_NO_RNG );
+    }
+
+    ret = ssl_generate_random( ssl );
+    if( ret != 0 )
+        return( ret );
+
+    return( 0 );
+}
+
 /**
  * \brief           Validate cipher suite against config in SSL context.
  *
@@ -717,12 +734,6 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
 
     MBEDTLS_SSL_DEBUG_MSG( 2, ( "=> write client hello" ) );
 
-    if( ssl->conf->f_rng == NULL )
-    {
-        MBEDTLS_SSL_DEBUG_MSG( 1, ( "no RNG provided") );
-        return( MBEDTLS_ERR_SSL_NO_RNG );
-    }
-
 #if defined(MBEDTLS_SSL_RENEGOTIATION)
     if( ssl->renego_status == MBEDTLS_SSL_INITIAL_HANDSHAKE )
 #endif
@@ -760,7 +771,6 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
      *    10  .  37   random bytes
      *
      */
-
     p = buf + 4;
     mbedtls_ssl_write_version( ssl->conf->max_major_ver,
                                ssl->conf->max_minor_ver,
@@ -781,16 +791,11 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
      *     opaque random_bytes[28];
      * } Random;
      *
-     * The current UNIX time (4 bytes) and following 28 random bytes are written
-     * by ssl_generate_random() into ssl->handshake->randbytes buffer and then
-     * copied from there into the output buffer.
+     * The current UNIX time (4 bytes) and following 28 random bytes are
+     * written by ssl_tls12_prepare_client_hello() into
+     * ssl->handshake->randbytes buffer and then copied from there into the
+     * output buffer.
      */
-    if( ( ret = ssl_generate_random( ssl ) ) != 0 )
-    {
-        MBEDTLS_SSL_DEBUG_RET( 1, "ssl_generate_random", ret );
-        return( ret );
-    }
-
     memcpy( p, ssl->handshake->randbytes, 32 );
     MBEDTLS_SSL_DEBUG_BUF( 3, "client hello, random bytes", p, 32 );
     p += 32;
@@ -3968,7 +3973,9 @@ int mbedtls_ssl_handshake_client_step( mbedtls_ssl_context *ssl )
         *  ==>   ClientHello
         */
        case MBEDTLS_SSL_CLIENT_HELLO:
-           ret = ssl_write_client_hello( ssl );
+           ret = ssl_tls12_prepare_client_hello( ssl );
+           if( ret == 0 )
+               ret = ssl_write_client_hello( ssl );
            break;
 
        /*
