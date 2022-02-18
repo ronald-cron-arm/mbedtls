@@ -681,6 +681,24 @@ static int ssl_validate_ciphersuite(
     return( 0 );
 }
 
+/*
+ * Structure of the (D)TLS 1.2 ClientHello message:
+ *
+ * struct {
+ *     ProtocolVersion client_version;
+ *     Random random;
+ *     SessionID session_id;
+ *     opaque cookie<0..2^8-1>; // DTLS 1.2 ONLY
+ *     CipherSuite cipher_suites<2..2^16-2>;
+ *     CompressionMethod compression_methods<1..2^8-1>;
+ *     select (extensions_present) {
+ *         case false:
+ *             struct {};
+ *         case true:
+ *             Extension extensions<0..2^16-1>;
+ *     };
+ * } ClientHello;
+ */
 static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
 {
     int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
@@ -741,9 +759,6 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
      *     6  .   9   current UNIX time
      *    10  .  37   random bytes
      *
-     * The current UNIX time (4 bytes) and following 28 random bytes are written
-     * by ssl_generate_random() into ssl->handshake->randbytes buffer and then
-     * copied from there into the output buffer.
      */
 
     p = buf + 4;
@@ -755,6 +770,21 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
     MBEDTLS_SSL_DEBUG_MSG( 3, ( "client hello, max version: [%d:%d]",
                    buf[4], buf[5] ) );
 
+    /* ...
+     * Random random;
+     * ...
+     *
+     * with
+     * 
+     * struct {
+     *     uint32 gmt_unix_time;
+     *     opaque random_bytes[28];
+     * } Random;
+     *
+     * The current UNIX time (4 bytes) and following 28 random bytes are written
+     * by ssl_generate_random() into ssl->handshake->randbytes buffer and then
+     * copied from there into the output buffer.
+     */
     if( ( ret = ssl_generate_random( ssl ) ) != 0 )
     {
         MBEDTLS_SSL_DEBUG_RET( 1, "ssl_generate_random", ret );
@@ -766,16 +796,13 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
     p += 32;
 
     /*
-     *    38  .  38   session id length
-     *    39  . 39+n  session id
-     *   39+n . 39+n  DTLS only: cookie length (1 byte)
-     *   40+n .  ..   DTLS only: cookie
-     *   ..   . ..    ciphersuitelist length (2 bytes)
-     *   ..   . ..    ciphersuitelist
-     *   ..   . ..    compression methods length (1 byte)
-     *   ..   . ..    compression methods
-     *   ..   . ..    extensions length (2 bytes)
-     *   ..   . ..    extensions
+     * ...
+     * SessionID session_id;
+     * ...
+     *
+     * with
+     *
+     * opaque SessionID<0..32>;
      */
     n = ssl->session_negotiate->id_len;
 
@@ -826,20 +853,9 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
     MBEDTLS_SSL_DEBUG_BUF( 3,   "client hello, session id", buf + 39, n );
 
     /*
-     *   With 'n' being the length of the session identifier
-     *
-     *   39+n . 39+n  DTLS only: cookie length (1 byte)
-     *   40+n .  ..   DTLS only: cookie
-     *   ..   . ..    ciphersuitelist length (2 bytes)
-     *   ..   . ..    ciphersuitelist
-     *   ..   . ..    compression methods length (1 byte)
-     *   ..   . ..    compression methods
-     *   ..   . ..    extensions length (2 bytes)
-     *   ..   . ..    extensions
-     */
-
-    /*
-     * DTLS cookie
+     * ...
+     * opaque cookie<0..2^8-1>; // DTLS ONLY
+     * ...
      */
 #if defined(MBEDTLS_SSL_PROTO_DTLS)
     if( ssl->conf->transport == MBEDTLS_SSL_TRANSPORT_DATAGRAM )
@@ -869,7 +885,14 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
 #endif
 
     /*
-     * Ciphersuite list
+     * ...
+     * CipherSuite cipher_suites<2..2^16-2>;
+     * ...
+     *
+     * with
+     *
+     * uint8 CipherSuite[2];
+     *
      */
     ciphersuites = ssl->conf->ciphersuite_list;
 
@@ -924,6 +947,15 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
     *q++ = (unsigned char)( n >> 7 );
     *q++ = (unsigned char)( n << 1 );
 
+    /*
+     * ...
+     * CompressionMethod compression_methods<1..2^8-1>;
+     * ...
+     *
+     * with
+     *
+     * enum { null(0), (255) } CompressionMethod;
+     */
     MBEDTLS_SSL_DEBUG_MSG( 3, ( "client hello, compress len.: %d", 1 ) );
     MBEDTLS_SSL_DEBUG_MSG( 3, ( "client hello, compress alg.: %d",
                         MBEDTLS_SSL_COMPRESS_NULL ) );
@@ -933,7 +965,6 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
     *p++ = MBEDTLS_SSL_COMPRESS_NULL;
 
     /* First write extensions, then the total length */
-
     MBEDTLS_SSL_CHK_BUF_PTR( p, end, 2 );
 
 #if defined(MBEDTLS_SSL_SERVER_NAME_INDICATION)
