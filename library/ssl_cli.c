@@ -53,7 +53,7 @@
 #endif
 
 #if defined(MBEDTLS_KEY_EXCHANGE_SOME_PSK_ENABLED)
-static int ssl_conf_has_static_psk( mbedtls_ssl_config const *conf )
+int ssl_conf_has_static_psk( mbedtls_ssl_config const *conf )
 {
     if( conf->psk_identity     == NULL ||
         conf->psk_identity_len == 0     )
