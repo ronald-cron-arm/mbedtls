@@ -427,14 +427,22 @@ static int ssl_write_client_hello_body( mbedtls_ssl_context *ssl,
 #endif /* MBEDTLS_SSL_ALPN */
 
 #if defined(MBEDTLS_SSL_PROTO_TLS1_3)
-    ret = mbedtls_ssl_tls13_write_client_hello_exts( ssl, p, end, &output_len );
-    if( ret != 0 )
-        return( ret );
-    p += output_len;
+    if( mbedtls_ssl_conf_is_tls13_enabled( ssl->conf ) )
+    {
+        ret = mbedtls_ssl_tls13_write_client_hello_exts( ssl, p, end,
+                                                         &output_len );
+        if( ret != 0 )
+            return( ret );
+        p += output_len;
+    }
 #endif
 
+    if(
 #if defined(MBEDTLS_SSL_PROTO_TLS1_3)
-    if( mbedtls_ssl_conf_tls13_some_ephemeral_enabled( ssl ) )
+        ( mbedtls_ssl_conf_is_tls13_enabled( ssl->conf ) &&
+          mbedtls_ssl_conf_tls13_some_ephemeral_enabled( ssl ) ) ||
+#endif
+        ( mbedtls_ssl_conf_is_tls12_enabled( ssl->conf ) && tls12_uses_ec ) )
     {
         ret = mbedtls_ssl_write_supported_groups_ext( ssl, p, end, &output_len );
         if( ret != 0 )
@@ -443,7 +451,12 @@ static int ssl_write_client_hello_body( mbedtls_ssl_context *ssl,
     }
 
 #if defined(MBEDTLS_KEY_EXCHANGE_WITH_CERT_ENABLED)
-    if( mbedtls_ssl_conf_tls13_ephemeral_enabled( ssl ) )
+    if(
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
+        ( mbedtls_ssl_conf_is_tls13_enabled( ssl->conf ) &&
+          mbedtls_ssl_conf_tls13_ephemeral_enabled( ssl ) ) ||
+#endif
+        mbedtls_ssl_conf_is_tls12_enabled( ssl->conf ) )
     {
         ret = mbedtls_ssl_write_sig_alg_ext( ssl, p, end, &output_len );
         if( ret != 0 )
@@ -451,9 +464,18 @@ static int ssl_write_client_hello_body( mbedtls_ssl_context *ssl,
         p += output_len;
     }
 #endif /* MBEDTLS_KEY_EXCHANGE_WITH_CERT_ENABLED */
-#endif /* MBEDTLS_SSL_PROTO_TLS1_3 */
 
-    /* Add more extensions here */
+#if defined(MBEDTLS_SSL_PROTO_TLS1_2)
+    if( mbedtls_ssl_conf_is_tls12_enabled( ssl->conf ) )
+    {
+        ret = mbedtls_ssl_tls12_write_client_hello_exts( ssl, p, end,
+                                                         tls12_uses_ec,
+                                                         &output_len );
+        if( ret != 0 )
+            return( ret );
+        p += output_len;
+    }
+#endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
 
     /* Write the length of the list of extensions. */
     extensions_len = p - p_extensions_len - 2;
