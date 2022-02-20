@@ -45,6 +45,18 @@
 #include "ssl_tls13_keys.h"
 #include "ssl_debug_helpers.h"
 
+#if defined(MBEDTLS_SSL_PROTO_TLS1_2)
+#if defined(MBEDTLS_KEY_EXCHANGE_SOME_PSK_ENABLED)
+int ssl_conf_has_static_psk( mbedtls_ssl_config const *conf );
+#endif
+int ssl_tls12_write_client_hello_exts( mbedtls_ssl_context *ssl,
+                                       unsigned char *buf,
+                                       const unsigned char *end,
+                                       int uses_ec,
+                                       size_t *out_len );
+#endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
+
+
 /* Write cipher_suites
  * CipherSuite cipher_suites<2..2^16-2>;
  */
@@ -308,7 +320,7 @@ static int ssl_write_client_hello_body( mbedtls_ssl_context *ssl,
 
     /* Write cipher_suites */
     ret = ssl_write_client_hello_cipher_suites( ssl, p, end,
-                                                &tls12_use_ec,
+                                                &tls12_uses_ec,
                                                 &output_len );
     if( ret != 0 )
         return( ret );
@@ -338,29 +350,6 @@ static int ssl_write_client_hello_body( mbedtls_ssl_context *ssl,
     p_extensions_len = p;
     p += 2;
 
-    ret = mbedtls_ssl_tls13_write_client_hello_exts( ssl, p, end, &output_len );
-    if( ret != 0 )
-        return( ret );
-    p += output_len;
-
-    if( mbedtls_ssl_conf_tls13_some_ephemeral_enabled( ssl ) )
-    {
-        ret = mbedtls_ssl_write_supported_groups_ext( ssl, p, end, &output_len );
-        if( ret != 0 )
-            return( ret );
-        p += output_len;
-    }
-
-#if defined(MBEDTLS_KEY_EXCHANGE_WITH_CERT_ENABLED)
-    if( mbedtls_ssl_conf_tls13_ephemeral_enabled( ssl ) )
-    {
-        ret = mbedtls_ssl_write_sig_alg_ext( ssl, p, end, &output_len );
-        if( ret != 0 )
-            return( ret );
-        p += output_len;
-    }
-#endif /* MBEDTLS_KEY_EXCHANGE_WITH_CERT_ENABLED */
-
 #if defined(MBEDTLS_SSL_SERVER_NAME_INDICATION)
     /* Write server name extension */
     ret = mbedtls_ssl_write_hostname_ext( ssl, p, end, &output_len );
@@ -369,7 +358,48 @@ static int ssl_write_client_hello_body( mbedtls_ssl_context *ssl,
     p += output_len;
 #endif /* MBEDTLS_SSL_SERVER_NAME_INDICATION */
 
-    /* Add more extensions here */
+    if( mbedtls_ssl_conf_is_tls13_enabled( ssl->conf ) )
+    {
+        ret = mbedtls_ssl_tls13_write_client_hello_exts( ssl, p, end,
+                                                         &output_len );
+        if( ret != 0 )
+            return( ret );
+        p += output_len;
+    }
+
+    if( ( mbedtls_ssl_conf_is_tls13_enabled( ssl->conf ) &&
+          mbedtls_ssl_conf_tls13_some_ephemeral_enabled( ssl ) ) ||
+        ( mbedtls_ssl_conf_is_tls12_enabled( ssl->conf ) &&
+          tls12_uses_ec ) )
+    {
+        ret = mbedtls_ssl_write_supported_groups_ext( ssl, p, end, &output_len );
+        if( ret != 0 )
+            return( ret );
+        p += output_len;
+    }
+
+#if defined(MBEDTLS_KEY_EXCHANGE_WITH_CERT_ENABLED)
+    if( mbedtls_ssl_conf_tls13_ephemeral_enabled( ssl ) ||
+        mbedtls_ssl_conf_is_tls12_enabled( ssl->conf ) )
+    {
+        ret = mbedtls_ssl_write_sig_alg_ext( ssl, p, end, &output_len );
+        if( ret != 0 )
+            return( ret );
+        p += output_len;
+    }
+#endif /* MBEDTLS_KEY_EXCHANGE_WITH_CERT_ENABLED */
+
+#if defined(MBEDTLS_SSL_PROTO_TLS1_2)
+    if( mbedtls_ssl_conf_is_tls12_enabled( ssl->conf ) )
+    {
+        ret = ssl_tls12_write_client_hello_exts( ssl, p, end,
+                                                 tls12_uses_ec,
+                                                 &output_len );
+        if( ret != 0 )
+            return( ret );
+        p += output_len;
+    }
+#endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
 
     /* Write the length of the list of extensions. */
     extensions_len = p - p_extensions_len - 2;

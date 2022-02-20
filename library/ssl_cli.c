@@ -736,11 +736,11 @@ static int ssl_validate_ciphersuite(
     return( 0 );
 }
 
-static int ssl_tls12_write_client_hello_exts( mbedtls_ssl_context *ssl,
-                                              unsigned char *buf,
-                                              const unsigned char *end,
-                                              int uses_ec,
-                                              size_t *out_len )
+int ssl_tls12_write_client_hello_exts( mbedtls_ssl_context *ssl,
+                                       unsigned char *buf,
+                                       const unsigned char *end,
+                                       int uses_ec,
+                                       size_t *out_len )
 {
     int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     unsigned char *p = buf;
