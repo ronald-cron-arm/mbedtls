@@ -146,7 +146,7 @@ static int ssl_write_client_hello_cipher_suites(
         if( ssl_validate_ciphersuite( ssl, ciphersuite_info ) )
             continue;
 
-#if defined(MBEDTLS_SSL_PTOTO_TLS1_2) && \
+#if defined(MBEDTLS_SSL_PROTO_TLS1_2) && \
     ( defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_ECDSA_C) || \
       defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED) )
         *tls12_uses_ec |= mbedtls_ssl_ciphersuite_uses_ec( ciphersuite_info );
