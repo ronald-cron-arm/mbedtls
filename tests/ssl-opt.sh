@@ -6413,7 +6413,7 @@ run_test    "ECJPAKE: server not configured" \
             "$P_CLI debug_level=3 ecjpake_pw=bla \
              force_ciphersuite=TLS-ECJPAKE-WITH-AES-128-CCM-8" \
             1 \
-            -c "add ciphersuite: 0xc0ff" \
+            -c "add ciphersuite: c0ff" \
             -c "adding ecjpake_kkpp extension" \
             -s "found ecjpake kkpp extension" \
             -s "skip ecjpake kkpp extension" \
@@ -6429,7 +6429,7 @@ run_test    "ECJPAKE: working, TLS" \
             "$P_CLI debug_level=3 ecjpake_pw=bla \
              force_ciphersuite=TLS-ECJPAKE-WITH-AES-128-CCM-8" \
             0 \
-            -c "add ciphersuite: 0xc0ff" \
+            -c "add ciphersuite: c0ff" \
             -c "adding ecjpake_kkpp extension" \
             -C "re-using cached ecjpake parameters" \
             -s "found ecjpake kkpp extension" \
@@ -9621,7 +9621,7 @@ run_test    "TLS 1.3: handshake dispatch test: tls13 only" \
             "$P_CLI debug_level=2 min_version=tls13 max_version=tls13" \
             1 \
             -s "tls13 server state: MBEDTLS_SSL_HELLO_REQUEST"     \
-            -c "tls13 client state: MBEDTLS_SSL_HELLO_REQUEST"
+            -c "tls13 client state: MBEDTLS_SSL_SERVER_HELLO"
 
 requires_openssl_tls1_3
 requires_config_enabled MBEDTLS_SSL_PROTO_TLS1_3
@@ -9632,7 +9632,6 @@ run_test    "TLS 1.3: minimal feature sets - openssl" \
             "$O_NEXT_SRV -msg -tls1_3 -num_tickets 0 -no_resume_ephemeral -no_cache" \
             "$P_CLI debug_level=3 min_version=tls13 max_version=tls13" \
             0 \
-            -c "tls13 client state: MBEDTLS_SSL_HELLO_REQUEST(0)"               \
             -c "tls13 client state: MBEDTLS_SSL_SERVER_HELLO(2)"                \
             -c "tls13 client state: MBEDTLS_SSL_ENCRYPTED_EXTENSIONS(19)"       \
             -c "tls13 client state: MBEDTLS_SSL_CERTIFICATE_REQUEST(5)"         \

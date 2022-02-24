@@ -38,6 +38,7 @@
 #endif /* !MBEDTLS_PLATFORM_C */
 
 #include "mbedtls/ssl.h"
+#include "ssl_client.h"
 #include "ssl_misc.h"
 #include "mbedtls/debug.h"
 #include "mbedtls/error.h"
@@ -499,6 +500,8 @@ void mbedtls_ssl_reset_checksum( mbedtls_ssl_context *ssl )
 static void ssl_update_checksum_start( mbedtls_ssl_context *ssl,
                                        const unsigned char *buf, size_t len )
 {
+    MBEDTLS_SSL_DEBUG_BUF( 4, "ssl_update_checksum_start", buf, len );
+
 #if defined(MBEDTLS_SHA256_C)
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
     psa_hash_update( &ssl->handshake->fin_sha256_psa, buf, len );
@@ -2738,25 +2741,20 @@ int mbedtls_ssl_handshake_step( mbedtls_ssl_context *ssl )
     {
         if( ssl->state == MBEDTLS_SSL_HELLO_REQUEST )
         {
-#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
-            if( mbedtls_ssl_conf_is_tls13_enabled( ssl->conf ) )
-                ret = mbedtls_ssl_tls13_handshake_client_step( ssl );
-            else
-#endif /* MBEDTLS_SSL_PROTO_TLS1_3 */
-#if defined(MBEDTLS_SSL_PROTO_TLS1_2)
-                ret = mbedtls_ssl_handshake_client_step( ssl );
-#endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
+            ret = mbedtls_ssl_write_client_hello( ssl );
         }
         else
         {
-#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
+#if defined(MBEDTLS_SSL_PROTO_TLS1_2) && defined(MBEDTLS_SSL_PROTO_TLS1_3)
             if( ssl->minor_ver == MBEDTLS_SSL_MINOR_VERSION_4 )
                 ret = mbedtls_ssl_tls13_handshake_client_step( ssl );
             else
-#endif /* MBEDTLS_SSL_PROTO_TLS1_3 */
-#if defined(MBEDTLS_SSL_PROTO_TLS1_2)
                 ret = mbedtls_ssl_handshake_client_step( ssl );
-#endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
+#elif defined(MBEDTLS_SSL_PROTO_TLS1_2)
+            ret = mbedtls_ssl_handshake_client_step( ssl );
+#else
+            ret = mbedtls_ssl_tls13_handshake_client_step( ssl );
+#endif
         }
     }
 #endif

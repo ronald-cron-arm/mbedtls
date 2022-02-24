@@ -30,6 +30,7 @@
 #endif
 
 #include "mbedtls/ssl.h"
+#include "ssl_client.h"
 #include "ssl_misc.h"
 #include "mbedtls/debug.h"
 #include "mbedtls/error.h"
@@ -51,6 +52,13 @@
 #if defined(MBEDTLS_SSL_SESSION_TICKETS)
 #include "mbedtls/platform_util.h"
 #endif
+
+int ssl_conf_has_static_psk( mbedtls_ssl_config const *conf );
+int ssl_tls12_write_client_hello_exts( mbedtls_ssl_context *ssl,
+                                       unsigned char *buf,
+                                       const unsigned char *end,
+                                       int uses_ec,
+                                       size_t *out_len );
 
 #if defined(MBEDTLS_KEY_EXCHANGE_SOME_PSK_ENABLED)
 int ssl_conf_has_static_psk( mbedtls_ssl_config const *conf )
