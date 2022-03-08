@@ -9636,8 +9636,8 @@ run_test    "TLS 1.3: handshake dispatch test: tls13 only" \
             "$P_SRV debug_level=2 min_version=tls13 max_version=tls13" \
             "$P_CLI debug_level=2 min_version=tls13 max_version=tls13" \
             1 \
-            -s "tls13 server state: MBEDTLS_SSL_HELLO_REQUEST"     \
-            -c "tls13 client state: MBEDTLS_SSL_HELLO_REQUEST"
+            -s "server state: MBEDTLS_SSL_HELLO_REQUEST"     \
+            -c "client state: MBEDTLS_SSL_HELLO_REQUEST"
 
 requires_openssl_tls1_3
 requires_config_enabled MBEDTLS_SSL_PROTO_TLS1_3
@@ -9648,24 +9648,24 @@ run_test    "TLS 1.3: minimal feature sets - openssl" \
             "$O_NEXT_SRV -msg -tls1_3 -num_tickets 0 -no_resume_ephemeral -no_cache" \
             "$P_CLI debug_level=3 min_version=tls13 max_version=tls13" \
             0 \
-            -c "tls13 client state: MBEDTLS_SSL_HELLO_REQUEST(0)"               \
-            -c "tls13 client state: MBEDTLS_SSL_SERVER_HELLO(2)"                \
-            -c "tls13 client state: MBEDTLS_SSL_ENCRYPTED_EXTENSIONS(19)"       \
-            -c "tls13 client state: MBEDTLS_SSL_CERTIFICATE_REQUEST(5)"         \
-            -c "tls13 client state: MBEDTLS_SSL_SERVER_CERTIFICATE(3)"          \
-            -c "tls13 client state: MBEDTLS_SSL_CERTIFICATE_VERIFY(9)"          \
-            -c "tls13 client state: MBEDTLS_SSL_SERVER_FINISHED(13)"            \
-            -c "tls13 client state: MBEDTLS_SSL_CLIENT_FINISHED(11)"            \
-            -c "tls13 client state: MBEDTLS_SSL_FLUSH_BUFFERS(14)"              \
-            -c "tls13 client state: MBEDTLS_SSL_HANDSHAKE_WRAPUP(15)"           \
+            -c "client state: MBEDTLS_SSL_HELLO_REQUEST" \
+            -c "client state: MBEDTLS_SSL_SERVER_HELLO" \
+            -c "client state: MBEDTLS_SSL_ENCRYPTED_EXTENSIONS" \
+            -c "client state: MBEDTLS_SSL_CERTIFICATE_REQUEST" \
+            -c "client state: MBEDTLS_SSL_SERVER_CERTIFICATE" \
+            -c "client state: MBEDTLS_SSL_CERTIFICATE_VERIFY" \
+            -c "client state: MBEDTLS_SSL_SERVER_FINISHED" \
+            -c "client state: MBEDTLS_SSL_CLIENT_FINISHED" \
+            -c "client state: MBEDTLS_SSL_FLUSH_BUFFERS" \
+            -c "client state: MBEDTLS_SSL_HANDSHAKE_WRAPUP" \
             -c "<= ssl_tls13_process_server_hello" \
             -c "server hello, chosen ciphersuite: ( 1301 ) - TLS1-3-AES-128-GCM-SHA256" \
-            -c "ECDH curve: x25519"         \
+            -c "ECDH curve: x25519" \
             -c "=> ssl_tls13_process_server_hello" \
-            -c "<= parse encrypted extensions"      \
+            -c "<= parse encrypted extensions" \
             -c "Certificate verification flags clear" \
-            -c "=> parse certificate verify"          \
-            -c "<= parse certificate verify"          \
+            -c "=> parse certificate verify" \
+            -c "<= parse certificate verify" \
             -c "mbedtls_ssl_tls13_process_certificate_verify() returned 0" \
             -c "<= parse finished message" \
             -c "Protocol is TLSv1.3" \
@@ -10097,7 +10097,7 @@ run_test    "TLS 1.3: HelloRetryRequest check, ciphersuite TLS_AES_128_GCM_SHA25
             0 \
             -c "received HelloRetryRequest message" \
             -c "<= ssl_tls13_process_server_hello ( HelloRetryRequest )" \
-            -c "tls13 client state: MBEDTLS_SSL_CLIENT_HELLO" \
+            -c "client state: MBEDTLS_SSL_CLIENT_HELLO" \
             -c "HTTP/1.0 200 ok"
 
 requires_config_enabled MBEDTLS_SSL_PROTO_TLS1_3
@@ -10111,7 +10111,7 @@ run_test    "TLS 1.3: HelloRetryRequest check, ciphersuite TLS_AES_256_GCM_SHA38
             0 \
             -c "received HelloRetryRequest message" \
             -c "<= ssl_tls13_process_server_hello ( HelloRetryRequest )" \
-            -c "tls13 client state: MBEDTLS_SSL_CLIENT_HELLO" \
+            -c "client state: MBEDTLS_SSL_CLIENT_HELLO" \
             -c "HTTP/1.0 200 ok"
 
 requires_gnutls_tls1_3
@@ -10126,7 +10126,7 @@ run_test    "TLS 1.3: HelloRetryRequest check, ciphersuite TLS_AES_128_GCM_SHA25
             0 \
             -c "received HelloRetryRequest message" \
             -c "<= ssl_tls13_process_server_hello ( HelloRetryRequest )" \
-            -c "tls13 client state: MBEDTLS_SSL_CLIENT_HELLO" \
+            -c "client state: MBEDTLS_SSL_CLIENT_HELLO" \
             -c "HTTP/1.0 200 OK"
 
 requires_gnutls_tls1_3
@@ -10141,7 +10141,7 @@ run_test    "TLS 1.3: HelloRetryRequest check, ciphersuite TLS_AES_256_GCM_SHA38
             0 \
             -c "received HelloRetryRequest message" \
             -c "<= ssl_tls13_process_server_hello ( HelloRetryRequest )" \
-            -c "tls13 client state: MBEDTLS_SSL_CLIENT_HELLO" \
+            -c "client state: MBEDTLS_SSL_CLIENT_HELLO" \
             -c "HTTP/1.0 200 OK"
 
 for i in opt-testcases/*.sh
