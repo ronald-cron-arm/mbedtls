@@ -801,6 +801,7 @@ static int ssl_tls13_server_hello_coordinate( mbedtls_ssl_context *ssl,
         mbedtls_ssl_tls13_add_hs_msg_to_checksum( ssl,
                                                   MBEDTLS_SSL_HS_SERVER_HELLO,
                                                   *buf, *buf_len );
+        psa_destroy_key( ssl->handshake->ecdh_psa_privkey );
         return( SSL_SERVER_HELLO_COORDINATE_TLS1_2 );
     }
 
