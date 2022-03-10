@@ -1230,12 +1230,24 @@ int mbedtls_ssl_read_record( mbedtls_ssl_context *ssl,
                              unsigned update_hs_digest );
 int mbedtls_ssl_fetch_input( mbedtls_ssl_context *ssl, size_t nb_want );
 
+/*
+ * Write handshake message header
+ */
+int mbedtls_ssl_start_handshake_msg( mbedtls_ssl_context *ssl, unsigned hs_type,
+                                     unsigned char **buf, size_t *buf_len );
+
 int mbedtls_ssl_write_handshake_msg_ext( mbedtls_ssl_context *ssl,
                                          int update_checksum );
 static inline int mbedtls_ssl_write_handshake_msg( mbedtls_ssl_context *ssl )
 {
     return( mbedtls_ssl_write_handshake_msg_ext( ssl, 1 /* update checksum */ ) );
 }
+
+/*
+ * Write handshake message tail
+ */
+int mbedtls_ssl_finish_handshake_msg( mbedtls_ssl_context *ssl,
+                                      size_t buf_len, size_t msg_len );
 
 int mbedtls_ssl_write_record( mbedtls_ssl_context *ssl, uint8_t force_flush );
 int mbedtls_ssl_flush_output( mbedtls_ssl_context *ssl );
@@ -1741,14 +1753,6 @@ int mbedtls_ssl_tls13_fetch_handshake_msg( mbedtls_ssl_context *ssl,
                                            size_t *buf_len );
 
 /*
- * Write TLS 1.3 handshake message header
- */
-int mbedtls_ssl_tls13_start_handshake_msg( mbedtls_ssl_context *ssl,
-                                           unsigned hs_type,
-                                           unsigned char **buf,
-                                           size_t *buf_len );
-
-/*
  * Handler of TLS 1.3 server certificate message
  */
 int mbedtls_ssl_tls13_process_certificate( mbedtls_ssl_context *ssl );
@@ -1775,13 +1779,6 @@ int mbedtls_ssl_tls13_process_certificate_verify( mbedtls_ssl_context *ssl );
  * Write of dummy-CCS's for middlebox compatibility
  */
 int mbedtls_ssl_tls13_write_change_cipher_spec( mbedtls_ssl_context *ssl );
-
-/*
- * Write TLS 1.3 handshake message tail
- */
-int mbedtls_ssl_tls13_finish_handshake_msg( mbedtls_ssl_context *ssl,
-                                            size_t buf_len,
-                                            size_t msg_len );
 
 void mbedtls_ssl_tls13_add_hs_hdr_to_checksum( mbedtls_ssl_context *ssl,
                                                unsigned hs_type,

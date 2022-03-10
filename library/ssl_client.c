@@ -391,7 +391,7 @@ int mbedtls_ssl_write_client_hello( mbedtls_ssl_context *ssl )
 
     MBEDTLS_SSL_PROC_CHK( ssl_tls13_prepare_client_hello( ssl ) );
 
-    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_tls13_start_handshake_msg(
+    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_start_handshake_msg(
                                 ssl, MBEDTLS_SSL_HS_CLIENT_HELLO,
                                 &buf, &buf_len ) );
 
@@ -405,9 +405,8 @@ int mbedtls_ssl_write_client_hello( mbedtls_ssl_context *ssl )
     ssl->handshake->update_checksum( ssl, buf, msg_len );
 
     MBEDTLS_SSL_PROC_CHK( ssl_tls13_finalize_client_hello( ssl ) );
-    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_tls13_finish_handshake_msg( ssl,
-                                                                  buf_len,
-                                                                  msg_len ) );
+    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_finish_handshake_msg(
+                              ssl, buf_len, msg_len ) );
 
 cleanup:
 

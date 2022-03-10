@@ -71,44 +71,6 @@ cleanup:
     return( ret );
 }
 
-int mbedtls_ssl_tls13_start_handshake_msg( mbedtls_ssl_context *ssl,
-                                           unsigned hs_type,
-                                           unsigned char **buf,
-                                           size_t *buf_len )
-{
-    /*
-     * Reserve 4 bytes for hanshake header. ( Section 4,RFC 8446 )
-     *    ...
-     *    HandshakeType msg_type;
-     *    uint24 length;
-     *    ...
-     */
-    *buf = ssl->out_msg + 4;
-    *buf_len = MBEDTLS_SSL_OUT_CONTENT_LEN - 4;
-
-    ssl->out_msgtype = MBEDTLS_SSL_MSG_HANDSHAKE;
-    ssl->out_msg[0]  = hs_type;
-
-    return( 0 );
-}
-
-int mbedtls_ssl_tls13_finish_handshake_msg( mbedtls_ssl_context *ssl,
-                                            size_t buf_len,
-                                            size_t msg_len )
-{
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
-    size_t msg_with_header_len;
-    ((void) buf_len);
-
-    /* Add reserved 4 bytes for handshake header */
-    msg_with_header_len = msg_len + 4;
-    ssl->out_msglen = msg_with_header_len;
-    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_write_handshake_msg_ext( ssl, 0 ) );
-
-cleanup:
-    return( ret );
-}
-
 void mbedtls_ssl_tls13_add_hs_msg_to_checksum( mbedtls_ssl_context *ssl,
                                                unsigned hs_type,
                                                unsigned char const *msg,
@@ -1016,7 +978,7 @@ int mbedtls_ssl_tls13_write_certificate( mbedtls_ssl_context *ssl )
         unsigned char *buf;
         size_t buf_len, msg_len;
 
-        MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_tls13_start_handshake_msg( ssl,
+        MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_start_handshake_msg( ssl,
                    MBEDTLS_SSL_HS_CERTIFICATE, &buf, &buf_len ) );
 
         MBEDTLS_SSL_PROC_CHK( ssl_tls13_write_certificate_body( ssl,
@@ -1030,7 +992,7 @@ int mbedtls_ssl_tls13_write_certificate( mbedtls_ssl_context *ssl )
                                                   msg_len );
 
         MBEDTLS_SSL_PROC_CHK( ssl_tls13_finalize_write_certificate( ssl ) );
-        MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_tls13_finish_handshake_msg(
+        MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_finish_handshake_msg(
                                   ssl, buf_len, msg_len ) );
     }
     else
@@ -1212,7 +1174,7 @@ int mbedtls_ssl_tls13_write_certificate_verify( mbedtls_ssl_context *ssl )
 
     MBEDTLS_SSL_DEBUG_MSG( 2, ( "=> write certificate verify" ) );
 
-    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_tls13_start_handshake_msg( ssl,
+    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_start_handshake_msg( ssl,
                 MBEDTLS_SSL_HS_CERTIFICATE_VERIFY, &buf, &buf_len ) );
 
     MBEDTLS_SSL_PROC_CHK( ssl_tls13_write_certificate_verify_body(
@@ -1223,7 +1185,7 @@ int mbedtls_ssl_tls13_write_certificate_verify( mbedtls_ssl_context *ssl )
     /* Update state */
     MBEDTLS_SSL_PROC_CHK( ssl_tls13_finalize_certificate_verify( ssl ) );
 
-    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_tls13_finish_handshake_msg(
+    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_finish_handshake_msg(
                                 ssl, buf_len, msg_len ) );
 
 cleanup:
@@ -1471,7 +1433,7 @@ int mbedtls_ssl_tls13_write_finished_message( mbedtls_ssl_context *ssl )
 
     MBEDTLS_SSL_PROC_CHK( ssl_tls13_prepare_finished_message( ssl ) );
 
-    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_tls13_start_handshake_msg( ssl,
+    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_start_handshake_msg( ssl,
                               MBEDTLS_SSL_HS_FINISHED, &buf, &buf_len ) );
 
     MBEDTLS_SSL_PROC_CHK( ssl_tls13_write_finished_message_body(
@@ -1481,8 +1443,8 @@ int mbedtls_ssl_tls13_write_finished_message( mbedtls_ssl_context *ssl )
                                               buf, msg_len );
 
     MBEDTLS_SSL_PROC_CHK( ssl_tls13_finalize_finished_message( ssl ) );
-    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_tls13_finish_handshake_msg( ssl,
-                                              buf_len, msg_len ) );
+    MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_finish_handshake_msg(
+                              ssl, buf_len, msg_len ) );
     MBEDTLS_SSL_PROC_CHK( mbedtls_ssl_flush_output( ssl ) );
 
 cleanup:
