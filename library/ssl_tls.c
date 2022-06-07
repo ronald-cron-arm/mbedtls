@@ -58,6 +58,93 @@
 #include "mbedtls/oid.h"
 #endif
 
+typedef struct {
+    uint8_t *start;
+    uint8_t *end;
+} mbedtls_ssl_parsing_tracking_buf;
+
+int mbedtls_ssl_parsing_tracking_enabled = 0;
+mbedtls_ssl_parsing_tracking_buf mbedtls_ssl_parsing_tracking_filo[16];
+int mbedtls_ssl_parsing_tracking_filo_idx = 0;
+
+void mbedtls_ssl_enable_parsing_tracking( void )
+{
+    mbedtls_ssl_parsing_tracking_enabled = 1;
+}
+
+void mbedtls_ssl_disable_parsing_tracking( void );
+{
+    mbedtls_ssl_parsing_tracking_enabled = 0;
+    mbedtls_ssl_parsing_tracking_filo_idx = 0;
+}
+
+int mbedtls_ssl_parsing_tracking_is_enabled( void )
+{
+    return( mbedtls_ssl_parsing_tracking_enabled );
+}
+
+int mbedtls_ssl_parsing_tracking( uint8_t *cur, const uint8_t *end, size_t need )
+{
+    static uint8_t *previous_inner;
+    uint8_t *inner;
+    mbedtls_ssl_parsing_tracking_buf *previous_buf, *buf;
+
+    if( ( cur > end ) || ( need > (size_t)( end - cur ) ) )
+        return( MBEDTLS_ERR_SSL_DECODE_ERROR );
+
+    if( !mbedtls_ssl_parsing_tracking_enabled )
+        return( 0 );
+
+    inner = cur + need;
+
+    if( mbedtls_ssl_parsing_tracking_filo_idx == 0 )
+    {
+        buf = mbedtls_ssl_parsing_tracking_filo;
+        buf->start = cur;
+        buf->end = end;
+        mbedtls_ssl_parsing_tracking_filo_idx = 1;
+        previous_inner = inner;
+        return;
+    }
+
+    previous_buf = mbedtls_ssl_parsing_tracking_filo +
+                   mbedtls_ssl_parsing_tracking_filo_idx - 1;
+
+    if( inner > previous_buf->end || end > previous_buf->end )
+        return( -1 );
+
+    if( cur < previous_buf->start )
+        return( -2 );
+    else if( cur < previous_inner )
+    {
+        if( end > previous_inner )
+            return( -3 );
+
+        if( mbedtls_ssl_parsing_tracking_filo_idx >= 16 )
+            return( -4 );
+
+        buf = mbedtls_ssl_parsing_tracking_filo +
+              ( mbedtls_ssl_parsing_tracking_filo_idx++ );
+        buf->start = cur;
+        buf->end = end;
+    }
+    else if( cur > previous_inner )
+        return( -5 );
+
+    for( i = mbedtls_ssl_parsing_tracking_filo_idx; i > 0; i-- )
+    {
+        buf = &mbedtls_ssl_parsing_tracking_filo[i - 1];
+        buf->start = cur;
+        if( buf->start >= buf->end )
+            mbedtls_ssl_parsing_tracking_filo_idx--;
+    }
+
+    previous_inner = inner;
+    return( 0 );
+}
+
+
+
 #if defined(MBEDTLS_SSL_PROTO_DTLS)
 
 #if defined(MBEDTLS_SSL_DTLS_CONNECTION_ID)

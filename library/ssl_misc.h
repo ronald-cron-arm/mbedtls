@@ -405,6 +405,9 @@ static inline int mbedtls_ssl_chk_buf_ptr( const uint8_t *cur,
         }                                                                \
     } while( 0 )
 
+int mbedtls_ssl_parsing_tracking_is_enabled( void );
+int mbedtls_ssl_parsing_tracking( uint8_t *cur, const uint8_t *end, size_t need );
+
 /**
  * \brief        This macro checks if the remaining length in an input buffer is
  *               greater or equal than a needed length. If it is not the case, it
@@ -421,6 +424,8 @@ static inline int mbedtls_ssl_chk_buf_ptr( const uint8_t *cur,
  */
 #define MBEDTLS_SSL_CHK_BUF_READ_PTR( cur, end, need )                          \
     do {                                                                        \
+        if( mbedtls_ssl_enable_parsing_tracking )                               \
+            return( mbedtls_ssl_parsing_tracking( cur, end, need ) ) ;          \
         if( mbedtls_ssl_chk_buf_ptr( ( cur ), ( end ), ( need ) ) != 0 )        \
         {                                                                       \
             MBEDTLS_SSL_DEBUG_MSG( 1,                                           \
