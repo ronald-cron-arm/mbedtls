@@ -22,6 +22,19 @@
 
 #if defined(MBEDTLS_PSA_CRYPTO_C)
 
+#include "psa_crypto_aead.c"
+#include "psa_crypto_cipher.c"
+#include "psa_crypto_client.c"
+#include "psa_crypto_driver_wrappers.c"
+#include "psa_crypto_ecp.c"
+#include "psa_crypto_hash.c"
+#include "psa_crypto_mac.c"
+#include "psa_crypto_pake.c"
+#include "psa_crypto_rsa.c"
+#include "psa_crypto_se.c"
+#include "psa_crypto_slot_management.c"
+#include "psa_crypto_storage.c"
+
 #if defined(MBEDTLS_PSA_CRYPTO_CONFIG)
 #include "check_crypto_config.h"
 #endif
@@ -2354,7 +2367,7 @@ static psa_status_t psa_mac_finalize_alg_and_key_validation(
     return( PSA_SUCCESS );
 }
 
-static psa_status_t psa_mac_setup( psa_mac_operation_t *operation,
+static psa_status_t psa_mac_setup_( psa_mac_operation_t *operation,
                                    mbedtls_svc_key_id_t key,
                                    psa_algorithm_t alg,
                                    int is_sign )
@@ -2419,14 +2432,14 @@ psa_status_t psa_mac_sign_setup( psa_mac_operation_t *operation,
                                  mbedtls_svc_key_id_t key,
                                  psa_algorithm_t alg )
 {
-    return( psa_mac_setup( operation, key, alg, 1 ) );
+    return( psa_mac_setup_( operation, key, alg, 1 ) );
 }
 
 psa_status_t psa_mac_verify_setup( psa_mac_operation_t *operation,
                                    mbedtls_svc_key_id_t key,
                                    psa_algorithm_t alg )
 {
-    return( psa_mac_setup( operation, key, alg, 0 ) );
+    return( psa_mac_setup_( operation, key, alg, 0 ) );
 }
 
 psa_status_t psa_mac_update( psa_mac_operation_t *operation,
@@ -3150,7 +3163,7 @@ exit:
 /* Symmetric cryptography */
 /****************************************************************/
 
-static psa_status_t psa_cipher_setup( psa_cipher_operation_t *operation,
+static psa_status_t psa_cipher_setup_( psa_cipher_operation_t *operation,
                                       mbedtls_svc_key_id_t key,
                                       psa_algorithm_t alg,
                                       mbedtls_operation_t cipher_operation )
@@ -3221,14 +3234,14 @@ psa_status_t psa_cipher_encrypt_setup( psa_cipher_operation_t *operation,
                                        mbedtls_svc_key_id_t key,
                                        psa_algorithm_t alg )
 {
-    return( psa_cipher_setup( operation, key, alg, MBEDTLS_ENCRYPT ) );
+    return( psa_cipher_setup_( operation, key, alg, MBEDTLS_ENCRYPT ) );
 }
 
 psa_status_t psa_cipher_decrypt_setup( psa_cipher_operation_t *operation,
                                        mbedtls_svc_key_id_t key,
                                        psa_algorithm_t alg )
 {
-    return( psa_cipher_setup( operation, key, alg, MBEDTLS_DECRYPT ) );
+    return( psa_cipher_setup_( operation, key, alg, MBEDTLS_DECRYPT ) );
 }
 
 psa_status_t psa_cipher_generate_iv( psa_cipher_operation_t *operation,
@@ -3742,7 +3755,7 @@ static psa_status_t psa_validate_tag_length( psa_algorithm_t alg ) {
 }
 
 /* Set the key for a multipart authenticated operation. */
-static psa_status_t psa_aead_setup( psa_aead_operation_t *operation,
+static psa_status_t psa_aead_setup_( psa_aead_operation_t *operation,
                                     int is_encrypt,
                                     mbedtls_svc_key_id_t key,
                                     psa_algorithm_t alg )
@@ -3823,7 +3836,7 @@ psa_status_t psa_aead_encrypt_setup( psa_aead_operation_t *operation,
                                      mbedtls_svc_key_id_t key,
                                      psa_algorithm_t alg )
 {
-    return( psa_aead_setup( operation, 1, key, alg ) );
+    return( psa_aead_setup_( operation, 1, key, alg ) );
 }
 
 /* Set the key for a multipart authenticated decryption operation. */
@@ -3831,7 +3844,7 @@ psa_status_t psa_aead_decrypt_setup( psa_aead_operation_t *operation,
                                      mbedtls_svc_key_id_t key,
                                      psa_algorithm_t alg )
 {
-    return( psa_aead_setup( operation, 0, key, alg ) );
+    return( psa_aead_setup_( operation, 0, key, alg ) );
 }
 
 /* Generate a random nonce / IV for multipart AEAD operation */

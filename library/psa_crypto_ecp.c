@@ -41,7 +41,7 @@
     defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) || \
     defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA) || \
     defined(MBEDTLS_PSA_BUILTIN_ALG_ECDH)
-psa_status_t mbedtls_psa_ecp_load_representation(
+static inline psa_status_t mbedtls_psa_ecp_load_representation(
     psa_key_type_t type, size_t curve_bits,
     const uint8_t *data, size_t data_length,
     mbedtls_ecp_keypair **p_ecp )
@@ -160,7 +160,7 @@ exit:
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR) || \
     defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY)
 
-psa_status_t mbedtls_psa_ecp_import_key(
+static inline psa_status_t mbedtls_psa_ecp_import_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *data, size_t data_length,
     uint8_t *key_buffer, size_t key_buffer_size,
@@ -200,7 +200,7 @@ exit:
     return( status );
 }
 
-psa_status_t mbedtls_psa_ecp_export_key( psa_key_type_t type,
+static inline psa_status_t mbedtls_psa_ecp_export_key( psa_key_type_t type,
                                          mbedtls_ecp_keypair *ecp,
                                          uint8_t *data,
                                          size_t data_size,
@@ -251,7 +251,7 @@ psa_status_t mbedtls_psa_ecp_export_key( psa_key_type_t type,
     }
 }
 
-psa_status_t mbedtls_psa_ecp_export_public_key(
+static inline psa_status_t mbedtls_psa_ecp_export_public_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size,
     uint8_t *data, size_t data_size, size_t *data_length )
@@ -279,7 +279,7 @@ psa_status_t mbedtls_psa_ecp_export_public_key(
         * defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY) */
 
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR)
-psa_status_t mbedtls_psa_ecp_generate_key(
+static inline psa_status_t mbedtls_psa_ecp_generate_key(
     const psa_key_attributes_t *attributes,
     uint8_t *key_buffer, size_t key_buffer_size, size_t *key_buffer_length )
 {
@@ -329,7 +329,7 @@ psa_status_t mbedtls_psa_ecp_generate_key(
 
 #if defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) || \
     defined(MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA)
-psa_status_t mbedtls_psa_ecdsa_sign_hash(
+static inline psa_status_t mbedtls_psa_ecdsa_sign_hash(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size,
     psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
@@ -402,7 +402,7 @@ cleanup:
     return( mbedtls_to_psa_error( ret ) );
 }
 
-psa_status_t mbedtls_psa_ecdsa_verify_hash(
+static inline psa_status_t mbedtls_psa_ecdsa_verify_hash(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size,
     psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,

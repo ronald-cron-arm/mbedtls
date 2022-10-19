@@ -42,9 +42,9 @@ typedef struct
 {
     psa_key_slot_t key_slots[MBEDTLS_PSA_KEY_SLOT_COUNT];
     unsigned key_slots_initialized : 1;
-} psa_global_data_t;
+} psa_slot_management_global_data_t;
 
-static psa_global_data_t global_data;
+static psa_slot_management_global_data_t slot_management_global_data;
 
 int psa_is_valid_key_id( mbedtls_svc_key_id_t key, int vendor_ok )
 {
@@ -93,7 +93,7 @@ int psa_is_valid_key_id( mbedtls_svc_key_id_t key, int vendor_ok )
  * \retval #PSA_ERROR_DOES_NOT_EXIST
  *         There is no key with key identifier \p key in the key slots.
  */
-static psa_status_t psa_get_and_lock_key_slot_in_memory(
+static inline psa_status_t psa_get_and_lock_key_slot_in_memory(
     mbedtls_svc_key_id_t key, psa_key_slot_t **p_slot )
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
@@ -103,7 +103,7 @@ static psa_status_t psa_get_and_lock_key_slot_in_memory(
 
     if( psa_key_id_is_volatile( key_id ) )
     {
-        slot = &global_data.key_slots[ key_id - PSA_KEY_ID_VOLATILE_MIN ];
+        slot = &slot_management_global_data.key_slots[ key_id - PSA_KEY_ID_VOLATILE_MIN ];
 
         /*
          * Check if both the PSA key identifier key_id and the owner
@@ -123,7 +123,7 @@ static psa_status_t psa_get_and_lock_key_slot_in_memory(
 
         for( slot_idx = 0; slot_idx < MBEDTLS_PSA_KEY_SLOT_COUNT; slot_idx++ )
         {
-            slot = &global_data.key_slots[ slot_idx ];
+            slot = &slot_management_global_data.key_slots[ slot_idx ];
             if( mbedtls_svc_key_id_equal( key, slot->attr.id ) )
                 break;
         }
@@ -141,12 +141,12 @@ static psa_status_t psa_get_and_lock_key_slot_in_memory(
     return( status );
 }
 
-psa_status_t psa_initialize_key_slots( void )
+static inline psa_status_t psa_initialize_key_slots( void )
 {
     /* Nothing to do: program startup and psa_wipe_all_key_slots() both
      * guarantee that the key slots are initialized to all-zero, which
      * means that all the key slots are in a valid, empty state. */
-    global_data.key_slots_initialized = 1;
+    slot_management_global_data.key_slots_initialized = 1;
     return( PSA_SUCCESS );
 }
 
@@ -156,21 +156,21 @@ void psa_wipe_all_key_slots( void )
 
     for( slot_idx = 0; slot_idx < MBEDTLS_PSA_KEY_SLOT_COUNT; slot_idx++ )
     {
-        psa_key_slot_t *slot = &global_data.key_slots[ slot_idx ];
+        psa_key_slot_t *slot = &slot_management_global_data.key_slots[ slot_idx ];
         slot->lock_count = 1;
         (void) psa_wipe_key_slot( slot );
     }
-    global_data.key_slots_initialized = 0;
+    slot_management_global_data.key_slots_initialized = 0;
 }
 
-psa_status_t psa_get_empty_key_slot( psa_key_id_t *volatile_key_id,
+static inline psa_status_t psa_get_empty_key_slot( psa_key_id_t *volatile_key_id,
                                      psa_key_slot_t **p_slot )
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     size_t slot_idx;
     psa_key_slot_t *selected_slot, *unlocked_persistent_key_slot;
 
-    if( ! global_data.key_slots_initialized )
+    if( ! slot_management_global_data.key_slots_initialized )
     {
         status = PSA_ERROR_BAD_STATE;
         goto error;
@@ -179,7 +179,7 @@ psa_status_t psa_get_empty_key_slot( psa_key_id_t *volatile_key_id,
     selected_slot = unlocked_persistent_key_slot = NULL;
     for( slot_idx = 0; slot_idx < MBEDTLS_PSA_KEY_SLOT_COUNT; slot_idx++ )
     {
-        psa_key_slot_t *slot = &global_data.key_slots[ slot_idx ];
+        psa_key_slot_t *slot = &slot_management_global_data.key_slots[ slot_idx ];
         if( ! psa_is_key_slot_occupied( slot ) )
         {
             selected_slot = slot;
@@ -214,7 +214,7 @@ psa_status_t psa_get_empty_key_slot( psa_key_id_t *volatile_key_id,
            goto error;
 
         *volatile_key_id = PSA_KEY_ID_VOLATILE_MIN +
-            ( (psa_key_id_t)( selected_slot - global_data.key_slots ) );
+            ( (psa_key_id_t)( selected_slot - slot_management_global_data.key_slots ) );
         *p_slot = selected_slot;
 
         return( PSA_SUCCESS );
@@ -229,7 +229,7 @@ error:
 }
 
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C)
-static psa_status_t psa_load_persistent_key_into_slot( psa_key_slot_t *slot )
+static inline psa_status_t psa_load_persistent_key_into_slot( psa_key_slot_t *slot )
 {
     psa_status_t status = PSA_SUCCESS;
     uint8_t *key_data = NULL;
@@ -271,7 +271,7 @@ exit:
 
 #if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
 
-static psa_status_t psa_load_builtin_key_into_slot( psa_key_slot_t *slot )
+static inline psa_status_t psa_load_builtin_key_into_slot( psa_key_slot_t *slot )
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
@@ -340,13 +340,13 @@ exit:
 }
 #endif /* MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS */
 
-psa_status_t psa_get_and_lock_key_slot( mbedtls_svc_key_id_t key,
+static inline psa_status_t psa_get_and_lock_key_slot( mbedtls_svc_key_id_t key,
                                         psa_key_slot_t **p_slot )
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 
     *p_slot = NULL;
-    if( ! global_data.key_slots_initialized )
+    if( ! slot_management_global_data.key_slots_initialized )
         return( PSA_ERROR_BAD_STATE );
 
     /*
@@ -396,7 +396,7 @@ psa_status_t psa_get_and_lock_key_slot( mbedtls_svc_key_id_t key,
 #endif /* MBEDTLS_PSA_CRYPTO_STORAGE_C || MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS */
 }
 
-psa_status_t psa_unlock_key_slot( psa_key_slot_t *slot )
+static inline psa_status_t psa_unlock_key_slot( psa_key_slot_t *slot )
 {
     if( slot == NULL )
         return( PSA_SUCCESS );
@@ -419,7 +419,7 @@ psa_status_t psa_unlock_key_slot( psa_key_slot_t *slot )
     return( PSA_ERROR_CORRUPTION_DETECTED );
 }
 
-psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
+static inline psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
                                         psa_se_drv_table_entry_t **p_drv )
 {
     if ( psa_key_lifetime_is_external( lifetime ) )
@@ -451,7 +451,7 @@ psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
         return( PSA_SUCCESS );
 }
 
-psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime )
+static inline psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime )
 {
     if ( PSA_KEY_LIFETIME_IS_VOLATILE( lifetime ) )
     {
@@ -546,7 +546,7 @@ void mbedtls_psa_get_stats( mbedtls_psa_stats_t *stats )
 
     for( slot_idx = 0; slot_idx < MBEDTLS_PSA_KEY_SLOT_COUNT; slot_idx++ )
     {
-        const psa_key_slot_t *slot = &global_data.key_slots[ slot_idx ];
+        const psa_key_slot_t *slot = &slot_management_global_data.key_slots[ slot_idx ];
         if( psa_is_key_slot_locked( slot ) )
         {
             ++stats->locked_slots;

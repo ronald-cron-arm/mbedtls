@@ -85,7 +85,7 @@ static psa_storage_uid_t psa_its_identifier_of_slot( mbedtls_svc_key_id_t key )
  * \retval #PSA_ERROR_STORAGE_FAILURE
  * \retval #PSA_ERROR_DOES_NOT_EXIST
  */
-static psa_status_t psa_crypto_storage_load(
+static inline psa_status_t psa_crypto_storage_load(
     const mbedtls_svc_key_id_t key, uint8_t *data, size_t data_size )
 {
     psa_status_t status;
@@ -134,7 +134,7 @@ int psa_is_key_present_in_storage( const mbedtls_svc_key_id_t key )
  * \retval #PSA_ERROR_STORAGE_FAILURE
  * \retval #PSA_ERROR_DATA_INVALID
  */
-static psa_status_t psa_crypto_storage_store( const mbedtls_svc_key_id_t key,
+static inline psa_status_t psa_crypto_storage_store( const mbedtls_svc_key_id_t key,
                                               const uint8_t *data,
                                               size_t data_length )
 {
@@ -175,7 +175,7 @@ exit:
     return( status );
 }
 
-psa_status_t psa_destroy_persistent_key( const mbedtls_svc_key_id_t key )
+static inline psa_status_t psa_destroy_persistent_key( const mbedtls_svc_key_id_t key )
 {
     psa_status_t ret;
     psa_storage_uid_t data_identifier = psa_its_identifier_of_slot( key );
@@ -207,7 +207,7 @@ psa_status_t psa_destroy_persistent_key( const mbedtls_svc_key_id_t key )
  * \retval #PSA_ERROR_DOES_NOT_EXIST
  * \retval #PSA_ERROR_DATA_CORRUPT
  */
-static psa_status_t psa_crypto_storage_get_data_length(
+static inline psa_status_t psa_crypto_storage_get_data_length(
     const mbedtls_svc_key_id_t key,
     size_t *data_length )
 {
@@ -261,7 +261,7 @@ void psa_format_key_data_for_storage( const uint8_t *data,
     memcpy( storage_format->key_data, data, data_length );
 }
 
-static psa_status_t check_magic_header( const uint8_t *data )
+static inline psa_status_t check_magic_header( const uint8_t *data )
 {
     if( memcmp( data, PSA_KEY_STORAGE_MAGIC_HEADER,
                 PSA_KEY_STORAGE_MAGIC_HEADER_LENGTH ) != 0 )
@@ -269,7 +269,7 @@ static psa_status_t check_magic_header( const uint8_t *data )
     return( PSA_SUCCESS );
 }
 
-psa_status_t psa_parse_key_data_from_storage( const uint8_t *storage_data,
+static inline psa_status_t psa_parse_key_data_from_storage( const uint8_t *storage_data,
                                               size_t storage_data_length,
                                               uint8_t **key_data,
                                               size_t *key_data_length,
@@ -318,7 +318,7 @@ psa_status_t psa_parse_key_data_from_storage( const uint8_t *storage_data,
     return( PSA_SUCCESS );
 }
 
-psa_status_t psa_save_persistent_key( const psa_core_key_attributes_t *attr,
+static inline psa_status_t psa_save_persistent_key( const psa_core_key_attributes_t *attr,
                                       const uint8_t *data,
                                       const size_t data_length )
 {
@@ -358,7 +358,7 @@ void psa_free_persistent_key_data( uint8_t *key_data, size_t key_data_length )
     mbedtls_free( key_data );
 }
 
-psa_status_t psa_load_persistent_key( psa_core_key_attributes_t *attr,
+static inline psa_status_t psa_load_persistent_key( psa_core_key_attributes_t *attr,
                                       uint8_t **data,
                                       size_t *data_length )
 {
@@ -404,7 +404,7 @@ exit:
 
 psa_crypto_transaction_t psa_crypto_transaction;
 
-psa_status_t psa_crypto_save_transaction( void )
+static inline psa_status_t psa_crypto_save_transaction( void )
 {
     struct psa_storage_info_t p_info;
     psa_status_t status;
@@ -423,7 +423,7 @@ psa_status_t psa_crypto_save_transaction( void )
                          0 ) );
 }
 
-psa_status_t psa_crypto_load_transaction( void )
+static inline psa_status_t psa_crypto_load_transaction( void )
 {
     psa_status_t status;
     size_t length;
@@ -437,7 +437,7 @@ psa_status_t psa_crypto_load_transaction( void )
     return( PSA_SUCCESS );
 }
 
-psa_status_t psa_crypto_stop_transaction( void )
+static inline psa_status_t psa_crypto_stop_transaction( void )
 {
     psa_status_t status = psa_its_remove( PSA_CRYPTO_ITS_TRANSACTION_UID );
     /* Whether or not updating the storage succeeded, the transaction is
@@ -456,7 +456,7 @@ psa_status_t psa_crypto_stop_transaction( void )
 /****************************************************************/
 
 #if defined(MBEDTLS_PSA_INJECT_ENTROPY)
-psa_status_t mbedtls_psa_storage_inject_entropy( const unsigned char *seed,
+static inline psa_status_t mbedtls_psa_storage_inject_entropy( const unsigned char *seed,
                                                  size_t seed_size )
 {
     psa_status_t status;

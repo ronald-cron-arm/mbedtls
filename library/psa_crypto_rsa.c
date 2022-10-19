@@ -51,7 +51,7 @@
  * mbedtls_rsa_get_len(), which returns a number of bytes, and no
  * way to return the exact bit size of a key.
  * To keep things simple, reject non-byte-aligned key sizes. */
-static psa_status_t psa_check_rsa_key_byte_aligned(
+static inline psa_status_t psa_check_rsa_key_byte_aligned(
     const mbedtls_rsa_context *rsa )
 {
     mbedtls_mpi n;
@@ -68,7 +68,7 @@ static psa_status_t psa_check_rsa_key_byte_aligned(
     return( status );
 }
 
-psa_status_t mbedtls_psa_rsa_load_representation(
+static inline psa_status_t mbedtls_psa_rsa_load_representation(
     psa_key_type_t type, const uint8_t *data, size_t data_length,
     mbedtls_rsa_context **p_rsa )
 {
@@ -128,7 +128,7 @@ exit:
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_KEY_PAIR) || \
     defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_PUBLIC_KEY)
 
-psa_status_t mbedtls_psa_rsa_import_key(
+static inline psa_status_t mbedtls_psa_rsa_import_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *data, size_t data_length,
     uint8_t *key_buffer, size_t key_buffer_size,
@@ -164,7 +164,7 @@ exit:
     return( status );
 }
 
-psa_status_t mbedtls_psa_rsa_export_key( psa_key_type_t type,
+static inline psa_status_t mbedtls_psa_rsa_export_key( psa_key_type_t type,
                                          mbedtls_rsa_context *rsa,
                                          uint8_t *data,
                                          size_t data_size,
@@ -220,7 +220,7 @@ psa_status_t mbedtls_psa_rsa_export_key( psa_key_type_t type,
 #endif /* MBEDTLS_PK_WRITE_C */
 }
 
-psa_status_t mbedtls_psa_rsa_export_public_key(
+static inline psa_status_t mbedtls_psa_rsa_export_public_key(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size,
     uint8_t *data, size_t data_size, size_t *data_length )
@@ -249,7 +249,7 @@ psa_status_t mbedtls_psa_rsa_export_public_key(
 
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_KEY_PAIR) && \
     defined(MBEDTLS_GENPRIME)
-static psa_status_t psa_rsa_read_exponent( const uint8_t *domain_parameters,
+static inline psa_status_t psa_rsa_read_exponent( const uint8_t *domain_parameters,
                                            size_t domain_parameters_size,
                                            int *exponent )
 {
@@ -275,7 +275,7 @@ static psa_status_t psa_rsa_read_exponent( const uint8_t *domain_parameters,
     return( PSA_SUCCESS );
 }
 
-psa_status_t mbedtls_psa_rsa_generate_key(
+static inline psa_status_t mbedtls_psa_rsa_generate_key(
     const psa_key_attributes_t *attributes,
     uint8_t *key_buffer, size_t key_buffer_size, size_t *key_buffer_length )
 {
@@ -318,7 +318,7 @@ psa_status_t mbedtls_psa_rsa_generate_key(
 
 /* Decode the hash algorithm from alg and store the mbedtls encoding in
  * md_alg. Verify that the hash length is acceptable. */
-static psa_status_t psa_rsa_decode_md_type( psa_algorithm_t alg,
+static inline psa_status_t psa_rsa_decode_md_type( psa_algorithm_t alg,
                                             size_t hash_length,
                                             mbedtls_md_type_t *md_alg )
 {
@@ -345,7 +345,7 @@ static psa_status_t psa_rsa_decode_md_type( psa_algorithm_t alg,
     return( PSA_SUCCESS );
 }
 
-psa_status_t mbedtls_psa_rsa_sign_hash(
+static inline psa_status_t mbedtls_psa_rsa_sign_hash(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size,
     psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
@@ -446,7 +446,7 @@ static int rsa_pss_expected_salt_len( psa_algorithm_t alg,
 }
 #endif /* MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS */
 
-psa_status_t mbedtls_psa_rsa_verify_hash(
+static inline psa_status_t mbedtls_psa_rsa_verify_hash(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size,
     psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
@@ -545,7 +545,7 @@ static int psa_rsa_oaep_set_padding_mode( psa_algorithm_t alg,
 }
 #endif /* defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_OAEP) */
 
-psa_status_t mbedtls_psa_asymmetric_encrypt( const psa_key_attributes_t *attributes,
+static inline psa_status_t mbedtls_psa_asymmetric_encrypt( const psa_key_attributes_t *attributes,
                                              const uint8_t *key_buffer,
                                              size_t key_buffer_size,
                                              psa_algorithm_t alg,
@@ -645,7 +645,7 @@ rsa_exit:
     return status;
 }
 
-psa_status_t mbedtls_psa_asymmetric_decrypt( const psa_key_attributes_t *attributes,
+static inline psa_status_t mbedtls_psa_asymmetric_decrypt( const psa_key_attributes_t *attributes,
                                              const uint8_t *key_buffer,
                                              size_t key_buffer_size,
                                              psa_algorithm_t alg,

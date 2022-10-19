@@ -92,7 +92,7 @@ static inline int psa_key_id_is_volatile( psa_key_id_t key_id )
  * \retval #PSA_ERROR_STORAGE_FAILURE
  * \retval #PSA_ERROR_DATA_CORRUPT
  */
-psa_status_t psa_get_and_lock_key_slot( mbedtls_svc_key_id_t key,
+static psa_status_t psa_get_and_lock_key_slot( mbedtls_svc_key_id_t key,
                                         psa_key_slot_t **p_slot );
 
 /** Initialize the key slot structures.
@@ -100,7 +100,7 @@ psa_status_t psa_get_and_lock_key_slot( mbedtls_svc_key_id_t key,
  * \retval #PSA_SUCCESS
  *         Currently this function always succeeds.
  */
-psa_status_t psa_initialize_key_slots( void );
+static psa_status_t psa_initialize_key_slots( void );
 
 /** Delete all data from key slots in memory.
  *
@@ -122,7 +122,7 @@ void psa_wipe_all_key_slots( void );
  * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
  * \retval #PSA_ERROR_BAD_STATE
  */
-psa_status_t psa_get_empty_key_slot( psa_key_id_t *volatile_key_id,
+static psa_status_t psa_get_empty_key_slot( psa_key_id_t *volatile_key_id,
                                      psa_key_slot_t **p_slot );
 
 /** Lock a key slot.
@@ -163,7 +163,7 @@ static inline psa_status_t psa_lock_key_slot( psa_key_slot_t *slot )
  *             The lock counter was equal to 0.
  *
  */
-psa_status_t psa_unlock_key_slot( psa_key_slot_t *slot );
+static psa_status_t psa_unlock_key_slot( psa_key_slot_t *slot );
 
 /** Test whether a lifetime designates a key in an external cryptoprocessor.
  *
@@ -197,7 +197,7 @@ static inline int psa_key_lifetime_is_external( psa_key_lifetime_t lifetime )
  * \retval #PSA_SUCCESS
  * \retval #PSA_ERROR_INVALID_ARGUMENT
  */
-psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
+static psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
                                         psa_se_drv_table_entry_t **p_drv );
 
 /** Validate the persistence of a key.
@@ -208,7 +208,7 @@ psa_status_t psa_validate_key_location( psa_key_lifetime_t lifetime,
  * \retval #PSA_ERROR_NOT_SUPPORTED The key is persistent but persistent keys
  *             are not supported.
  */
-psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime );
+static psa_status_t psa_validate_key_persistence( psa_key_lifetime_t lifetime );
 
 /** Validate a key identifier.
  *

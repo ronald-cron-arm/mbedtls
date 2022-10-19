@@ -345,7 +345,7 @@ psa_status_t psa_pake_set_role( psa_pake_operation_t *operation,
 }
 
 #if defined(MBEDTLS_PSA_BUILTIN_ALG_JPAKE)
-static psa_status_t psa_pake_ecjpake_setup( psa_pake_operation_t *operation )
+psa_status_t psa_pake_ecjpake_setup( psa_pake_operation_t *operation )
 {
     int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;

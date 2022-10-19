@@ -31,14 +31,14 @@
 #include <string.h>
 
 #if defined(MBEDTLS_PSA_BUILTIN_ALG_HMAC)
-static psa_status_t psa_hmac_abort_internal(
+static inline psa_status_t psa_hmac_abort_internal(
     mbedtls_psa_hmac_operation_t *hmac )
 {
     mbedtls_platform_zeroize( hmac->opad, sizeof( hmac->opad ) );
     return( psa_hash_abort( &hmac->hash_ctx ) );
 }
 
-static psa_status_t psa_hmac_setup_internal(
+static inline psa_status_t psa_hmac_setup_internal(
     mbedtls_psa_hmac_operation_t *hmac,
     const uint8_t *key,
     size_t key_length,
@@ -103,7 +103,7 @@ cleanup:
     return( status );
 }
 
-static psa_status_t psa_hmac_update_internal(
+static inline psa_status_t psa_hmac_update_internal(
     mbedtls_psa_hmac_operation_t *hmac,
     const uint8_t *data,
     size_t data_length )
@@ -111,7 +111,7 @@ static psa_status_t psa_hmac_update_internal(
     return( psa_hash_update( &hmac->hash_ctx, data, data_length ) );
 }
 
-static psa_status_t psa_hmac_finish_internal(
+static inline psa_status_t psa_hmac_finish_internal(
     mbedtls_psa_hmac_operation_t *hmac,
     uint8_t *mac,
     size_t mac_size )
@@ -152,7 +152,7 @@ exit:
 #endif /* MBEDTLS_PSA_BUILTIN_ALG_HMAC */
 
 #if defined(MBEDTLS_PSA_BUILTIN_ALG_CMAC)
-static psa_status_t cmac_setup( mbedtls_psa_mac_operation_t *operation,
+static inline psa_status_t cmac_setup( mbedtls_psa_mac_operation_t *operation,
                                 const psa_key_attributes_t *attributes,
                                 const uint8_t *key_buffer )
 {
@@ -194,7 +194,7 @@ exit:
 
 /* Initialize this driver's MAC operation structure. Once this function has been
  * called, mbedtls_psa_mac_abort can run and will do the right thing. */
-static psa_status_t mac_init(
+static inline psa_status_t mac_init(
     mbedtls_psa_mac_operation_t *operation,
     psa_algorithm_t alg )
 {
@@ -229,7 +229,7 @@ static psa_status_t mac_init(
     return( status );
 }
 
-psa_status_t mbedtls_psa_mac_abort( mbedtls_psa_mac_operation_t *operation )
+static inline psa_status_t mbedtls_psa_mac_abort( mbedtls_psa_mac_operation_t *operation )
 {
     if( operation->alg == 0 )
     {
@@ -272,7 +272,7 @@ bad_state:
     return( PSA_ERROR_BAD_STATE );
 }
 
-static psa_status_t psa_mac_setup( mbedtls_psa_mac_operation_t *operation,
+static inline psa_status_t psa_mac_setup( mbedtls_psa_mac_operation_t *operation,
                                    const psa_key_attributes_t *attributes,
                                    const uint8_t *key_buffer,
                                    size_t key_buffer_size,
@@ -321,7 +321,7 @@ static psa_status_t psa_mac_setup( mbedtls_psa_mac_operation_t *operation,
     return( status );
 }
 
-psa_status_t mbedtls_psa_mac_sign_setup(
+static inline psa_status_t mbedtls_psa_mac_sign_setup(
     mbedtls_psa_mac_operation_t *operation,
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer,
@@ -332,7 +332,7 @@ psa_status_t mbedtls_psa_mac_sign_setup(
                            key_buffer, key_buffer_size, alg ) );
 }
 
-psa_status_t mbedtls_psa_mac_verify_setup(
+static inline psa_status_t mbedtls_psa_mac_verify_setup(
     mbedtls_psa_mac_operation_t *operation,
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer,
@@ -343,7 +343,7 @@ psa_status_t mbedtls_psa_mac_verify_setup(
                            key_buffer, key_buffer_size, alg ) );
 }
 
-psa_status_t mbedtls_psa_mac_update(
+static inline psa_status_t mbedtls_psa_mac_update(
     mbedtls_psa_mac_operation_t *operation,
     const uint8_t *input,
     size_t input_length )
@@ -377,7 +377,7 @@ psa_status_t mbedtls_psa_mac_update(
     }
 }
 
-static psa_status_t psa_mac_finish_internal(
+static inline psa_status_t psa_mac_finish_internal(
     mbedtls_psa_mac_operation_t *operation,
     uint8_t *mac, size_t mac_size )
 {
@@ -411,7 +411,7 @@ static psa_status_t psa_mac_finish_internal(
     }
 }
 
-psa_status_t mbedtls_psa_mac_sign_finish(
+static inline psa_status_t mbedtls_psa_mac_sign_finish(
     mbedtls_psa_mac_operation_t *operation,
     uint8_t *mac,
     size_t mac_size,
@@ -429,7 +429,7 @@ psa_status_t mbedtls_psa_mac_sign_finish(
     return( status );
 }
 
-psa_status_t mbedtls_psa_mac_verify_finish(
+static inline psa_status_t mbedtls_psa_mac_verify_finish(
     mbedtls_psa_mac_operation_t *operation,
     const uint8_t *mac,
     size_t mac_length )
@@ -457,7 +457,7 @@ cleanup:
     return( status );
 }
 
-psa_status_t mbedtls_psa_mac_compute(
+static inline psa_status_t mbedtls_psa_mac_compute(
     const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer,
     size_t key_buffer_size,
