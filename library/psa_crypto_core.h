@@ -51,7 +51,7 @@ static inline int mbedtls_psa_safer_memcmp(
  */
 typedef struct
 {
-    psa_core_key_attributes_t attr;
+    psa_key_attributes_t attr;
 
     /*
      * Number of locks on the key slot held by the library.
@@ -103,7 +103,7 @@ typedef struct
  */
 static inline int psa_is_key_slot_occupied( const psa_key_slot_t *slot )
 {
-    return( slot->attr.type != 0 );
+    return( slot->attr.core.type != 0 );
 }
 
 /** Test whether a key slot is locked.
@@ -130,7 +130,7 @@ static inline int psa_is_key_slot_locked( const psa_key_slot_t *slot )
 static inline uint16_t psa_key_slot_get_flags( const psa_key_slot_t *slot,
                                                uint16_t mask )
 {
-    return( slot->attr.flags & mask );
+    return( slot->attr.core.flags & mask );
 }
 
 /** Set flags in psa_key_slot_t::attr::core::flags.
@@ -143,7 +143,7 @@ static inline void psa_key_slot_set_flags( psa_key_slot_t *slot,
                                            uint16_t mask,
                                            uint16_t value )
 {
-    slot->attr.flags = ( ( ~mask & slot->attr.flags ) |
+    slot->attr.core.flags = ( ( ~mask & slot->attr.core.flags ) |
                               ( mask & value ) );
 }
 
@@ -155,7 +155,7 @@ static inline void psa_key_slot_set_flags( psa_key_slot_t *slot,
 static inline void psa_key_slot_set_bits_in_flags( psa_key_slot_t *slot,
                                                    uint16_t mask )
 {
-    slot->attr.flags |= mask;
+    slot->attr.core.flags |= mask;
 }
 
 /** Turn off flags in psa_key_slot_t::attr::core::flags.
@@ -166,7 +166,7 @@ static inline void psa_key_slot_set_bits_in_flags( psa_key_slot_t *slot,
 static inline void psa_key_slot_clear_bits( psa_key_slot_t *slot,
                                             uint16_t mask )
 {
-    slot->attr.flags &= ~mask;
+    slot->attr.core.flags &= ~mask;
 }
 
 #if defined(MBEDTLS_PSA_CRYPTO_SE_C)
