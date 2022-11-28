@@ -57,7 +57,7 @@ class Expr:
             header="""
             #include <psa/crypto.h>
             """,
-            include_path=['include']) #type: List[str]
+            include_path=['include', 'drivers/builtin/include']) #type: List[str]
         for e, v in zip(expressions, values):
             self.value_cache[e] = int(v, 0)
         self.unknown_values.clear()
