@@ -1810,6 +1810,7 @@ struct mbedtls_ssl_context {
      * MBEDTLS_SSL_EARLY_DATA_DISCARD
      */
     uint8_t MBEDTLS_PRIVATE(discard_early_data_record);
+    uint32_t MBEDTLS_PRIVATE(received_early_data_size); /*!< Number of received early data bytes */
 #endif
 
     /*

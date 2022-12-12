@@ -2146,6 +2146,9 @@ int mbedtls_ssl_tls13_write_early_data_ext(mbedtls_ssl_context *ssl,
                                            const unsigned char *end,
                                            size_t *out_len);
 
+int mbedtls_ssl_tls13_check_early_data_size(mbedtls_ssl_context *ssl,
+                                            uint32_t early_data_size);
+
 #if defined(MBEDTLS_SSL_CLI_C)
 /*
  * The client has not sent the first ClientHello yet, it is unknown if the
