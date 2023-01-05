@@ -34,6 +34,14 @@
 #define PSA_CRYPTO_BUILTIN_COMPOSITES_H
 #include "mbedtls/private_access.h"
 
+/* Include the Mbed TLS configuration file, the way Mbed TLS does it
+ * in each of its header files. */
+#include "mbedtls/build_info.h"
+
+#include "mbedtls/gcm.h"
+#include "mbedtls/ccm.h"
+#include "mbedtls/chachapoly.h"
+
 #include <psa/crypto_driver_common.h>
 
 /*
