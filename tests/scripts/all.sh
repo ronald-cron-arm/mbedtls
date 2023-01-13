@@ -1974,7 +1974,8 @@ component_test_psa_crypto_config_accel_ecdsa () {
     scripts/config.py -f tests/include/test/drivers/config_test_driver.h set MBEDTLS_SHA384_C
     scripts/config.py -f tests/include/test/drivers/config_test_driver.h set MBEDTLS_SHA512_C
 
-    loc_accel_list="ALG_ECDSA ALG_DETERMINISTIC_ECDSA KEY_TYPE_ECC_KEY_PAIR KEY_TYPE_ECC_PUBLIC_KEY"
+#   loc_accel_list="ALG_ECDSA ALG_DETERMINISTIC_ECDSA KEY_TYPE_ECC_KEY_PAIR KEY_TYPE_ECC_PUBLIC_KEY ECC_SECP_R1_521 ECC_BRAINPOOL_P_R1_512 ECC_MONTGOMERY_448 ECC_SECP_R1_384 ECC_BRAINPOOL_P_R1_384"
+    loc_accel_list="ALG_ECDSA ALG_DETERMINISTIC_ECDSA KEY_TYPE_ECC_KEY_PAIR KEY_TYPE_ECC_PUBLIC_KEY ECC_MONTGOMERY_448"
     loc_accel_flags=$( echo "$loc_accel_list" | sed 's/[^ ]* */-DLIBTESTDRIVER1_MBEDTLS_PSA_ACCEL_&/g' )
     make -C tests libtestdriver1.a CFLAGS="$ASAN_CFLAGS $loc_accel_flags" LDFLAGS="$ASAN_CFLAGS"
 
@@ -1990,6 +1991,12 @@ component_test_psa_crypto_config_accel_ecdsa () {
     scripts/config.py unset MBEDTLS_ECDSA_C
     scripts/config.py unset MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
     scripts/config.py unset MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED
+
+#   scripts/config.py unset MBEDTLS_ECP_DP_SECP521R1_ENABLED
+#   scripts/config.py unset MBEDTLS_ECP_DP_BP512R1_ENABLED
+#   scripts/config.py unset MBEDTLS_ECP_DP_CURVE448_ENABLED
+#   scripts/config.py unset MBEDTLS_ECP_DP_SECP384R1_ENABLED
+#   scripts/config.py unset MBEDTLS_ECP_DP_BP384R1_ENABLED
 
     loc_accel_flags="$loc_accel_flags $( echo "$loc_accel_list" | sed 's/[^ ]* */-DMBEDTLS_PSA_ACCEL_&/g' )"
     make CFLAGS="$ASAN_CFLAGS -O -Werror -I../tests/include -I../tests -I../../tests -DPSA_CRYPTO_DRIVER_TEST -DMBEDTLS_TEST_LIBTESTDRIVER1 $loc_accel_flags" LDFLAGS="-ltestdriver1 $ASAN_CFLAGS"

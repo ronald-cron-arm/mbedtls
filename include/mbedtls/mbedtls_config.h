@@ -933,7 +933,7 @@
  *      MBEDTLS_TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256
  *      MBEDTLS_TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256
  */
-#define MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
+//#define MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
 
 /**
  * \def MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED
@@ -955,7 +955,7 @@
  *      MBEDTLS_TLS_ECDH_ECDSA_WITH_CAMELLIA_128_GCM_SHA256
  *      MBEDTLS_TLS_ECDH_ECDSA_WITH_CAMELLIA_256_GCM_SHA384
  */
-#define MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED
+//#define MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED
 
 /**
  * \def MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED
@@ -1228,7 +1228,7 @@
  *          compatibility with application code that relies on drivers,
  *          but the driver interfaces may change without notice.
  */
-//#define MBEDTLS_PSA_CRYPTO_DRIVERS
+#define MBEDTLS_PSA_CRYPTO_DRIVERS
 
 /** \def MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
  *
@@ -1982,7 +1982,7 @@
  * This feature is still experimental and is not ready for production since
  * it is not completed.
  */
-//#define MBEDTLS_PSA_CRYPTO_CONFIG
+#define MBEDTLS_PSA_CRYPTO_CONFIG
 
 /**
  * \def MBEDTLS_VERSION_FEATURES
@@ -2482,7 +2482,7 @@
  *           and at least one MBEDTLS_ECP_DP_XXX_ENABLED for a
  *           short Weierstrass curve.
  */
-#define MBEDTLS_ECDSA_C
+//#define MBEDTLS_ECDSA_C
 
 /**
  * \def MBEDTLS_ECJPAKE_C
