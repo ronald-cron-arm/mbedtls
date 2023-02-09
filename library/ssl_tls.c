@@ -5189,9 +5189,18 @@ int mbedtls_ssl_config_defaults(mbedtls_ssl_config *conf,
         conf, MBEDTLS_SSL_TLS1_3_DEFAULT_NEW_SESSION_TICKETS);
 #endif
     /*
-     * Allow all TLS 1.3 key exchange modes by default.
+     * Allow all enabled TLS 1.3 key exchange modes by default.
      */
-    conf->tls13_kex_modes = MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_ALL;
+    conf->tls13_kex_modes = 0;
+#if defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK_ENABLED)
+    conf->tls13_kex_modes |= MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK;
+#endif
+#if defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_EPHEMERAL_ENABLED)
+    conf->tls13_kex_modes |= MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_EPHEMERAL;
+#endif
+#if defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK_EPHEMERAL_ENABLED)
+    conf->tls13_kex_modes |= MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK_EPHEMERAL;
+#endif
 #endif /* MBEDTLS_SSL_PROTO_TLS1_3 */
 
     if (transport == MBEDTLS_SSL_TRANSPORT_DATAGRAM) {
