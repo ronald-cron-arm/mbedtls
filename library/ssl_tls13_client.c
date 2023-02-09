@@ -1492,12 +1492,14 @@ static int ssl_tls13_preprocess_server_hello(mbedtls_ssl_context *ssl,
         mbedtls_ssl_add_hs_msg_to_checksum(ssl, MBEDTLS_SSL_HS_SERVER_HELLO,
                                            buf, (size_t) (end - buf));
 
+#if defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_SOME_EPHEMERAL_ENABLED)
         if (mbedtls_ssl_conf_tls13_some_ephemeral_enabled(ssl)) {
             ret = ssl_tls13_reset_key_share(ssl);
             if (ret != 0) {
                 return ret;
             }
         }
+#endif
 
         return SSL_SERVER_HELLO_TLS1_2;
     }

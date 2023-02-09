@@ -600,7 +600,7 @@ static int ssl_write_client_hello_body(mbedtls_ssl_context *ssl,
 #if defined(MBEDTLS_ECDH_C) || defined(MBEDTLS_ECDSA_C) || \
     defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
     if (
-#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
+#if defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_SOME_EPHEMERAL_ENABLED)
         (propose_tls13 &&
          mbedtls_ssl_conf_tls13_some_ephemeral_enabled(ssl)) ||
 #endif
@@ -618,7 +618,7 @@ static int ssl_write_client_hello_body(mbedtls_ssl_context *ssl,
 
 #if defined(MBEDTLS_SSL_HANDSHAKE_WITH_CERT_ENABLED)
     if (
-#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
+#if defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_EPHEMERAL_ENABLED)
         (propose_tls13 && mbedtls_ssl_conf_tls13_ephemeral_enabled(ssl)) ||
 #endif
 #if defined(MBEDTLS_SSL_PROTO_TLS1_2)
