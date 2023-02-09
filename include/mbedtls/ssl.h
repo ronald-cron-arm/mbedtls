@@ -3194,6 +3194,8 @@ void mbedtls_ssl_conf_ciphersuites(mbedtls_ssl_config *conf,
  *        server-side applications must also provide a certificate via
  *        mbedtls_ssl_conf_own_cert().
  *
+ * \note  Only the key exchange modes enabled in the build are taken into
+ *        account.
  */
 
 void mbedtls_ssl_conf_tls13_key_exchange_modes(mbedtls_ssl_config *conf,

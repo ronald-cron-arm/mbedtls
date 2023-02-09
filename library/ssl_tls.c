@@ -1700,7 +1700,18 @@ void mbedtls_ssl_conf_ciphersuites(mbedtls_ssl_config *conf,
 void mbedtls_ssl_conf_tls13_key_exchange_modes(mbedtls_ssl_config *conf,
                                                const int kex_modes)
 {
-    conf->tls13_kex_modes = kex_modes & MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_ALL;
+    int actual_kex_modes = kex_modes & MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_ALL;
+
+#if !defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK_ENABLED)
+    actual_kex_modes &= ~MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK;
+#endif
+#if !defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_EPHEMERAL_ENABLED)
+    actual_kex_modes &= ~MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_EPHEMERAL;
+#endif
+#if !defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK_EPHEMERAL_ENABLED)
+    actual_kex_modes &= ~MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK_EPHEMERAL;
+#endif
+    conf->tls13_kex_modes = actual_kex_modes;
 }
 
 #if defined(MBEDTLS_SSL_EARLY_DATA)
