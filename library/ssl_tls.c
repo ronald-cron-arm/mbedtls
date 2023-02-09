@@ -5889,7 +5889,7 @@ int mbedtls_ssl_parse_sig_alg_ext(mbedtls_ssl_context *ssl,
                                   mbedtls_ssl_sig_alg_to_str(sig_alg)));
 #if defined(MBEDTLS_SSL_PROTO_TLS1_2)
         if (ssl->tls_version == MBEDTLS_SSL_VERSION_TLS1_2 &&
-            (!(mbedtls_ssl_sig_alg_is_supported(ssl, sig_alg) &&
+            (!(mbedtls_ssl_tls12_sig_alg_is_supported(sig_alg) &&
                mbedtls_ssl_sig_alg_is_offered(ssl, sig_alg)))) {
             continue;
         }
@@ -9229,6 +9229,13 @@ int mbedtls_ssl_write_sig_alg_ext(mbedtls_ssl_context *ssl, unsigned char *buf,
     unsigned char *supported_sig_alg; /* Start of supported_signature_algorithms */
     size_t supported_sig_alg_len = 0; /* Length of supported_signature_algorithms */
 
+    mbedtls_ssl_protocol_version min_tls_version = ssl->tls_version;
+#if defined(MBEDTLS_SSL_CLI_C)
+    if (ssl->conf->endpoint == MBEDTLS_SSL_IS_CLIENT) {
+        min_tls_version = ssl->handshake->min_tls_version;
+    }
+#endif
+
     *out_len = 0;
 
     MBEDTLS_SSL_DEBUG_MSG(3, ("adding signature_algorithms extension"));
@@ -9251,12 +9258,31 @@ int mbedtls_ssl_write_sig_alg_ext(mbedtls_ssl_context *ssl, unsigned char *buf,
     }
 
     for (; *sig_alg != MBEDTLS_TLS1_3_SIG_NONE; sig_alg++) {
+        int propose_sig_alg;
         MBEDTLS_SSL_DEBUG_MSG(3, ("got signature scheme [%x] %s",
                                   *sig_alg,
                                   mbedtls_ssl_sig_alg_to_str(*sig_alg)));
-        if (!mbedtls_ssl_sig_alg_is_supported(ssl, *sig_alg)) {
+
+        propose_sig_alg = 0;
+#if defined(MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_EPHEMERAL_ENABLED)
+        if (min_tls_version <= MBEDTLS_SSL_VERSION_TLS1_3 &&
+            MBEDTLS_SSL_VERSION_TLS1_3 <= ssl->tls_version &&
+            mbedtls_ssl_tls13_sig_alg_is_supported(*sig_alg)) {
+            propose_sig_alg = 1;
+        }
+#endif
+#if defined(MBEDTLS_KEY_EXCHANGE_WITH_CERT_ENABLED)
+        if (min_tls_version <= MBEDTLS_SSL_VERSION_TLS1_2 &&
+            MBEDTLS_SSL_VERSION_TLS1_2 <= ssl->tls_version &&
+            mbedtls_ssl_tls12_sig_alg_is_supported(*sig_alg)) {
+            propose_sig_alg = 1;
+        }
+#endif
+
+        if (!propose_sig_alg) {
             continue;
         }
+
         MBEDTLS_SSL_CHK_BUF_PTR(p, end, 2);
         MBEDTLS_PUT_UINT16_BE(*sig_alg, p, 0);
         p += 2;

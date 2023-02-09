@@ -2462,7 +2462,7 @@ static int ssl_write_certificate_request(mbedtls_ssl_context *ssl)
         if (mbedtls_ssl_set_calc_verify_md(ssl, hash)) {
             continue;
         }
-        if (!mbedtls_ssl_sig_alg_is_supported(ssl, *sig_alg)) {
+        if (!mbedtls_ssl_tls12_sig_alg_is_supported(*sig_alg)) {
             continue;
         }
 

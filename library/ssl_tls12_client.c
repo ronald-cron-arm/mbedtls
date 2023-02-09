@@ -2308,7 +2308,7 @@ start_processing:
         if (mbedtls_ssl_get_pk_type_and_md_alg_from_sig_alg(
                 sig_alg, &pk_alg, &md_alg) != 0 &&
             !mbedtls_ssl_sig_alg_is_offered(ssl, sig_alg) &&
-            !mbedtls_ssl_sig_alg_is_supported(ssl, sig_alg)) {
+            !mbedtls_ssl_tls12_sig_alg_is_supported(sig_alg)) {
             MBEDTLS_SSL_DEBUG_MSG(1,
                                   ("bad server key exchange message"));
             mbedtls_ssl_send_alert_message(
