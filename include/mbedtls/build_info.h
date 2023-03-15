@@ -80,54 +80,6 @@
 #include MBEDTLS_USER_CONFIG_FILE
 #endif
 
-/* Auto-enable MBEDTLS_MD_C if needed by a module that didn't require it
- * in a previous release, to ensure backwards compatibility.
- */
-#if defined(MBEDTLS_PKCS5_C)
-#define MBEDTLS_MD_C
-#endif
-
-/* Auto-enable MBEDTLS_MD_LIGHT based on MBEDTLS_MD_C.
- * This allows checking for MD_LIGHT rather than MD_LIGHT || MD_C.
- */
-#if defined(MBEDTLS_MD_C)
-#define MBEDTLS_MD_LIGHT
-#endif
-
-/* Auto-enable MBEDTLS_MD_LIGHT if needed by a module that didn't require it
- * in a previous release, to ensure backwards compatibility.
- */
-#if defined(MBEDTLS_ECJPAKE_C) || \
-    defined(MBEDTLS_PEM_PARSE_C) || \
-    defined(MBEDTLS_ENTROPY_C) || \
-    defined(MBEDTLS_PKCS12_C) || \
-    defined(MBEDTLS_RSA_C)
-#define MBEDTLS_MD_LIGHT
-#endif
-
-/* MBEDTLS_ECP_C now consists of MBEDTLS_ECP_LIGHT plus functions for curve
- * arithmetic. As a consequence if MBEDTLS_ECP_C is required for some reason,
- * then MBEDTLS_ECP_LIGHT should be enabled as well. */
-#if defined(MBEDTLS_ECP_C)
-#define MBEDTLS_ECP_LIGHT
-#endif
-
-/* If MBEDTLS_PSA_CRYPTO_C is defined, make sure MBEDTLS_PSA_CRYPTO_CLIENT
- * is defined as well to include all PSA code.
- */
-#if defined(MBEDTLS_PSA_CRYPTO_C)
-#define MBEDTLS_PSA_CRYPTO_CLIENT
-#endif /* MBEDTLS_PSA_CRYPTO_C */
-
-/* The PK wrappers need pk_write functions to format RSA key objects
- * when they are dispatching to the PSA API. This happens under USE_PSA_CRYPTO,
- * and also even without USE_PSA_CRYPTO for mbedtls_pk_sign_ext(). */
-#if defined(MBEDTLS_PSA_CRYPTO_C) && defined(MBEDTLS_RSA_C)
-#define MBEDTLS_PK_C
-#define MBEDTLS_PK_WRITE_C
-#define MBEDTLS_PK_PARSE_C
-#endif
-
 /* The following blocks make it easier to disable all of TLS,
  * or of TLS 1.2 or 1.3 or DTLS, without having to manually disable all
  * key exchanges, options and extensions related to them. */
@@ -188,6 +140,54 @@
 #if defined(MBEDTLS_PSA_CRYPTO_CONFIG) /* PSA_WANT_xxx influences MBEDTLS_xxx */ || \
     defined(MBEDTLS_PSA_CRYPTO_C) /* MBEDTLS_xxx influences PSA_WANT_xxx */
 #include "mbedtls/config_psa.h"
+#endif
+
+/* Auto-enable MBEDTLS_MD_C if needed by a module that didn't require it
+ * in a previous release, to ensure backwards compatibility.
+ */
+#if defined(MBEDTLS_PKCS5_C)
+#define MBEDTLS_MD_C
+#endif
+
+/* Auto-enable MBEDTLS_MD_LIGHT based on MBEDTLS_MD_C.
+ * This allows checking for MD_LIGHT rather than MD_LIGHT || MD_C.
+ */
+#if defined(MBEDTLS_MD_C)
+#define MBEDTLS_MD_LIGHT
+#endif
+
+/* Auto-enable MBEDTLS_MD_LIGHT if needed by a module that didn't require it
+ * in a previous release, to ensure backwards compatibility.
+ */
+#if defined(MBEDTLS_ECJPAKE_C) || \
+    defined(MBEDTLS_PEM_PARSE_C) || \
+    defined(MBEDTLS_ENTROPY_C) || \
+    defined(MBEDTLS_PKCS12_C) || \
+    defined(MBEDTLS_RSA_C)
+#define MBEDTLS_MD_LIGHT
+#endif
+
+/* MBEDTLS_ECP_C now consists of MBEDTLS_ECP_LIGHT plus functions for curve
+ * arithmetic. As a consequence if MBEDTLS_ECP_C is required for some reason,
+ * then MBEDTLS_ECP_LIGHT should be enabled as well. */
+#if defined(MBEDTLS_ECP_C)
+#define MBEDTLS_ECP_LIGHT
+#endif
+
+/* If MBEDTLS_PSA_CRYPTO_C is defined, make sure MBEDTLS_PSA_CRYPTO_CLIENT
+ * is defined as well to include all PSA code.
+ */
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+#define MBEDTLS_PSA_CRYPTO_CLIENT
+#endif /* MBEDTLS_PSA_CRYPTO_C */
+
+/* The PK wrappers need pk_write functions to format RSA key objects
+ * when they are dispatching to the PSA API. This happens under USE_PSA_CRYPTO,
+ * and also even without USE_PSA_CRYPTO for mbedtls_pk_sign_ext(). */
+#if defined(MBEDTLS_PSA_CRYPTO_C) && defined(MBEDTLS_RSA_C)
+#define MBEDTLS_PK_C
+#define MBEDTLS_PK_WRITE_C
+#define MBEDTLS_PK_PARSE_C
 #endif
 
 #include "mbedtls/check_config.h"
