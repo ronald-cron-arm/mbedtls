@@ -28,8 +28,11 @@
 #include <mbedtls/psa_util.h>
 #include <mbedtls/error.h>
 #include <mbedtls/lms.h>
-#include <mbedtls/ssl.h>
 #include <mbedtls/rsa.h>
+
+#if defined(MBEDTLS_USE_PSA_CRYPTO) || defined(MBEDTLS_SSL_PROTO_TLS1_3)
+#include <mbedtls/ssl.h>
+#endif
 
 /* PSA_SUCCESS is kept at the top of each error table since
  * it's the most common status when everything functions properly. */
