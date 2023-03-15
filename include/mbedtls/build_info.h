@@ -80,29 +80,6 @@
 #include MBEDTLS_USER_CONFIG_FILE
 #endif
 
-/* Auto-enable MBEDTLS_MD_LIGHT based on MBEDTLS_MD_C.
- * This allows checking for MD_LIGHT rather than MD_LIGHT || MD_C.
- */
-#if defined(MBEDTLS_MD_C)
-#define MBEDTLS_MD_LIGHT
-#endif
-
-/* If MBEDTLS_PSA_CRYPTO_C is defined, make sure MBEDTLS_PSA_CRYPTO_CLIENT
- * is defined as well to include all PSA code.
- */
-#if defined(MBEDTLS_PSA_CRYPTO_C)
-#define MBEDTLS_PSA_CRYPTO_CLIENT
-#endif /* MBEDTLS_PSA_CRYPTO_C */
-
-/* The PK wrappers need pk_write functions to format RSA key objects
- * when they are dispatching to the PSA API. This happens under USE_PSA_CRYPTO,
- * and also even without USE_PSA_CRYPTO for mbedtls_pk_sign_ext(). */
-#if defined(MBEDTLS_PSA_CRYPTO_C) && defined(MBEDTLS_RSA_C)
-#define MBEDTLS_PK_C
-#define MBEDTLS_PK_WRITE_C
-#define MBEDTLS_PK_PARSE_C
-#endif
-
 #if !defined(MBEDTLS_SSL_PROTO_TLS1_2)
 #undef MBEDTLS_KEY_EXCHANGE_RSA_ENABLED
 #undef MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED
@@ -139,6 +116,29 @@
 #if defined(MBEDTLS_PSA_CRYPTO_CONFIG) /* PSA_WANT_xxx influences MBEDTLS_xxx */ || \
     defined(MBEDTLS_PSA_CRYPTO_C) /* MBEDTLS_xxx influences PSA_WANT_xxx */
 #include "mbedtls/config_psa.h"
+#endif
+
+/* Auto-enable MBEDTLS_MD_LIGHT based on MBEDTLS_MD_C.
+ * This allows checking for MD_LIGHT rather than MD_LIGHT || MD_C.
+ */
+#if defined(MBEDTLS_MD_C)
+#define MBEDTLS_MD_LIGHT
+#endif
+
+/* If MBEDTLS_PSA_CRYPTO_C is defined, make sure MBEDTLS_PSA_CRYPTO_CLIENT
+ * is defined as well to include all PSA code.
+ */
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+#define MBEDTLS_PSA_CRYPTO_CLIENT
+#endif /* MBEDTLS_PSA_CRYPTO_C */
+
+/* The PK wrappers need pk_write functions to format RSA key objects
+ * when they are dispatching to the PSA API. This happens under USE_PSA_CRYPTO,
+ * and also even without USE_PSA_CRYPTO for mbedtls_pk_sign_ext(). */
+#if defined(MBEDTLS_PSA_CRYPTO_C) && defined(MBEDTLS_RSA_C)
+#define MBEDTLS_PK_C
+#define MBEDTLS_PK_WRITE_C
+#define MBEDTLS_PK_PARSE_C
 #endif
 
 #include "mbedtls/check_config.h"
