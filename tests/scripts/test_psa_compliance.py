@@ -53,7 +53,7 @@ PSA_ARCH_TESTS_REF = 'fix-pr-5736'
 def main():
     mbedtls_dir = os.getcwd()
 
-    if not os.path.exists('library/libmbedcrypto.a'):
+    if not os.path.exists('mbedtls_out_of_source_build/core/libpsacrypto.a'):
         subprocess.check_call(['make', '-C', 'library', 'libmbedcrypto.a'])
 
     psa_arch_tests_dir = 'psa-arch-tests'
@@ -81,8 +81,8 @@ def main():
                      '-DTARGET=tgt_dev_apis_stdc',
                      '-DTOOLCHAIN=HOST_GCC',
                      '-DSUITE=CRYPTO',
-                     '-DPSA_CRYPTO_LIB_FILENAME={}/library/libmbedcrypto.a'.format(mbedtls_dir),
-                     '-DPSA_INCLUDE_PATHS={}/include'.format(mbedtls_dir)
+                     '-DPSA_CRYPTO_LIB_FILENAME={}/mbedtls_out_of_source_build/core/libpsacrypto.a'.format(mbedtls_dir),
+                     '-DPSA_INCLUDE_PATHS={}/include;{}/drivers/builtin/include'.format(mbedtls_dir, mbedtls_dir)
         ])
         subprocess.check_call(['cmake', '--build', '.'])
 
