@@ -124,14 +124,14 @@ set -e -o pipefail -u
 shopt -s extglob
 
 pre_check_environment () {
-    if [ -d library -a -d include -a -d tests ]; then :; else
+    if [ -d core -a -d include -a -d tests ]; then :; else
         echo "Must be run from mbed TLS root" >&2
         exit 1
     fi
 }
 
 pre_initialize_variables () {
-    CONFIG_H='include/mbedtls/mbedtls_config.h'
+    CONFIG_H='drivers/builtin/include/mbedtls/mbedtls_config.h'
     CRYPTO_CONFIG_H='include/psa/crypto_config.h'
     CONFIG_TEST_DRIVER_H='tests/include/test/drivers/config_test_driver.h'
 
@@ -142,7 +142,7 @@ pre_initialize_variables () {
     # Files clobbered by config.py
     files_to_back_up="$CONFIG_H $CRYPTO_CONFIG_H $CONFIG_TEST_DRIVER_H"
     # Files clobbered by in-tree cmake
-    files_to_back_up="$files_to_back_up Makefile library/Makefile programs/Makefile tests/Makefile programs/fuzz/Makefile"
+    #files_to_back_up="$files_to_back_up Makefile library/Makefile programs/Makefile tests/Makefile programs/fuzz/Makefile"
 
     append_outcome=0
     MEMORY=0
@@ -290,7 +290,7 @@ EOF
 # Does not remove generated source files.
 cleanup()
 {
-    command make clean
+    #command make clean
 
     # Remove CMake artefacts
     find . -name .git -prune -o \
@@ -530,7 +530,7 @@ pre_check_git () {
             exit 1
         fi
 
-        if ! git diff --quiet include/mbedtls/mbedtls_config.h; then
+        if ! git diff --quiet drivers/builtin/include/mbedtls/mbedtls_config.h; then
             err_msg "Warning - the configuration file 'include/mbedtls/mbedtls_config.h' has been edited. "
             echo "You can either delete or preserve your work, or force the test by rerunning the"
             echo "script as: $0 --force"
@@ -787,7 +787,7 @@ pre_check_tools () {
 pre_generate_files() {
     # since make doesn't have proper dependencies, remove any possibly outdate
     # file that might be around before generating fresh ones
-    make neat
+    # make neat
     if [ $QUIET -eq 1 ]; then
         make generated_files >/dev/null
     else
@@ -4391,7 +4391,7 @@ pre_prepare_outcome_file
 pre_print_configuration
 pre_check_tools
 cleanup
-pre_generate_files
+#pre_generate_files
 
 # Run the requested tests.
 for ((error_test_i=1; error_test_i <= error_test; error_test_i++)); do
