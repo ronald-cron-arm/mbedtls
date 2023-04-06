@@ -601,7 +601,15 @@ extern "C" {
 #endif /* !MBEDTLS_PSA_ACCEL_ECC_SECP_K1_256 */
 #endif /* PSA_WANT_ECC_SECP_K1_256 */
 
-
+/* BELOW THIS LINE - PLACEHOLDER FOR PSA-CRYPTO ADDITIONAL CONFIG OPTIONS TRANSLATION */
+/* 
+ * The PSA-Crypto repository defines configuration options beyond the
+ * PSA_WANT_xyz ones. They also need to be translated into the appropriate
+ * Mbed TLS configuration options for the builtin driver code in PSA-Crypto
+ * (based on Mbed TLS cryptographic code) to be properly configured. The
+ * additional pre-processor logic is added here by the script building the
+ * PSA-Crypto library from the Mbed TLS one.
+ */
 
 /****************************************************************/
 /* Infer PSA requirements from Mbed TLS capabilities */
