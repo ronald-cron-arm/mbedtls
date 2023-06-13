@@ -2123,6 +2123,23 @@ static inline struct psa_pake_operation_s psa_pake_operation_init(void)
     return v;
 }
 
+typedef enum {
+    PSA_KEY_DATA_FORMAT_NONE,
+    PSA_KEY_DATA_FORMAT_SUBJECT_PUBLIC_KEY_INFO,
+    PSA_KEY_DATA_FORMAT_RSA_PUBLIC_KEY,
+    PSA_KEY_DATA_FORMAT_PRIVATE_KEY_INFO,
+    PSA_KEY_DATA_FORMAT_RSA_PRIVATE_KEY,
+    PSA_KEY_DATA_FORMAT_EC_PRIVATE_KEY,
+    PSA_KEY_DATA_FORMAT_COUNT_PLUS_ONE,
+} psa_key_data_format_t;
+#define PSA_KEY_DATA_FORMAT_COUNT (PSA_KEY_DATA_FORMAT_COUNT_PLUS_ONE - 1)
+
+psa_status_t psa_import_key_ext(const psa_key_attributes_t *attributes,
+                                psa_key_data_format_t format,
+                                const uint8_t *data,
+                                size_t data_length,
+                                mbedtls_svc_key_id_t *key);
+
 #ifdef __cplusplus
 }
 #endif

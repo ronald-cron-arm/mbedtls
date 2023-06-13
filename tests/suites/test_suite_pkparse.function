@@ -17,9 +17,12 @@ void pk_parse_keyfile_rsa(char *key_file, char *password, int result)
     mbedtls_pk_context ctx;
     int res;
     char *pwd = password;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_status_t status;
+    mbedtls_svc_key_id_t key = MBEDTLS_SVC_KEY_ID_INIT;
 
     mbedtls_pk_init(&ctx);
-    MD_PSA_INIT();
+    USE_PSA_INIT();
 
     if (strcmp(pwd, "NULL") == 0) {
         pwd = NULL;
@@ -37,9 +40,21 @@ void pk_parse_keyfile_rsa(char *key_file, char *password, int result)
         TEST_ASSERT(mbedtls_rsa_check_privkey(rsa) == 0);
     }
 
+    {
+        unsigned char *buf;
+        size_t buf_len;
+
+        int ret = mbedtls_pk_load_file(key_file, &buf, &buf_len);
+        if (ret == 0) {
+            status = psa_import_key_ext(&attributes, 0, buf, buf_len, &key);
+            mbedtls_fprintf( stderr, "\n!!! status=%d\n", status);
+        }
+    }
+
 exit:
     mbedtls_pk_free(&ctx);
-    MD_PSA_DONE();
+    psa_destroy_key(key);
+    USE_PSA_DONE();
 }
 
 /* END_CASE */
@@ -49,9 +64,12 @@ void pk_parse_public_keyfile_rsa(char *key_file, int result)
 {
     mbedtls_pk_context ctx;
     int res;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_status_t status;
+    mbedtls_svc_key_id_t key = MBEDTLS_SVC_KEY_ID_INIT;
 
     mbedtls_pk_init(&ctx);
-    MD_PSA_INIT();
+    USE_PSA_INIT();
 
     res = mbedtls_pk_parse_public_keyfile(&ctx, key_file);
 
@@ -64,9 +82,21 @@ void pk_parse_public_keyfile_rsa(char *key_file, int result)
         TEST_ASSERT(mbedtls_rsa_check_pubkey(rsa) == 0);
     }
 
+    {
+        unsigned char *buf;
+        size_t buf_len;
+
+        int ret = mbedtls_pk_load_file(key_file, &buf, &buf_len);
+        if (ret == 0) {
+            status = psa_import_key_ext(&attributes, 0, buf, buf_len, &key);
+            mbedtls_fprintf( stderr, "\n!!! status=%d\n", status);
+        }
+    }
+
 exit:
     mbedtls_pk_free(&ctx);
-    MD_PSA_DONE();
+    psa_destroy_key(key);
+    USE_PSA_DONE();
 }
 /* END_CASE */
 
@@ -133,6 +163,9 @@ exit:
 void pk_parse_key(data_t *buf, int result)
 {
     mbedtls_pk_context pk;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_status_t status;
+    mbedtls_svc_key_id_t key = MBEDTLS_SVC_KEY_ID_INIT;
 
     mbedtls_pk_init(&pk);
     USE_PSA_INIT();
@@ -140,8 +173,12 @@ void pk_parse_key(data_t *buf, int result)
     TEST_ASSERT(mbedtls_pk_parse_key(&pk, buf->x, buf->len, NULL, 0,
                                      mbedtls_test_rnd_std_rand, NULL) == result);
 
+    status = psa_import_key_ext(&attributes, 4, buf->x, buf->len, &key);
+    mbedtls_fprintf( stderr, "\n!!! status=%d\n", status);
+
 exit:
     mbedtls_pk_free(&pk);
+    psa_destroy_key(key);
     USE_PSA_DONE();
 }
 /* END_CASE */

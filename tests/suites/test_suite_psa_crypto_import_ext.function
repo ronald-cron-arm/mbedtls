@@ -1,0 +1,30 @@
+/* BEGIN_HEADER */
+
+#include <stdint.h>
+
+/* END_HEADER */
+
+/* BEGIN_DEPENDENCIES
+ * depends_on:MBEDTLS_PSA_CRYPTO_C
+ * END_DEPENDENCIES
+ */
+
+/* BEGIN_CASE */
+void psa_import_key_ext(data_t *buf, int format_arg, int expected_status_arg)
+{
+    psa_status_t status;
+    psa_status_t expected_status = (psa_status_t)expected_status_arg;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_key_data_format_t format = format_arg;
+    mbedtls_svc_key_id_t key = MBEDTLS_SVC_KEY_ID_INIT;
+
+    PSA_ASSERT(psa_crypto_init());
+
+    status = psa_import_key_ext(&attributes, format, buf->x, buf->len, &key);
+    TEST_EQUAL(status, expected_status);
+
+exit:
+    psa_destroy_key(key);
+    PSA_DONE();
+}
+/* END_CASE */
