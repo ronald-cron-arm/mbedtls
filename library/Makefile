@@ -13,7 +13,7 @@ LOCAL_CFLAGS = $(WARNING_CFLAGS) -I. -I../include -D_FILE_OFFSET_BITS=64
 LOCAL_LDFLAGS =
 
 ifdef DEBUG
-LOCAL_CFLAGS += -g3
+LOCAL_CFLAGS += -g3 -O0
 endif
 
 # MicroBlaze specific options:
