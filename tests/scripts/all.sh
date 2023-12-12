@@ -6063,7 +6063,7 @@ support_test_psa_compliance () {
 
 component_check_code_style () {
     msg "Check C code style"
-    ./scripts/code_style.py
+    ./tf/scripts/code_style.py
 }
 
 support_check_code_style() {
