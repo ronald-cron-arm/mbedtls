@@ -13,7 +13,7 @@ default: all
 # Include public header files from ../include, test-specific header files
 # from ./include, and private header files (used by some invasive tests)
 # from ../library.
-LOCAL_CFLAGS = $(WARNING_CFLAGS) -I./include -I../include -I../library -D_FILE_OFFSET_BITS=64
+LOCAL_CFLAGS = $(WARNING_CFLAGS) -I./include -I../include -I../tf/tests/include -I../library -D_FILE_OFFSET_BITS=64
 LOCAL_LDFLAGS = -L../library			\
 		-lmbedtls$(SHARED_SUFFIX)	\
 		-lmbedx509$(SHARED_SUFFIX)	\
@@ -174,11 +174,11 @@ all: $(BINARIES)
 $(MBEDLIBS):
 	$(MAKE) -C ../library
 
-MBEDTLS_TEST_OBJS=$(patsubst %.c,%.o,$(wildcard src/*.c src/drivers/*.c src/test_helpers/*.c))
+MBEDTLS_TEST_OBJS=$(patsubst %.c,%.o,$(wildcard src/*.c src/drivers/*.c src/test_helpers/*.c ../tf/tests/src/*.c))
 
 mbedtls_test: $(MBEDTLS_TEST_OBJS)
 
-TEST_OBJS_DEPS = $(wildcard include/test/*.h include/test/*/*.h)
+TEST_OBJS_DEPS = $(wildcard include/test/*.h include/test/*/*.h ../tf/tests/include/test/*.h)
 ifdef RECORD_PSA_STATUS_COVERAGE_LOG
 # Explicitly depend on this header because on a clean copy of the source tree,
 # it doesn't exist yet and must be generated as part of the build, and
@@ -196,6 +196,10 @@ src/drivers/%.o : src/drivers/%.c
 	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) -o $@ -c $<
 
 src/test_helpers/%.o : src/test_helpers/%.c
+	echo "  CC    $<"
+	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) -o $@ -c $<
+
+../tf/tests/src/%.o : ../tf/tests/src/%.c
 	echo "  CC    $<"
 	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) -o $@ -c $<
 
@@ -236,6 +240,7 @@ clean:
 ifndef WINDOWS
 	rm -rf $(BINARIES) *.c *.datax
 	rm -f src/*.o src/drivers/*.o src/test_helpers/*.o src/libmbed*
+	rm -f ../tf/tests/src/*.o
 	rm -f include/test/instrument_record_status.h
 	rm -f include/alt-extra/*/*_alt.h
 	rm -rf libtestdriver1
@@ -248,6 +253,7 @@ else
 	if exist src/drivers/*.o del /Q /F src/drivers/*.o
 	if exist src/test_helpers/*.o del /Q /F src/test_helpers/*.o
 	if exist src/libmbed* del /Q /F src/libmed*
+	if exist ../tf/tests/src/*.o del /Q /F ../tf/tests/src/*.o
 	if exist include/test/instrument_record_status.h del /Q /F include/test/instrument_record_status.h
 endif
 

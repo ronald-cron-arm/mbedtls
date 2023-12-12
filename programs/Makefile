@@ -7,10 +7,11 @@ WARNING_CXXFLAGS ?= -Wall -Wextra -Wformat=2 -Wno-format-nonliteral
 LDFLAGS ?=
 
 MBEDTLS_TEST_PATH:=../tests/src
-MBEDTLS_TEST_OBJS:=$(patsubst %.c,%.o,$(wildcard ${MBEDTLS_TEST_PATH}/*.c ${MBEDTLS_TEST_PATH}/drivers/*.c))
+MBEDTLS_TF_TEST_PATH:=../tf/tests/src
+MBEDTLS_TEST_OBJS:=$(patsubst %.c,%.o,$(wildcard ${MBEDTLS_TEST_PATH}/*.c ${MBEDTLS_TEST_PATH}/drivers/*.c) ${MBEDTLS_TF_TEST_PATH}/*.c)
 
-LOCAL_CFLAGS = $(WARNING_CFLAGS) -I../tests/include -I../include -D_FILE_OFFSET_BITS=64
-LOCAL_CXXFLAGS = $(WARNING_CXXFLAGS) -I../include -I../tests/include -D_FILE_OFFSET_BITS=64
+LOCAL_CFLAGS = $(WARNING_CFLAGS) -I../tests/include -I../tf/tests/include -I../include -D_FILE_OFFSET_BITS=64
+LOCAL_CXXFLAGS = $(WARNING_CXXFLAGS) -I../include -I../tests/include -I../tf/tests/include -D_FILE_OFFSET_BITS=64
 LOCAL_LDFLAGS = ${MBEDTLS_TEST_OBJS} 		\
 		-L../library 			\
 		-lmbedtls$(SHARED_SUFFIX)	\
