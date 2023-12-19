@@ -87,12 +87,12 @@ if(GEN_FILES)
             --directory ${CMAKE_CURRENT_BINARY_DIR}/suites
         DEPENDS
             ${CMAKE_CURRENT_SOURCE_DIR}/../tests/scripts/generate_bignum_tests.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/bignum_common.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/bignum_core.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/bignum_mod_raw.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/bignum_mod.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/test_case.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/test_data_generation.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/bignum_common.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/bignum_core.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/bignum_mod_raw.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/bignum_mod.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/test_case.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/test_data_generation.py
     )
     add_custom_command(
         OUTPUT
@@ -105,10 +105,10 @@ if(GEN_FILES)
             --directory ${CMAKE_CURRENT_BINARY_DIR}/suites
         DEPENDS
             ${CMAKE_CURRENT_SOURCE_DIR}/../tests/scripts/generate_ecp_tests.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/bignum_common.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/ecp.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/test_case.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/test_data_generation.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/bignum_common.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/ecp.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/test_case.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/test_data_generation.py
     )
     add_custom_command(
         OUTPUT
@@ -121,13 +121,13 @@ if(GEN_FILES)
             --directory ${CMAKE_CURRENT_BINARY_DIR}/suites
         DEPENDS
             ${CMAKE_CURRENT_SOURCE_DIR}/../tests/scripts/generate_psa_tests.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/crypto_data_tests.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/crypto_knowledge.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/crypto_data_tests.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/crypto_knowledge.py
             ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/macro_collector.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/psa_information.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/psa_storage.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/test_case.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mbedtls_dev/test_data_generation.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/psa_information.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/psa_storage.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/test_case.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tf/scripts/tf_dev/test_data_generation.py
             ${CMAKE_CURRENT_SOURCE_DIR}/../include/psa/crypto_config.h
             ${CMAKE_CURRENT_SOURCE_DIR}/../include/psa/crypto_values.h
             ${CMAKE_CURRENT_SOURCE_DIR}/../include/psa/crypto_extra.h
