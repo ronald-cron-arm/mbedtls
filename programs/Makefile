@@ -1,3 +1,6 @@
+ifneq ("$(wildcard ./tf/scripts/project_name.txt))","")
+TF_PRESENT = 1
+endif
 
 # To compile on SunOS: add "-lsocket -lnsl" to LDFLAGS
 
@@ -69,12 +72,14 @@ BUILD_DLOPEN =
 endif
 
 # Tests objects and flags when building with them
+ifdef TF_PRESENT
 MBEDTLS_TEST_PATH:=../tests/src
 MBEDTLS_TF_TEST_PATH:=../tf/tests/src
 MBEDTLS_TEST_OBJS:=$(patsubst %.c,%.o,$(wildcard ${MBEDTLS_TEST_PATH}/*.c ${MBEDTLS_TEST_PATH}/drivers/*.c) ${MBEDTLS_TF_TEST_PATH}/*.c)
 LOCAL_CFLAGS_EXT = $(LOCAL_CFLAGS) -I../tests/include -I../tf/tests/include
 LOCAL_CXXFLAGS_EXT = $(LOCAL_CXXFLAGS) -I../tests/include -I../tf/tests/include
 LOCAL_LDFLAGS_EXT = $(MBEDTLS_TEST_OBJS) $(LOCAL_LDFLAGS)
+endif
 
 ## The following assignment is the list of base names of applications that
 ## will be built on Windows. Extra Linux/Unix/POSIX-only applications can
@@ -117,7 +122,10 @@ APPS = \
 	random/gen_random_ctr_drbg \
 	util/pem2der \
 	util/strerror \
-	ssl/dtls_client \
+# End of APPS
+
+ifdef TF_PRESENT
+APPS += ssl/dtls_client \
 	ssl/dtls_server \
 	ssl/mini_client \
 	ssl/ssl_client1 \
@@ -140,10 +148,10 @@ APPS = \
 	x509/crl_app \
 	x509/load_roots \
 	x509/req_app \
-# End of APPS
 
 ifeq ($(THREADING),pthread)
 APPS +=	ssl/ssl_pthread_server
+endif
 endif
 
 ifdef BUILD_DLOPEN
@@ -161,21 +169,24 @@ EXES = $(patsubst %,%$(EXEXT),$(APPS))
 .PHONY: all clean list fuzz
 
 all: $(EXES)
+
+$(MBEDLIBS):
+	$(MAKE) -C ../library
+
+ifdef TF_PRESENT
+${MBEDTLS_TEST_OBJS}:
+	$(MAKE) -C ../tests mbedtls_test
+
+fuzz: ${MBEDTLS_TEST_OBJS}
+	$(MAKE) -C fuzz THIRDPARTY_INCLUDES=$(THIRDPARTY_INCLUDES)
+
 ifndef WINDOWS
 # APPS doesn't include the fuzzing programs, which aren't "normal"
 # sample or test programs, and don't build with MSVC which is
 # warning about fopen
 all: fuzz
 endif
-
-fuzz: ${MBEDTLS_TEST_OBJS}
-	$(MAKE) -C fuzz THIRDPARTY_INCLUDES=$(THIRDPARTY_INCLUDES)
-
-$(MBEDLIBS):
-	$(MAKE) -C ../library
-
-${MBEDTLS_TEST_OBJS}:
-	$(MAKE) -C ../tests mbedtls_test
+endif
 
 .PHONY: generated_files
 GENERATED_FILES = psa/psa_constant_names_generated.c test/query_config.c
@@ -350,7 +361,7 @@ util/strerror$(EXEXT): util/strerror.c $(MBEDLIBS)
 	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) util/strerror.c    $(LOCAL_LDFLAGS) $(LDFLAGS) -o $@
 
 
-
+ifdef TF_PRESENT
 ssl/dtls_client$(EXEXT): ssl/dtls_client.c $(MBEDLIBS) $(MBEDTLS_TEST_OBJS)
 	echo "  CC    ssl/dtls_client.c"
 	$(CC) $(LOCAL_CFLAGS_EXT) $(CFLAGS) ssl/dtls_client.c  $(LOCAL_LDFLAGS_EXT) $(LDFLAGS) -o $@
@@ -478,6 +489,7 @@ x509/load_roots$(EXEXT): x509/load_roots.c $(MBEDLIBS) $(MBEDTLS_TEST_OBJS)
 x509/req_app$(EXEXT): x509/req_app.c $(MBEDLIBS) $(MBEDTLS_TEST_OBJS)
 	echo "  CC    x509/req_app.c"
 	$(CC) $(LOCAL_CFLAGS_EXT) $(CFLAGS) x509/req_app.c    $(LOCAL_LDFLAGS_EXT) $(LDFLAGS) -o $@
+endif
 
 clean:
 ifndef WINDOWS
