@@ -292,7 +292,7 @@ add_subdirectory(library)
 # target. This library of objects is used by tests and programs CMake files
 # to define the test executables.
 #
-if(ENABLE_TESTING OR ENABLE_PROGRAMS)
+if(ENABLE_TESTING)
     file(GLOB MBEDTLS_TEST_FILES
          ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/*.c
          ${CMAKE_CURRENT_SOURCE_DIR}/tf/tests/src/*.c
