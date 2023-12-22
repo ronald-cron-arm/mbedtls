@@ -2,7 +2,7 @@ DESTDIR=/usr/local
 PREFIX=mbedtls_
 PERL ?= perl
 
-ifneq ("$(wildcard ./tf/scripts/project_name.txt))","")
+ifneq ("$(wildcard ./tf/scripts/project_name.txt)","")
 TF_PRESENT = 1
 endif
 
@@ -38,7 +38,7 @@ programs: lib
 tests:
 	echo "Test framework not present, tests cannot be built."
 
-tests/%:
+tests/%: ;
 
 check: tests
 

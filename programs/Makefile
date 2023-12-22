@@ -1,4 +1,4 @@
-ifneq ("$(wildcard ./tf/scripts/project_name.txt))","")
+ifneq ("$(wildcard ./tf/scripts/project_name.txt)","")
 TF_PRESENT = 1
 endif
 
