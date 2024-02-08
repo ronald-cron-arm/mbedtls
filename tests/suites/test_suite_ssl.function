@@ -4120,6 +4120,7 @@ void tls13_max_early_data_size(int scenario)
     char pattern[128];
     unsigned char buf_write[64];
     size_t early_data_len = sizeof(buf_write);
+    uint32_t expended_early_data_len = 0;
     uint32_t written_early_data_size = 0;
     int write_early_data_flag = 1;
     uint32_t max_early_data_size;
@@ -4154,6 +4155,14 @@ void tls13_max_early_data_size(int scenario)
 
     switch (scenario) {
         case TEST_EARLY_DATA_ACCEPTED:
+            break;
+
+        case TEST_EARLY_DATA_SERVER_REJECTS:
+            server_options.early_data = MBEDTLS_SSL_EARLY_DATA_DISABLED;
+            ret = mbedtls_snprintf(pattern, sizeof(pattern),
+                                   "EarlyData: deprotect and discard app data records.");
+            TEST_ASSERT(ret < (int) sizeof(pattern));
+            mbedtls_debug_set_threshold(3);
             break;
 
         default:
@@ -4200,7 +4209,7 @@ void tls13_max_early_data_size(int scenario)
         uint32_t remaining = max_early_data_size -
                              server_ep.ssl.received_early_data_size;
 
-        /* Reach maximum early data exactly */
+        /* In case of accepted early data, reach max_early_data_size exactly. */
         if (early_data_len >= remaining) {
             early_data_len = remaining;
             write_early_data_flag = 0;
@@ -4226,13 +4235,30 @@ void tls13_max_early_data_size(int scenario)
                 TEST_EQUAL(server_ep.ssl.received_early_data_size,
                            written_early_data_size);
                 break;
+
+            case TEST_EARLY_DATA_SERVER_REJECTS:
+                TEST_EQUAL(ret, MBEDTLS_ERR_SSL_WANT_READ);
+                TEST_EQUAL(server_pattern.counter, 1);
+                server_pattern.counter = 0;
+                if (expended_early_data_len == 0) {
+                    expended_early_data_len = server_ep.ssl.received_early_data_size;
+                }
+                remaining = max_early_data_size - server_ep.ssl.received_early_data_size;
+                if (expended_early_data_len > remaining) {
+                    write_early_data_flag = 0;
+                }
+                break;
         }
         TEST_ASSERT(server_ep.ssl.received_early_data_size <= max_early_data_size);
     }
 
     mbedtls_debug_set_threshold(3);
-    ret = write_early_data(&(client_ep.ssl), buf_write, 1);
-    TEST_EQUAL(ret, 1);
+
+    early_data_len = (scenario == TEST_EARLY_DATA_ACCEPTED) ?
+                     1 : sizeof(buf_write);
+
+    ret = write_early_data(&(client_ep.ssl), buf_write, early_data_len);
+    TEST_EQUAL(ret, early_data_len);
 
     ret = mbedtls_snprintf(pattern, sizeof(pattern),
                            "EarlyData: Too many early data received");
