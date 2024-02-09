@@ -3300,3 +3300,6 @@ tls13_max_early_data_size:TEST_EARLY_DATA_ACCEPTED
 
 TLS 1.3 maximum early data size, server rejects early data
 tls13_max_early_data_size:TEST_EARLY_DATA_SERVER_REJECTS
+
+TLS 1.3 maximum early data size, hello retry request
+tls13_max_early_data_size:TEST_EARLY_DATA_HRR
