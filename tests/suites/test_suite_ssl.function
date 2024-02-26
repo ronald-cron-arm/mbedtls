@@ -4527,8 +4527,8 @@ void tls13_cli_max_early_data_size(int max_early_data_size_arg)
     /*
      * (max_early_data_size + 1024) for the size of the socket buffers for the
      * server one to be able to contain the maximum number of early data bytes
-     * plus the first flight client messages. Needed because we cannot initiate
-     * the handshake on server side before doing all the calls to
+     * plus the first flight of client messages. Needed because we cannot
+     * initiate the handshake on server side before doing all the calls to
      * mbedtls_ssl_write_early_data() we want to test. See below for more
      * information.
      */
