@@ -319,6 +319,10 @@ class CodeSizeCalculator:
                  git_worktree_path, self.git_rev], cwd=self.repo_path,
                 stderr=subprocess.STDOUT
             )
+            subprocess.check_output(
+                [self.git_command, "submodule", "update", "--init"],
+                cwd=git_worktree_path, stderr=subprocess.STDOUT
+            )
 
         return git_worktree_path
 
