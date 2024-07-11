@@ -351,7 +351,7 @@ class AbiChecker:
         # Existing test data files. This may be missing some automatically
         # generated files if they haven't been generated yet.
         storage_data_files = set(glob.glob(
-            'tests/suites/test_suite_*storage_format*.data'
+            'tf-psa-crypto/tests/suites/test_suite_*storage_format*.data'
         ))
         # Discover and (re)generate automatically generated data files.
         to_be_generated = set()
