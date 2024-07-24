@@ -1,8 +1,3 @@
-option(USE_STATIC_MBEDTLS_LIBRARY "Build Mbed TLS static library." ON)
-option(USE_SHARED_MBEDTLS_LIBRARY "Build Mbed TLS shared library." OFF)
-option(LINK_WITH_PTHREAD "Explicitly link Mbed TLS library to pthread." OFF)
-option(LINK_WITH_TRUSTED_STORAGE "Explicitly link Mbed TLS library to trusted_storage." OFF)
-
 # Set the project root directory if it's not already defined, as may happen if
 # the library folder is included directly by a parent project, without
 # including the top level CMakeLists.txt.
@@ -109,16 +104,13 @@ if (NOT USE_STATIC_MBEDTLS_LIBRARY AND NOT USE_SHARED_MBEDTLS_LIBRARY)
     message(FATAL_ERROR "Need to choose static or shared mbedtls build!")
 endif(NOT USE_STATIC_MBEDTLS_LIBRARY AND NOT USE_SHARED_MBEDTLS_LIBRARY)
 
-set(mbedcrypto_target "${MBEDTLS_TARGET_PREFIX}mbedcrypto")
 set(mbedtls_target    "${MBEDTLS_TARGET_PREFIX}mbedtls")
 set(mbedx509_target   "${MBEDTLS_TARGET_PREFIX}mbedx509")
 
-set(mbedcrypto_target ${mbedcrypto_target} PARENT_SCOPE)
 set(mbedtls_target    ${mbedtls_target}    PARENT_SCOPE)
 set(mbedx509_target   ${mbedx509_target}   PARENT_SCOPE)
 
 if (USE_STATIC_MBEDTLS_LIBRARY)
-    set(mbedcrypto_static_target ${mbedcrypto_target})
     set(mbedtls_static_target    ${mbedtls_target})
     set(mbedx509_static_target   ${mbedx509_target})
 endif()
@@ -126,7 +118,6 @@ endif()
 set(target_libraries ${mbedx509_target} ${mbedtls_target})
 
 if(USE_STATIC_MBEDTLS_LIBRARY AND USE_SHARED_MBEDTLS_LIBRARY)
-    string(APPEND mbedcrypto_static_target "_static")
     string(APPEND mbedtls_static_target    "_static")
     string(APPEND mbedx509_static_target   "_static")
 
