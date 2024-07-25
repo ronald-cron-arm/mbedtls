@@ -417,7 +417,6 @@ if(ENABLE_TESTING)
     enable_testing()
 
     add_subdirectory(tests)
-    add_subdirectory(tf-psa-crypto/tests)
 
     # additional convenience targets for Unix only
     if(UNIX)
