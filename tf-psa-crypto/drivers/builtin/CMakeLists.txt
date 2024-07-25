@@ -49,23 +49,23 @@ else()
     link_to_source(src/version_features.c)
 endif()
 
-set(builtin_target ${MBEDTLS_TARGET_PREFIX}builtin)
-if (USE_STATIC_MBEDTLS_LIBRARY)
+set(builtin_target ${TF_PSA_CRYPTO_TARGET_PREFIX}builtin)
+if (USE_STATIC_TF_PSA_CRYPTO_LIBRARY)
     set(builtin_static_target ${builtin_target})
 endif()
 set(target_libraries ${builtin_target})
-if(USE_STATIC_MBEDTLS_LIBRARY AND USE_SHARED_MBEDTLS_LIBRARY)
+if(USE_STATIC_TF_PSA_CRYPTO_LIBRARY AND USE_SHARED_TF_PSA_CRYPTO_LIBRARY)
     string(APPEND builtin_static_target "_static")
     list(APPEND target_libraries ${builtin_static_target})
 endif()
 
-if(USE_STATIC_MBEDTLS_LIBRARY)
+if(USE_STATIC_TF_PSA_CRYPTO_LIBRARY)
     add_library(${builtin_static_target} STATIC ${src_builtin})
-endif(USE_STATIC_MBEDTLS_LIBRARY)
+endif(USE_STATIC_TF_PSA_CRYPTO_LIBRARY)
 
-if(USE_SHARED_MBEDTLS_LIBRARY)
+if(USE_SHARED_TF_PSA_CRYPTO_LIBRARY)
     add_library(${builtin_target} SHARED ${src_builtin})
-endif(USE_SHARED_MBEDTLS_LIBRARY)
+endif(USE_SHARED_TF_PSA_CRYPTO_LIBRARY)
 
 foreach (target IN LISTS target_libraries)
     target_include_directories(${target}
@@ -88,7 +88,7 @@ foreach (target IN LISTS target_libraries)
             PUBLIC MBEDTLS_USER_CONFIG_FILE="${MBEDTLS_USER_CONFIG_FILE}")
     endif()
 
-    if(INSTALL_MBEDTLS_HEADERS)
+    if(INSTALL_TF_PSA_CRYPTO_HEADERS)
 
       install(DIRECTORY include/mbedtls
         DESTINATION include
@@ -97,7 +97,7 @@ foreach (target IN LISTS target_libraries)
         GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         FILES_MATCHING PATTERN "*.h")
 
-    endif(INSTALL_MBEDTLS_HEADERS)
+    endif(INSTALL_TF_PSA_CRYPTO_HEADERS)
 
     install(TARGETS ${target}
     EXPORT MbedTLSTargets
