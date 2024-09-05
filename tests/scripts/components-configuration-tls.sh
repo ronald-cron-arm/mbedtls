@@ -26,7 +26,6 @@ component_test_tls1_2_default_stream_cipher_only () {
     msg "build: default with only stream cipher use psa"
 
     scripts/config.py set MBEDTLS_USE_PSA_CRYPTO
-    scripts/config.py set MBEDTLS_PSA_CRYPTO_CONFIG
     # Disable AEAD (controlled by the presence of one of GCM_C, CCM_C, CHACHAPOLY_C)
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CCM
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CCM_STAR_NO_TAG
@@ -64,7 +63,6 @@ component_test_tls1_2_default_cbc_legacy_cipher_only () {
     msg "build: default with only CBC-legacy cipher use psa"
 
     scripts/config.py set MBEDTLS_USE_PSA_CRYPTO
-    scripts/config.py set MBEDTLS_PSA_CRYPTO_CONFIG
     # Disable AEAD (controlled by the presence of one of GCM_C, CCM_C, CHACHAPOLY_C)
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CCM
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CCM_STAR_NO_TAG
@@ -99,7 +97,6 @@ component_test_tls1_2_default_cbc_legacy_cbc_etm_cipher_only () {
     msg "build: default with only CBC-legacy and CBC-EtM ciphers use psa"
 
     scripts/config.py set MBEDTLS_USE_PSA_CRYPTO
-    scripts/config.py set MBEDTLS_PSA_CRYPTO_CONFIG
     # Disable AEAD (controlled by the presence of one of GCM_C, CCM_C, CHACHAPOLY_C)
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CCM
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CCM_STAR_NO_TAG
@@ -352,7 +349,6 @@ component_test_ssl_alloc_buffer_and_mfl () {
 
 component_test_when_no_ciphersuites_have_mac () {
     msg "build: when no ciphersuites have MAC"
-    scripts/config.py set MBEDTLS_PSA_CRYPTO_CONFIG
     scripts/config.py -f "$CRYPTO_CONFIG_H" unset PSA_WANT_ALG_CBC_NO_PADDING
     scripts/config.py -f "$CRYPTO_CONFIG_H" unset PSA_WANT_ALG_CBC_PKCS7
     scripts/config.py -f "$CRYPTO_CONFIG_H" unset PSA_WANT_ALG_CMAC
@@ -410,7 +406,6 @@ component_test_tls13_only_psk () {
     scripts/config.py unset MBEDTLS_PKCS7_C
     scripts/config.py set   MBEDTLS_SSL_EARLY_DATA
 
-    scripts/config.py set MBEDTLS_PSA_CRYPTO_CONFIG
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_ECDH
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_ECDSA
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_DETERMINISTIC_ECDSA
@@ -462,7 +457,6 @@ component_test_tls13_only_ephemeral_ffdh () {
     scripts/config.py unset MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK_EPHEMERAL_ENABLED
     scripts/config.py unset MBEDTLS_SSL_EARLY_DATA
 
-    scripts/config.py set MBEDTLS_PSA_CRYPTO_CONFIG
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_ECDH
     # Note: The three unsets below are to be removed for Mbed TLS 4.0
     scripts/config.py unset MBEDTLS_ECDH_C
@@ -486,7 +480,6 @@ component_test_tls13_only_psk_ephemeral () {
     scripts/config.py unset MBEDTLS_PKCS7_C
     scripts/config.py set   MBEDTLS_SSL_EARLY_DATA
 
-    scripts/config.py set MBEDTLS_PSA_CRYPTO_CONFIG
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_ECDSA
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_DETERMINISTIC_ECDSA
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_RSA_OAEP
@@ -514,7 +507,6 @@ component_test_tls13_only_psk_ephemeral_ffdh () {
     scripts/config.py unset MBEDTLS_PKCS7_C
     scripts/config.py set   MBEDTLS_SSL_EARLY_DATA
 
-    scripts/config.py set MBEDTLS_PSA_CRYPTO_CONFIG
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_ECDH
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_ECDSA
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_DETERMINISTIC_ECDSA
@@ -543,7 +535,6 @@ component_test_tls13_only_psk_all () {
     scripts/config.py unset MBEDTLS_PKCS7_C
     scripts/config.py set   MBEDTLS_SSL_EARLY_DATA
 
-    scripts/config.py set MBEDTLS_PSA_CRYPTO_CONFIG
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_ECDSA
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_DETERMINISTIC_ECDSA
     scripts/config.py -f $CRYPTO_CONFIG_H unset PSA_WANT_ALG_RSA_OAEP

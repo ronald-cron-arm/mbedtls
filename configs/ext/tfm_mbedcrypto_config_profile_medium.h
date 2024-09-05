@@ -217,31 +217,6 @@
  */
 #define MBEDTLS_SHA256_SMALLER
 
-/**
- * \def MBEDTLS_PSA_CRYPTO_CONFIG
- *
- * This setting allows support for cryptographic mechanisms through the PSA
- * API to be configured separately from support through the mbedtls API.
- *
- * When this option is disabled, the PSA API exposes the cryptographic
- * mechanisms that can be implemented on top of the `mbedtls_xxx` API
- * configured with `MBEDTLS_XXX` symbols.
- *
- * When this option is enabled, the PSA API exposes the cryptographic
- * mechanisms requested by the `PSA_WANT_XXX` symbols defined in
- * include/psa/crypto_config.h. The corresponding `MBEDTLS_XXX` settings are
- * automatically enabled if required (i.e. if no PSA driver provides the
- * mechanism). You may still freely enable additional `MBEDTLS_XXX` symbols
- * in mbedtls_config.h.
- *
- * If the symbol #MBEDTLS_PSA_CRYPTO_CONFIG_FILE is defined, it specifies
- * an alternative header to include instead of include/psa/crypto_config.h.
- *
- * This feature is still experimental and is not ready for production since
- * it is not completed.
- */
-#define MBEDTLS_PSA_CRYPTO_CONFIG
-
 /* \} name SECTION: mbed TLS feature support */
 
 /**
@@ -465,8 +440,7 @@
  * If defined, this is a header which will be included instead of
  * `"psa/crypto_config.h"`.
  * This header file specifies which cryptographic mechanisms are available
- * through the PSA API when #MBEDTLS_PSA_CRYPTO_CONFIG is enabled, and
- * is not used when #MBEDTLS_PSA_CRYPTO_CONFIG is disabled.
+ * through the PSA API.
  *
  * This macro is expanded after an <tt>\#include</tt> directive. This is a popular but
  * non-standard feature of the C language, so this feature is only available
@@ -532,8 +506,7 @@
  * If you enable this option, you do not need to enable any ECC-related
  * MBEDTLS_xxx option. You do need to separately request support for the
  * cryptographic mechanisms through the PSA API:
- * - #MBEDTLS_PSA_CRYPTO_C and #MBEDTLS_PSA_CRYPTO_CONFIG for PSA-based
- *   configuration;
+ * - #MBEDTLS_PSA_CRYPTO_C PSA-based configuration;
  * - #MBEDTLS_USE_PSA_CRYPTO if you want to use p256-m from PK, X.509 or TLS;
  * - #PSA_WANT_ECC_SECP_R1_256;
  * - #PSA_WANT_ALG_ECDH and/or #PSA_WANT_ALG_ECDSA as needed;

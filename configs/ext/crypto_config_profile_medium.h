@@ -9,10 +9,8 @@
  * \brief PSA crypto configuration options (set of defines)
  *
  */
-#if defined(MBEDTLS_PSA_CRYPTO_CONFIG)
 /**
- * When #MBEDTLS_PSA_CRYPTO_CONFIG is enabled in mbedtls_config.h,
- * this file determines which cryptographic mechanisms are enabled
+ * This file determines which cryptographic mechanisms are enabled
  * through the PSA Cryptography API (\c psa_xxx() functions).
  *
  * To enable a cryptographic mechanism, uncomment the definition of
@@ -28,14 +26,6 @@
  * (\c PSA_WANT_ALG_xxx). Mechanisms with additional parameters may involve
  * additional symbols.
  */
-#else
-/**
- * When \c MBEDTLS_PSA_CRYPTO_CONFIG is disabled in mbedtls_config.h,
- * this file is not used, and cryptographic mechanisms are supported
- * through the PSA API if and only if they are supported through the
- * mbedtls_xxx API.
- */
-#endif
 
 #ifndef PROFILE_M_PSA_CRYPTO_CONFIG_H
 #define PROFILE_M_PSA_CRYPTO_CONFIG_H

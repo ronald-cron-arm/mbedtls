@@ -50,11 +50,7 @@ The current model is difficult to adapt to the PSA interface for several reasons
 ### PSA Crypto configuration file
 
 The PSA Crypto configuration file `psa/crypto_config.h` defines a series of symbols of the form `PSA_WANT_xxx` where `xxx` describes the feature that the symbol enables. The symbols are documented in the section [“PSA Crypto configuration symbols”](#psa-crypto-configuration-symbols) below.
-
-The symbol `MBEDTLS_PSA_CRYPTO_CONFIG` in `mbedtls/mbedtls_config.h` determines whether `psa/crypto_config.h` is used.
-
-* If `MBEDTLS_PSA_CRYPTO_CONFIG` is unset, which is the default at least in Mbed TLS 2.x versions, things are as they are today: the PSA subsystem includes generic code unconditionally, and includes support for specific mechanisms conditionally based on the existing `MBEDTLS_xxx_` symbols.
-* If `MBEDTLS_PSA_CRYPTO_CONFIG` is set, the necessary software implementations of cryptographic algorithms are included based on both the content of the PSA Crypto configuration file and the Mbed TLS configuration file. For example, the code in `aes.c` is enabled if either `mbedtls/mbedtls_config.h` contains `MBEDTLS_AES_C` or `psa/crypto_config.h` contains `PSA_WANT_KEY_TYPE_AES`.
+The necessary software implementations of cryptographic algorithms are included based on the content of the PSA Crypto configuration file. For example, the code in `aes.c` is enabled if `psa/crypto_config.h` contains `PSA_WANT_KEY_TYPE_AES`.
 
 ### PSA Crypto configuration symbols
 
