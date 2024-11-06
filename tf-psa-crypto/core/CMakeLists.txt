@@ -86,9 +86,6 @@ if(USE_STATIC_TF_PSA_CRYPTO_LIBRARY AND USE_SHARED_TF_PSA_CRYPTO_LIBRARY)
         ${mbedcrypto_static_target})
 endif()
 
-set(p256m_target "${TF_PSA_CRYPTO_TARGET_PREFIX}p256m")
-set(everest_target "${TF_PSA_CRYPTO_TARGET_PREFIX}everest")
-
 if(USE_STATIC_TF_PSA_CRYPTO_LIBRARY)
     add_library(${mbedcrypto_static_target} STATIC ${src_crypto})
     set_base_compile_options(${mbedcrypto_static_target})
@@ -97,14 +94,6 @@ if(USE_STATIC_TF_PSA_CRYPTO_LIBRARY)
     target_link_libraries(${mbedcrypto_static_target} PUBLIC ${libs})
 
     target_link_libraries(${mbedcrypto_static_target} PUBLIC ${builtin_static_target})
-
-    if(TARGET ${everest_target})
-        target_link_libraries(${mbedcrypto_static_target} PUBLIC ${everest_target})
-    endif()
-
-    if(TARGET ${p256m_target})
-        target_link_libraries(${mbedcrypto_static_target} PUBLIC ${p256m_target})
-    endif()
 endif(USE_STATIC_TF_PSA_CRYPTO_LIBRARY)
 
 if(USE_SHARED_TF_PSA_CRYPTO_LIBRARY)
@@ -116,14 +105,6 @@ if(USE_SHARED_TF_PSA_CRYPTO_LIBRARY)
     target_link_libraries(${mbedcrypto_target} PUBLIC ${libs})
 
     target_link_libraries(${mbedcrypto_target} PUBLIC ${builtin_target})
-
-    if(TARGET ${everest_target})
-        target_link_libraries(${mbedcrypto_target} PUBLIC ${everest_target})
-    endif()
-
-    if(TARGET ${p256m_target})
-        target_link_libraries(${mbedcrypto_target} PUBLIC ${p256m_target})
-    endif()
 endif(USE_SHARED_TF_PSA_CRYPTO_LIBRARY)
 
 foreach(target IN LISTS target_libraries)
