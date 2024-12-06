@@ -40,7 +40,7 @@ foreach(exe IN LISTS executables)
     endif()
     add_executable(${exe}
         ${exe}.c
-        $<TARGET_OBJECTS:mbedtls_test>
+        $<TARGET_OBJECTS:mbedtls_framework_test>
         $<TARGET_OBJECTS:mbedtls_test_helpers>
         ${extra_sources})
     set_base_compile_options(${exe})
@@ -59,7 +59,7 @@ endforeach()
 if(THREADS_FOUND)
     add_executable(ssl_pthread_server
         ssl_pthread_server.c
-        $<TARGET_OBJECTS:mbedtls_test>
+        $<TARGET_OBJECTS:mbedtls_framework_test>
         $<TARGET_OBJECTS:mbedtls_test_helpers>)
     set_base_compile_options(ssl_pthread_server)
     target_include_directories(ssl_pthread_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../framework/tests/include
