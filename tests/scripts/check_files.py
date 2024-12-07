@@ -113,6 +113,7 @@ BINARY_FILE_PATH_RE_LIST = [
     r'framework/data_files/.*malformed[^/]+\Z',
     r'framework/data_files/format_pkcs12\.fmt\Z',
     r'framework/data_files/.*\.bin\Z',
+    r'tf-psa-crypto/framework/*',
 ]
 BINARY_FILE_PATH_RE = re.compile('|'.join(BINARY_FILE_PATH_RE_LIST))
 
