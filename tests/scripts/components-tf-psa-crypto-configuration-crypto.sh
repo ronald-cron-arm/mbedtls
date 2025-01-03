@@ -67,7 +67,7 @@ component_build_psa_crypto_spm () {
 component_test_no_rsa_key_pair_generation () {
     msg "build: default config minus PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_GENERATE"
     scripts/config.py unset MBEDTLS_GENPRIME
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_GENERATE
+    scripts/config.py unset PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_GENERATE
     make
 
     msg "test: default config minus PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_GENERATE"
@@ -118,7 +118,7 @@ component_test_crypto_full_md_light_only () {
     scripts/config.py unset MBEDTLS_PKCS7_C
     # Disable indirect dependencies of MD_C
     scripts/config.py unset MBEDTLS_ECDSA_DETERMINISTIC # needs HMAC_DRBG
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_DETERMINISTIC_ECDSA
+    scripts/config.py unset PSA_WANT_ALG_DETERMINISTIC_ECDSA
     # Disable things that would auto-enable MD_C
     scripts/config.py unset MBEDTLS_PKCS5_C
 
@@ -144,17 +144,17 @@ component_test_full_no_cipher () {
     # on CIPHER_C so we disable them.
     # This does not hold for KEY_TYPE_CHACHA20 and ALG_CHACHA20_POLY1305
     # so we keep them enabled.
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CCM_STAR_NO_TAG
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CMAC
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CBC_NO_PADDING
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CBC_PKCS7
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CFB
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_CTR
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_ECB_NO_PADDING
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_OFB
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_ALG_STREAM_CIPHER
-    scripts/config.py -c $CRYPTO_CONFIG_H unset PSA_WANT_KEY_TYPE_DES
+    scripts/config.py unset PSA_WANT_ALG_CCM_STAR_NO_TAG
+    scripts/config.py unset PSA_WANT_ALG_CMAC
+    scripts/config.py unset PSA_WANT_ALG_CBC_NO_PADDING
+    scripts/config.py unset PSA_WANT_ALG_CBC_PKCS7
+    scripts/config.py unset PSA_WANT_ALG_CFB
+    scripts/config.py unset PSA_WANT_ALG_CTR
+    scripts/config.py unset PSA_WANT_ALG_ECB_NO_PADDING
+    scripts/config.py unset PSA_WANT_ALG_OFB
+    scripts/config.py unset PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
+    scripts/config.py unset PSA_WANT_ALG_STREAM_CIPHER
+    scripts/config.py unset PSA_WANT_KEY_TYPE_DES
 
     # The following modules directly depends on CIPHER_C
     scripts/config.py unset MBEDTLS_CMAC_C
@@ -230,7 +230,7 @@ build_and_test_psa_want_key_pair_partial () {
 
     # All the PSA_WANT_KEY_TYPE_xxx_KEY_PAIR_yyy are enabled by default in
     # crypto_config.h so we just disable the one we don't want.
-    scripts/config.py -f "$CRYPTO_CONFIG_H" unset "$disabled_psa_want"
+    scripts/config.py unset "$disabled_psa_want"
 
     make CC=$ASAN_CC CFLAGS="$ASAN_CFLAGS" LDFLAGS="$ASAN_CFLAGS"
 
@@ -279,9 +279,9 @@ component_test_new_psa_want_key_pair_symbol () {
 
     # Keep only PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC enabled in order to ensure
     # that proper translations is done in crypto_legacy.h.
-    scripts/config.py -f "$CRYPTO_CONFIG_H" unset PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_IMPORT
-    scripts/config.py -f "$CRYPTO_CONFIG_H" unset PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_EXPORT
-    scripts/config.py -f "$CRYPTO_CONFIG_H" unset PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_GENERATE
+    scripts/config.py unset PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_IMPORT
+    scripts/config.py unset PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_EXPORT
+    scripts/config.py unset PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_GENERATE
 
     make
 
