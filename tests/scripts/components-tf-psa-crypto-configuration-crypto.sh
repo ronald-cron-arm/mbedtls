@@ -83,7 +83,8 @@ component_test_psa_inject_entropy () {
     scripts/config.py unset MBEDTLS_PLATFORM_NV_SEED_ALT
     scripts/config.py unset MBEDTLS_PLATFORM_STD_NV_SEED_READ
     scripts/config.py unset MBEDTLS_PLATFORM_STD_NV_SEED_WRITE
-    make CC=$ASAN_CC CFLAGS="$ASAN_CFLAGS '-DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"../tests/configs/user-config-for-test.h\"'" LDFLAGS="$ASAN_CFLAGS"
+    CC=$ASAN_CC cmake -D TF_PSA_CRYPTO_USER_CONFIG_FILE=../tests/configs/user-config-for-test.h -D CMAKE_BUILD_TYPE:String=Asan .
+    make
 
     msg "test: full + MBEDTLS_PSA_INJECT_ENTROPY"
     make test
