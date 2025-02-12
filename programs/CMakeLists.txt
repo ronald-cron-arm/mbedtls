@@ -1,6 +1,12 @@
 set(programs_target "${MBEDTLS_TARGET_PREFIX}programs")
 add_custom_target(${programs_target})
 
+link_to_source(../framework/tests/programs/metatest.c)
+link_to_source(../framework/tests/programs/query_compile_time_config.c)
+link_to_source(../framework/tests/programs/query_config.h)
+link_to_source(../framework/tests/programs/query_included_headers.c)
+link_to_source(../framework/tests/programs/zeroize.c)
+
 add_subdirectory(aes)
 add_subdirectory(cipher)
 if (NOT WIN32)
