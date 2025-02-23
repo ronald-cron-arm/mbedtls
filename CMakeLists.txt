@@ -420,17 +420,18 @@ if(ENABLE_TESTING OR ENABLE_PROGRAMS)
     if(GEN_FILES)
         add_custom_command(
             OUTPUT
-                ${MBEDTLS_FRAMEWORK_DIR}/tests/src/test_keys.h
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/src/test_keys.h
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test
             COMMAND
                 "${MBEDTLS_PYTHON_EXECUTABLE}"
                 "${MBEDTLS_FRAMEWORK_DIR}/scripts/generate_test_keys.py"
                 "--output"
-                "${MBEDTLS_FRAMEWORK_DIR}/tests/src/test_keys.h"
+                "${CMAKE_CURRENT_BINARY_DIR}/tests/src/test_keys.h"
             DEPENDS
                 ${MBEDTLS_FRAMEWORK_DIR}/scripts/generate_test_keys.py
         )
         add_custom_target(mbedtls_test_keys_header
-            DEPENDS ${MBEDTLS_FRAMEWORK_DIR}/tests/src/test_keys.h)
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tests/src/test_keys.h)
         add_dependencies(mbedtls_test mbedtls_test_keys_header)
     endif()
     target_include_directories(mbedtls_test
@@ -454,17 +455,18 @@ if(ENABLE_TESTING OR ENABLE_PROGRAMS)
     if(GEN_FILES)
         add_custom_command(
             OUTPUT
-                ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_certs.h
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/src/test_certs.h
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/tests/src
             COMMAND
                 "${MBEDTLS_PYTHON_EXECUTABLE}"
                 "${MBEDTLS_FRAMEWORK_DIR}/scripts/generate_test_cert_macros.py"
                 "--output"
-                "${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_certs.h"
+                "${CMAKE_CURRENT_BINARY_DIR}/tests/src/test_certs.h"
             DEPENDS
                 ${MBEDTLS_FRAMEWORK_DIR}/scripts/generate_test_cert_macros.py
         )
         add_custom_target(mbedtls_test_certs_header
-            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_certs.h)
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tests/src/test_certs.h)
         add_dependencies(mbedtls_test_helpers mbedtls_test_certs_header)
     endif()
     target_include_directories(mbedtls_test_helpers
