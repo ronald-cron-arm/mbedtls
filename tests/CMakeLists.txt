@@ -95,13 +95,7 @@ string(REGEX REPLACE "[ ,;]" "|" SKIP_TEST_SUITES_REGEX "${SKIP_TEST_SUITES}")
 string(REPLACE "." "\\." SKIP_TEST_SUITES_REGEX "${SKIP_TEST_SUITES_REGEX}")
 set(SKIP_TEST_SUITES_REGEX "^(${SKIP_TEST_SUITES_REGEX})(\$|\\.)")
 
-function(add_test_suite function_name)
-    if(ARGV1)
-        set(data_name ${ARGV1})
-    else()
-        set(data_name ${function_name})
-    endif()
-
+function(add_test_suite function_name data_name)
     # Get the test names of the tests with generated .data files
     # from the generated_data_files list in parent scope.
     set(config_generated_data_names "")
