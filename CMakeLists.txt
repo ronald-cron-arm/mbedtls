@@ -420,18 +420,18 @@ if(ENABLE_TESTING OR ENABLE_PROGRAMS)
     if(GEN_FILES)
         add_custom_command(
             OUTPUT
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/src/test_keys.h
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test/test_keys.h
             COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test
             COMMAND
                 "${MBEDTLS_PYTHON_EXECUTABLE}"
                 "${MBEDTLS_FRAMEWORK_DIR}/scripts/generate_test_keys.py"
                 "--output"
-                "${CMAKE_CURRENT_BINARY_DIR}/tests/src/test_keys.h"
+                "${CMAKE_CURRENT_BINARY_DIR}/tests/include/test/test_keys.h"
             DEPENDS
                 ${MBEDTLS_FRAMEWORK_DIR}/scripts/generate_test_keys.py
         )
         add_custom_target(mbedtls_test_keys_header
-            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tests/src/test_keys.h)
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test/test_keys.h)
         add_dependencies(mbedtls_test mbedtls_test_keys_header)
     endif()
     target_include_directories(mbedtls_test
@@ -470,6 +470,7 @@ if(ENABLE_TESTING OR ENABLE_PROGRAMS)
         add_dependencies(mbedtls_test_helpers mbedtls_test_certs_header)
     endif()
     target_include_directories(mbedtls_test_helpers
+        PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/tests/src
         PRIVATE ${MBEDTLS_FRAMEWORK_DIR}/tests/include
         PRIVATE tests/include
         PRIVATE include
