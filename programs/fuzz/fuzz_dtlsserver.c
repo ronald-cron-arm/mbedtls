@@ -9,6 +9,8 @@
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/timing.h"
 #include "mbedtls/ssl_cookie.h"
+#include "mbedtls/debug.h"
+#include "mbedtls/platform.h"
 
 #if defined(MBEDTLS_SSL_SRV_C) && \
     defined(MBEDTLS_ENTROPY_C) && \
@@ -16,6 +18,25 @@
     defined(MBEDTLS_TIMING_C) && \
     (defined(MBEDTLS_MD_CAN_SHA384) || \
     defined(MBEDTLS_MD_CAN_SHA256))
+
+void my_debug(void *ctx, int level,                                             
+              const char *file, int line,                                       
+              const char *str)                                                  
+{                                                                               
+    const char *p, *basename;                                                   
+                                                                                
+    /* Extract basename from file */                                            
+    for (p = basename = file; *p != '\0'; p++) {                                
+        if (*p == '/' || *p == '\\') {                                          
+            basename = p + 1;                                                   
+        }                                                                       
+    }                                                                           
+                                                                                
+    mbedtls_fprintf((FILE *) ctx, "%s:%04d: |%d| %s",                           
+                    basename, line, level, str);                                
+    fflush((FILE *) ctx);                                                       
+}
+
 const char *pers = "fuzz_dtlsserver";
 const unsigned char client_ip[4] = { 0x7F, 0, 0, 1 };
 static int initialized = 0;
@@ -63,6 +84,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)
     }
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
 
+    mbedtls_debug_set_threshold(5);
+
     if (mbedtls_ctr_drbg_seed(&ctr_drbg, dummy_entropy, &entropy,
                               (const unsigned char *) pers, strlen(pers)) != 0) {
         goto exit;
@@ -100,6 +123,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)
 
     srand(1);
     mbedtls_ssl_conf_rng(&conf, dummy_random, &ctr_drbg);
+    mbedtls_ssl_conf_dbg(&conf, my_debug, stdout);
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C) && defined(MBEDTLS_PEM_PARSE_C)
     mbedtls_ssl_conf_ca_chain(&conf, srvcert.next, NULL);
@@ -132,7 +156,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)
         goto exit;
     }
 
+    mbedtls_fprintf(stderr, "!!! COUCOU !!!\n");
+
     ret = mbedtls_ssl_handshake(&ssl);
+
+    mbedtls_fprintf(stderr, "!!! COUCOU 2 !!!\n");
 
     if (ret == MBEDTLS_ERR_SSL_HELLO_VERIFY_REQUIRED) {
         biomemfuzz.Offset = ssl.MBEDTLS_PRIVATE(next_record_offset);
